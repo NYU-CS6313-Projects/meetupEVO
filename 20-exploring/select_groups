@@ -1,0 +1,14 @@
+#!/bin/env python
+
+from glob import glob
+import os
+import random
+
+data_dir = "../10-data"
+
+random_file_sample = random.sample( glob("%s/events_updated/*.json" % data_dir), 5 )
+
+for f in random_file_sample:
+  print f
+
+

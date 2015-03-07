@@ -1,0 +1,31 @@
+#!/bin/env python
+
+# matplotlib must be imported first
+# and set to a non-GUI backend
+import matplotlib
+matplotlib.use('Agg')
+
+import sys
+import fileinput
+from utilities import flatten_col, EventReader
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+# read list of json-files to work on from stdin
+list_of_files = [ f.strip() for f in fileinput.input() ]
+
+plt.title("Group Evolution by Number of Event")
+for df in EventReader( list_of_files ):
+    if u"name_group" not in df.columns:
+	print "skipping one"
+        continue
+    group_name = df[u"name_group"][0]
+    print "Group %s" % group_name
+    plt.plot(df["yes_rsvp_count"],  label=group_name)
+    
+plt.legend(loc=2)
+
+fig = matplotlib.pyplot.gcf()
+fig.set_size_inches(10,6)
+fig.savefig("groups-and-no-of-events.png")
