@@ -2,11 +2,18 @@
 
 from glob import glob
 import os
+import sys
 import random
 
 data_dir = "../10-data"
 
-random_file_sample = random.sample( glob("%s/events_updated/*.json" % data_dir), 5 )
+if len(sys.argv) > 1:
+  no = int( sys.argv[1] )
+else:
+  no = 5
+
+sys.stderr.write( "selecting %d groups" % no )
+random_file_sample = random.sample( glob("%s/events_updated/*.json" % data_dir), no )
 
 for f in random_file_sample:
   print f
