@@ -1,3 +1,6 @@
+member-retention.png: 
+	select_groups 1 | plot_member_retention
+
 groups_events_yes.html: generate_sparkline
 	select_groups 10 | generate_sparkline > groups_events_yes.html
 

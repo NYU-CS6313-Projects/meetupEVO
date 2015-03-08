@@ -13,10 +13,10 @@ import matplotlib.pyplot as plt
 
 
 # read list of json-files to work on from stdin
-list_of_files = [ f.strip() for f in fileinput.input() ]
+group_ids = [ f.strip() for f in fileinput.input() ]
 
-plt.title("Group Evolution by Number of Event")
-for df in EventReader( list_of_files ):
+plt.title("Group Evolution by Number of Events")
+for df in EventReader( group_ids ):
     if u"name_group" not in df.columns:
 	print "skipping one"
         continue
