@@ -1,0 +1,83 @@
+#!/usr/local/bin/env python
+
+# matplotlib must be imported first
+# and set to a non-GUI backend
+import matplotlib
+matplotlib.use('Agg')
+
+
+import fileinput, json, csv, sys, os, time
+from collections import Counter
+import matplotlib.pyplot as plt
+
+for group_id in fileinput.input():
+  group_id = group_id.strip()
+  try:
+    group  = json.load( open( "group_%s.json" % group_id )  )['results'][0]
+    events = json.load( open( "group_%s_events.json" % group_id )  )['results']
+    att    = json.load( open( "group_%s_attendance.json" % group_id )  )
+  except Exception as e:
+    print e
+    print "Could not read data for group %s, skipping" % group_id
+    continue
+
+  print "Group %s" % group['name']
+  print "Found %d Events" % len(events)
+  print "Found %d Events with attendees" % len( att['events'] )
+
+  new_members_at = Counter()
+  old_members_at = Counter()
+  total_members_at = Counter()
+  known_members_count = Counter()
+  known_members_count = Counter()
+  known_members = {}
+  t = {}
+  for i in range( len( events ) ):
+    event = events[i]
+    t0 = time.strftime('%d.%m.%Y', time.localtime(int(event['time'])/1000))
+    event_id = event['id']
+
+    if type(att['events'][i]['attendees']) == dict:
+      print "skipping event because of errors"
+      continue
+    print
+    print "%s: %15s) %3d/%3d %s" % ( t0, event_id, event['headcount'], event['yes_rsvp_count'],  event['name'] )
+    t[i] = t0
+    check_event_id = att['events'][i]['event_id']
+    if not check_event_id  == event_id:
+      print "                  %15s! skipping" %check_event_id
+      break
+    attendees = att['events'][i]['attendees']
+
+    if i > 0:
+      total_members_at[ i ] = total_members_at[ i-1 ]
+    for a in attendees:
+      member_id = a['member']['id']
+      known_members_count[member_id] += 1
+      if known_members_count[member_id] == 1:
+        new_members_at[ i ] += 1
+        total_members_at[ i ] += 1
+      else:
+        old_members_at[ i ] += 1
+      known_members[member_id] = a['member']
+      print "                  %15s %s %s" % (a['member']['id'], a['status'], a['member']['name'])
+
+    print "%s: %15s) %3d old,  %3d new, %3d total" % ( t0, event_id, old_members_at[ i ] , new_members_at[ i ], total_members_at[i]  )
+
+  event_no = max( t.keys() )
+  old = [ old_members_at[i] for i in range(  event_no )]
+  new = [ new_members_at[i] for i in range(  event_no )]
+  total = [ total_members_at[i] for i in range(  event_no )]
+
+  plt.title("Retention of group members in %s" % group['name'])
+  plt.bar(range(len(total)), total,  label="total no attendees ever seen", color="b")
+  plt.bar(range(len(old)), old,  label="old attendees at this event", color="r")
+  plt.bar(range(len(new)), new,  label="new attendees at this event", color="y", bottom=old)
+  plt.xticks(range(len(t)), t, size='small', rotation=65)
+  fig = plt.gcf()
+  fig.subplots_adjust(bottom=0.2)
+  plt.legend(loc=2)
+
+  fig = matplotlib.pyplot.gcf()
+  fig.set_size_inches(10,6)
+  fig.savefig("group-%s-retention.png" % group_id)
