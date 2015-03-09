@@ -1,0 +1,47 @@
+#!/usr/local/bin/env python
+
+from cache import DiskCacheFetcher
+import fileinput, json, csv, sys, os, time
+
+api_key = '4b201b46433e352a72da32e572613'
+
+cache_age = 60*60*24
+fetcher = DiskCacheFetcher()
+
+for group_id in fileinput.input():
+  group_id = group_id.strip()
+  # print "Scraping attendance for group %s" % group_id
+  url = "https://api.meetup.com/2/events?&key=%s&photo-host=public&group_id=%s&status=past&page=2000" % (api_key, group_id)
+  group_json_string = fetcher.fetch( url, cache_age )
+  if len( group_json_string ) == 0:
+    # print "Could not find group %s, skipping" % group_id
+    continue
+  group_data = json.loads( group_json_string )
+  fp = open( "group_%s.json" % group_id, "w" )
+  fp.write( group_json_string )
+  fp.close()
+
+  attendance_list = []
+  for event in group_data['results']:
+    t0 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(event['time'])/1000))
+    event_id = event['id']
+    print "%s: %15s) %3d/%3d %s" % ( t0, event_id, event['headcount'], event['yes_rsvp_count'],  event['name'] )
+
+    url = "https://api.meetup.com/salzburgwebdev/events/%s/attendance?key=%s" % (event_id, api_key)
+    json_string = fetcher.fetch( url, cache_age )
+    if len( json_string ) > 0:
+      json_data = json.loads( json_string )
+      attendance_list.append( '{ "event_id": "' + event_id.encode('utf-8') + '", "attendees": ' + json_string + '}')
+
+  fp = open( "group_%s_attendance.json" % group_id, "wb" )
+  fp.write( '{ "group_id": %s, ' % group_id )
+  fp.write( '  "events": [ ')
+  fp.write( ','.join(attendance_list) )
+  fp.write( '  ]')
+  fp.write( '}')
+  fp.close()
+
+
+
+
+
