@@ -18,7 +18,7 @@ import fileinput, json, csv, sys, os, time
 
 api_key = '4b201b46433e352a72da32e572613'
 
-cache_age = 60*60*24
+cache_age = 0
 fetcher = DiskCacheFetcher()
 
 for group_id in fileinput.input():
