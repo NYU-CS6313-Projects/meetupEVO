@@ -1,3 +1,7 @@
+events.csv:
+	select_groups all | convert_events > events.csv
+
+
 member-retention.png: 
 	select_groups 1 | plot_member_retention
 

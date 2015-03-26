@@ -1,0 +1,15 @@
+#!/bin/env python
+
+import matplotlib
+import sys
+import fileinput
+from utilities import flatten_col, EventReader
+
+# read list of json-files to work on from stdin
+group_ids = [ f.strip() for f in fileinput.input() ]
+
+print "writing"
+for df in EventReader( group_ids ):
+  print df.to_csv()
+    
+

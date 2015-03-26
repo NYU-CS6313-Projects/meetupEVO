@@ -7,7 +7,9 @@ import random
 
 data_dir = "../10-data"
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 1 and sys.argv[1] == 'all':
+  no = None
+else if len(sys.argv) > 1:
   no = int( sys.argv[1] )
 else:
   no = 5
@@ -15,7 +17,11 @@ else:
 # sys.stderr.write( "selecting %d groups" % no )
 
 all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json","") for path in glob("%s/events_updated/*.json" % data_dir) ]
-random_file_sample = random.sample( all_groups, no )
+
+if no is None:
+  random_file_sample = all_groups
+else: 
+  random_file_sample = random.sample( all_groups, no )
 
 for f in random_file_sample:
   print f
