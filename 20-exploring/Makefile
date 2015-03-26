@@ -1,5 +1,5 @@
 events.csv:
-	select_groups all | convert_events > events.csv
+	select_groups all | convert_events 
 
 
 member-retention.png: 

@@ -9,7 +9,7 @@ data_dir = "../10-data"
 
 if len(sys.argv) > 1 and sys.argv[1] == 'all':
   no = None
-else if len(sys.argv) > 1:
+elif len(sys.argv) > 1:
   no = int( sys.argv[1] )
 else:
   no = 5

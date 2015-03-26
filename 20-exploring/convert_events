@@ -3,13 +3,20 @@
 import matplotlib
 import sys
 import fileinput
+
 from utilities import flatten_col, EventReader
 
 # read list of json-files to work on from stdin
 group_ids = [ f.strip() for f in fileinput.input() ]
 
-print "writing"
-for df in EventReader( group_ids ):
-  print df.to_csv()
+# all_the_columns = set()
+# types_of_columns = {}
+for df in EventReader( group_ids, do_max = True ):
+  #if 'description' in df.columns:
+  #  del(df['description'])
+  # all_the_columns.update( set( df.columns.values ) )
+  # types_of_columns.update( df.dtypes.to_dict() )
+  # print df.to_csv()
+  print df.head()
     
 
