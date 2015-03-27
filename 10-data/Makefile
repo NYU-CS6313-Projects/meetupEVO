@@ -14,7 +14,7 @@ events_updated.list:
 	ls -U events_updated/ | grep .json > events_updated.list
 
 groups_new.list:
-	ls -U groups_new/ | grep .json > groups_new.list
+	ls -U groups_new/ | grep category | grep .json > groups_new.list
 	
 members_updated.list:
 	ls -U members_updated/ | grep .json > members_updated.list
