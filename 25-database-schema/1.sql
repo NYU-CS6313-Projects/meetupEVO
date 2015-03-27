@@ -1,3 +1,5 @@
+-- this version was created by python script 20-exploring/create_postgres_schema
+
 CREATE TABLE groups (
   rating FLOAT  NULL,
   member_id_organizer BIGINT  NULL,
