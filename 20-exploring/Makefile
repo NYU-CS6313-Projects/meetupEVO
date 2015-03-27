@@ -1,6 +1,14 @@
-events.csv:
-	select_groups all | convert_events 
+groups-notext.csv:
+	./convert_groups > groups-notext.csv
 
+explore-groups:
+	./select_groups all | ./explore_groups  > groupscolumns.txt
+
+events.csv:
+	./select_groups all | ./convert_events > events.csv
+
+explore-events:
+	./select_groups all | ./explore_events  > eventscolumns.txt
 
 member-retention.png: 
 	select_groups 1 | plot_member_retention
