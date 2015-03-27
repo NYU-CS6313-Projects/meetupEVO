@@ -1,0 +1,40 @@
+#!/bin/env python
+
+from utilities import GroupsReader, GroupsReaderCOLUMNS, EventReaderCOLUMNS, RsvpReaderCOLUMNS, MemberCOLUMNS
+from numpy import dtype
+# import  psycopg2, psycopg2.extras
+#db_conn = psycopg2.connect("dbname='infovis_meetup'")
+#db_conn.autocommit = True
+#db_cursor = db3_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+def map_type(v):
+  if v == dtype('float64'): return 'FLOAT'
+  if v == dtype('int64'): return 'BIGINT'
+  if v == dtype('O'): return 'VARCHAR(100)'
+  return 'VARCHAR(1000)'
+
+def create_table( table_name, columns, primary_key ):
+  print "CREATE TABLE %s (" % table_name
+  for k,v in columns.items():
+    print "  %s %s %s NULL," % (k, map_type(v), "primary key" if k == primary_key else "")
+
+  print ");"
+
+
+group_columns = GroupsReaderCOLUMNS
+group_columns['id_group'] = group_columns['id_main']
+del(group_columns['id_main'])
+create_table( "groups", group_columns, "id_group" );
+
+event_columns = EventReaderCOLUMNS
+event_columns['id_event'] = event_columns['id_main']
+del(event_columns['id_main'])
+del(event_columns['id'])
+del(event_columns['0_venue'])
+create_table( "events", event_columns, "id_event" );
+
+member_columns = MemberCOLUMNS
+create_table( "members", member_columns, "id_member" );
+
+rsvp_columns = RsvpReaderCOLUMNS
+create_table( "rsvps", rsvp_columns, "id_rsvp" );
