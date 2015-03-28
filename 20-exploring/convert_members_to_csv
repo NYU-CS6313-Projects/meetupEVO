@@ -1,0 +1,23 @@
+#!/bin/env python
+
+import matplotlib
+import sys
+import fileinput
+import csv
+
+from utilities import flatten_col, GroupMemberReader
+
+# read list of json-files to work on from stdin
+group_ids = [ f.strip() for f in fileinput.input() ]
+
+# all_the_columns = set()
+# types_of_columns = {}
+
+onlyOnFirstFile = True
+for df in GroupMemberReader( group_ids, do_max = True ):
+  print df.to_csv(encoding='utf-8', header = onlyOnFirstFile, quoting =  csv.QUOTE_NONNUMERIC),
+  onlyOnFirstFile = False
+
+
+
+
