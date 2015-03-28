@@ -7,6 +7,11 @@ clean:
 clean_data:
 	rm rsvps/* events_updated/* groups_new/* members_updated/*
 
+organizers.json:
+	echo "[" > organizers.json
+	jq -c '.[]|.organizer' groups_new/category_* | sort | uniq | sed -e "s/$$/,/" >> organizers.json
+	echo "{}]" >> organizers.json
+
 id_venue.txt:
 	jq ".[]|.venue.id" events_updated/*.json | grep -v null | sort -n | uniq > id_venue.txt
 
