@@ -18,11 +18,22 @@ engine = create_engine('postgresql+psycopg2:///infovis_meetup')
 all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json","") for path in glob("%s/events_updated/*.json" % data_dir) ]
 print all_groups
 
-for df in VenuesReader( all_groups , do_max = True):
-  if not 'id_venue' in df.columns:
+
+if False:
+  for df in VenuesReader( all_groups , do_max = True):
+    if not 'id_venue' in df.columns:
+      print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.to_sql('venues', engine, if_exists = 'append', index = False)
+
+  # manual fixes:  lat + lon cannot be null in python dataframes, have to find nulls again in postgres:    
+  db_cursor.execute("update venues set lat=null,lon=null where lat=0.0 and lon=0.0")
+
+
+
+db_cursor.execute("delete from members")
+for df in GroupMemberReader( all_groups, do_max = True):
+  if not 'id_member' in df.columns:
     print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
   else:
-    df.to_sql('venues', engine, if_exists = 'append', index = False)
-
-# manual fixes:  lat + lon cannot be null in python dataframes, have to find nulls again in postgres:    
-db_cursor.execute("update venues set lat=null,lon=null where lat=0.0 and lon=0.0")
+    df.to_sql('members', engine, if_exists = 'append', index = False)

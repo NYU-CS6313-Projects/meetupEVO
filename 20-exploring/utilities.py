@@ -415,7 +415,6 @@ MemberCOLUMNS = {
   'link_photo': dtype('O'),
   'lon': dtype('float64'),
   'name': dtype('O'),
-  'other_services': dtype('O'),
   'state': dtype('O'),
   'status': dtype('O'),
   'thumb_link_photo': dtype('O'),
