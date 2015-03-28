@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Evolution of Meetup Groups</title>
+    <meta name="mobile-web-app-capable" content="yes">
+
+
+    <!-- We are using Twitter Bootstrap in the cloud, see http://getbootstrap.com/getting-started/ -->
+    <link href='http://fonts.googleapis.com/css?family=Ubuntu:700,500|Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.3/css/jquery.dataTables.min.css">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="pull-left" href="#"><img src="{{ url_for('static', filename='logo-2x.png') }}" style="max-width:50px; margin-top: 7px; margin-right: 20px;"></a>
+          <a class="navbar-brand" href="#">Evolution of Meetup Groups</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#">Something</a></li>
+            <li><a href="#">Other</a></li>
+            <li><a href="#">Another</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            {% if current_user %}
+            <li><a href="#">Backend</a></li>
+            {% endif %}
+            {% if not current_user %}
+            <li><a href="#">Log In</a></li>
+            {% else %}
+            <li><a href="#">Log Out</a></li>
+            {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="main container">
+      {% for message in get_flashed_messages() %}
+      <div class="alert info fade in">
+        <button class="close" data-dismiss="alert">×</button>
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% block body %}{% endblock %}
+  </div>
+
+  
+    <!-- We are using jquery and Twitter Bootstrap javascript in the cloud, see http://getbootstrap.com/getting-started/ -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
+    <script>
+      $(function(){
+        // activate menu
+        // from https://stackoverflow.com/questions/4866284/jquery-add-class-active-on-menu
+        var url = window.location.pathname; 
+        // create regexp to match current url pathname and remove trailing slash if present 
+        // as it could collide with the link in navigation in case trailing slash wasn't present there
+        var urlRegExp = new RegExp("^" + url + "$"); 
+        // now grab every link from the navigation
+        $('.navbar-nav a').each(function(){
+          // and test its normalized href against the url pathname regexp
+          href = $(this).attr('href');
+          if(urlRegExp.test(href)){
+            $(this).parents('li').addClass('active');
+          }
+        });
+
+      });
+
+      // At first, let's check if we have permission for notification
+      // If not, let's ask for it
+
+    </script>
+    {% block javascript %}{% endblock %}
+  </body>
+</html>
