@@ -401,26 +401,16 @@ class EventReader:
     return full_df
     
 GroupMemberCOLUMNS = {
-  'bio': dtype('O'),
-  'city': dtype('O'),
-  'country': dtype('O'),
   'id_group': dtype('O'),
-  'highres_link_photo': dtype('O'),
-  'hometown': dtype('O'),
   'id_member': dtype('int64'),
-  'id_photo': dtype('float64'),
+  'name': dtype('O'),
+  'bio': dtype('O'),
+  'visited': dtype('int64'),
+  'visited_time': dtype('O'),
+  'visited_wday': dtype('int64'),
   'joined': dtype('int64'),
   'joined_time': dtype('O'),
-  'joined_wday': dtype('int64'),
-  'lat': dtype('float64'),
-  'link': dtype('O'),
-  'link_photo': dtype('O'),
-  'lon': dtype('float64'),
-  'name': dtype('O'),
-  'state': dtype('O'),
-  'status': dtype('O'),
-  'thumb_link_photo': dtype('O'),
-  'visited': dtype('int64')
+  'joined_wday': dtype('int64')
 }
 class GroupMemberReader:
   def __init__(self,group_ids, members_dir="../10-data/members_updated/", ext=".json", do_max = False, max_columns = GroupMemberCOLUMNS):

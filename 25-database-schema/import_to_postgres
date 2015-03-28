@@ -20,7 +20,7 @@ all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json"
 print all_groups
 
 
-if False:
+if True:
   for df in VenuesReader( all_groups , do_max = True):
     if not 'id_venue' in df.columns:
       print "skipping venue df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
@@ -33,7 +33,7 @@ if False:
   print "%d venues inserted" % db_cursor.fetchone()['c']
 
 
-if False:
+if True:
   db_cursor.execute("delete from members")
   for df in MemberReader( all_groups, do_max = True):
     if 'status' in df.columns:
@@ -41,12 +41,13 @@ if False:
     if not 'id_member' in df.columns:
       print "skipping member df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
     else:
+      print df[ df['id_member'] == 104699912 ]
       df.to_sql('members', engine, if_exists = 'append', index = False)
   db_cursor.execute("select count(*) as c from members")
   m1 = db_cursor.fetchone()['c']
   print "%d members inserted" % m1
 
-if False:
+if True:
   db_cursor.execute("select count(*) as c from members")
   m1 = db_cursor.fetchone()['c']
   orgas = json.load(open(data_dir + "organizers.json"))
@@ -62,7 +63,7 @@ if False:
   print "%d members in all" % m2
 
 
-if False:
+if True:
   db_cursor.execute("delete from groups")
   for df in GroupReader( do_max = True):
     if not 'id_group' in df.columns or not 'member_id_organizer' in df.columns:
@@ -75,14 +76,14 @@ if False:
 
 
 
-if False:
-  db_cursor.execute("delete from members")
+if True:
+  db_cursor.execute("delete from is_member_of")
   for df in GroupMemberReader( all_groups, do_max = True):
     if 'status' in df.columns:
       del( df['status'] )
-    if not 'id_member' in df.columns:
+    if  not ('id_member' in df.columns) or not ('id_group' in df.columns):
       print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
     else:
-      df.to_sql('members', engine, if_exists = 'append', index = False)
+      df.to_sql('is_member_of', engine, if_exists = 'append', index = False)
 
 
