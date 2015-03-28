@@ -7,6 +7,9 @@ clean:
 clean_data:
 	rm rsvps/* events_updated/* groups_new/* members_updated/*
 
+id_venue.txt:
+	jq ".[]|.venue.id" events_updated/*.json | grep -v null | sort -n | uniq > id_venue.txt
+
 rsvps.list:
 	ls -U rsvps/ | grep .json > rsvps.list
 

@@ -5,6 +5,13 @@ import os
 from glob import glob
 
 
+def empty_df_of_type( d ):
+    dict = {}
+    for k,v in d.items():
+       dict[k] = pd.Series(dtype=v) 
+    full_df = pd.DataFrame(dict)
+    return full_df
+
 def date_time_col(df, col):
     if not col in df.columns:
       return df
@@ -118,10 +125,7 @@ class GroupsReader:
     if not self.do_max:
       return df
 
-    dict = {}
-    for k,v in self.max_columns.items():
-       dict[k] = pd.Series(dtype=v) 
-    full_df = pd.DataFrame(dict)
+    full_df = empty_df_of_type(self.max_columns)
 
     for k in self.max_columns.keys():
 	if k in df.columns:
@@ -193,10 +197,7 @@ class RsvpReader:
     if not self.do_max:
       return df
 
-    dict = {}
-    for k,v in self.max_columns.items():
-       dict[k] = pd.Series(dtype=v) 
-    full_df = pd.DataFrame(dict)
+    full_df = empty_df_of_type(self.max_columns)
     for k in self.max_columns.keys():
 	if k in df.columns:
 	   full_df[k] = df[k]
@@ -266,6 +267,10 @@ class VenuesReader:
 	    'lat', 'lon', 'name', 'phone', 'repinned', 'state', 'zip' ]:
           del( df[colname] )
 
+    if not 'id_venue' in df.columns:
+      print "ERROR: no id_venue in df of len %d, columns %s" % ( len(df.index), df.columns.values )
+      return empty_df_of_type(self.max_columns)
+      
     for i in self.used_ids:
       df = df[ df.id_venue != i ]
 
@@ -280,10 +285,7 @@ class VenuesReader:
     if not self.do_max:
       return df
 
-    dict = {}
-    for k,v in self.max_columns.items():
-       dict[k] = pd.Series(dtype=v) 
-    full_df = pd.DataFrame(dict)
+    full_df = empty_df_of_type(self.max_columns)
 
     for k in self.max_columns.keys():
       if k in df.columns:
@@ -391,10 +393,7 @@ class EventReader:
     if not self.do_max:
       return df
 
-    dict = {}
-    for k,v in self.max_columns.items():
-       dict[k] = pd.Series(dtype=v) 
-    full_df = pd.DataFrame(dict)
+    full_df = empty_df_of_type(self.max_columns)
 
     for k in self.max_columns.keys():
 	if k in df.columns:
@@ -458,10 +457,7 @@ class GroupMemberReader:
     if not self.do_max:
       return df
     
-    dict = {}
-    for k,v in self.max_columns.items():
-       dict[k] = pd.Series(dtype=v) 
-    full_df = pd.DataFrame(dict)
+    full_df = empty_df_of_type(self.max_columns)
    
     for k in self.max_columns.keys():
 	if k in df.columns:

@@ -1,9 +1,9 @@
 #!/bin/env python
 
-from utilities import CategoryReader
+from utilities import GroupsReader
 
 onlyOnFirstFile = True
-for df in CategoryReader( do_max = True, do_text = False ):
+for df in GroupsReader( do_max = True, do_text = False ):
   print df.to_csv(encoding='utf-8', header = onlyOnFirstFile),
   onlyOnFirstFile = False
     
