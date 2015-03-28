@@ -1,0 +1,29 @@
+#!/bin/env python
+
+# matplotlib must be imported first
+# and set to a non-GUI backend
+import matplotlib
+matplotlib.use('Agg')
+
+import sys
+import fileinput
+from utilities import flatten_col, GroupMemberReader
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+group_ids = [ gid.strip() for gid in fileinput.input() ]
+
+for df in GroupMemberReader( group_ids ):
+    if(len(df) == 0):
+	print "Group has no members"
+	continue
+    print df.joined
+    #plt.plot(df["yes_rsvp_count"],  label=group_name)
+    
+#plt.title("Member retention in group %s" % group_name)
+#plt.legend(loc=2)
+#
+#fig = matplotlib.pyplot.gcf()
+#fig.set_size_inches(10,6)
+#fig.savefig("groups-and-no-of-events.png")
