@@ -85,13 +85,13 @@ CREATE TABLE events (
   /* belongs to one group */
   id_group VARCHAR(30) REFERENCES groups(id_group) NOT NULL,
   /* has one venue */
-  id_venue BIGINT REFERENCES venues(id_venue) NOT NULL,
+  id_venue BIGINT REFERENCES venues(id_venue) NULL,
   /* core event attributes */
   name VARCHAR(100)  NULL,
-  description VARCHAR(500)  NULL,
+  description VARCHAR(15000)  NULL,
   time TIMESTAMP NULL,
   time_wday SMALLINT  NULL,
-  utc_offset SMALLINT  NULL,
+  utc_offset INTEGER  NULL,
   event_url VARCHAR(150)  NULL,
   duration FLOAT  NULL,
   status VARCHAR(100)  NULL,
@@ -102,6 +102,7 @@ CREATE TABLE events (
   created TIMESTAMP NULL,
   created_wday SMALLINT  NULL,
   updated TIMESTAMP  NULL,
+  updated_wday SMALLINT  NULL,
   photo_url VARCHAR(250)  NULL,
   /* fee */
   label_fee VARCHAR(100)  NULL,
@@ -121,6 +122,7 @@ CREATE TABLE events (
 COMMENT ON COLUMN events.duration IS 'Event duration in milliseconds';
 COMMENT ON COLUMN events.why IS 'We should do this because...';
 COMMENT ON COLUMN events.venue_visibility IS 'Controls the visibility of venue. May be one of "public" or "members"';
+COMMENT ON COLUMN events.utc_offset IS 'The local offset from UTC time, in milliseconds';
 
 
 CREATE TABLE rsvps (

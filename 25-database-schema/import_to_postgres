@@ -4,7 +4,7 @@ from glob import glob
 import sys
 import json
 sys.path.insert(0, '.')
-from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader
+from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader, EventReader
 import  psycopg2, psycopg2.extras
 
 data_dir = "../10-data/"
@@ -20,7 +20,7 @@ all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json"
 print all_groups
 
 
-if True:
+if False:
   for df in VenuesReader( all_groups , do_max = True):
     if not 'id_venue' in df.columns:
       print "skipping venue df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
@@ -33,7 +33,7 @@ if True:
   print "%d venues inserted" % db_cursor.fetchone()['c']
 
 
-if True:
+if False:
   db_cursor.execute("delete from members")
   for df in MemberReader( all_groups, do_max = True):
     if 'status' in df.columns:
@@ -47,7 +47,7 @@ if True:
   m1 = db_cursor.fetchone()['c']
   print "%d members inserted" % m1
 
-if True:
+if False:
   db_cursor.execute("select count(*) as c from members")
   m1 = db_cursor.fetchone()['c']
   orgas = json.load(open(data_dir + "organizers.json"))
@@ -63,7 +63,7 @@ if True:
   print "%d members in all" % m2
 
 
-if True:
+if False:
   db_cursor.execute("delete from groups")
   for df in GroupReader( do_max = True):
     if not 'id_group' in df.columns or not 'member_id_organizer' in df.columns:
@@ -75,8 +75,7 @@ if True:
   print "%d groups inserted" % db_cursor.fetchone()['c']
 
 
-
-if True:
+if False:
   db_cursor.execute("delete from is_member_of")
   for df in GroupMemberReader( all_groups, do_max = True):
     if 'status' in df.columns:
@@ -85,5 +84,18 @@ if True:
       print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
     else:
       df.to_sql('is_member_of', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from is_member_of")
+  print "%d is_member_of records inserted" % db_cursor.fetchone()['c']
+
+
+if True:
+  db_cursor.execute("delete from events")
+  for df in EventReader( all_groups, do_max = True):
+    if  not ('id_event' in df.columns):
+      print "skipping event df with len=%d, columns %s" % ( len(df.index), df.columns.values ) 
+    else:
+      df.to_sql('events', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from events")
+  print "%d event inserted" % db_cursor.fetchone()['c']
 
 
