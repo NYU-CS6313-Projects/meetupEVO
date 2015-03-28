@@ -1,3 +1,6 @@
+charachters.xml: 
+	echo "4033532" | ./sankey_cohorts
+
 group_4033532_cohorts.png: 
 	echo "4033532" | ./plot_cohorts
 

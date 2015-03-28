@@ -1,0 +1,77 @@
+#!/usr/local/bin/env python
+
+# matplotlib must be imported first
+# and set to a non-GUI backend
+import matplotlib
+matplotlib.use('Agg')
+
+# -*- coding: utf-8 -*-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
+import fileinput, json, csv, os, time, codecs
+from collections import Counter
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from matplotlib import cm
+
+
+for group_id in fileinput.input():
+  group_id = group_id.strip()
+  try:
+    df = pd.read_csv("group_%s_cohorts.csv" % group_id)
+    df['datetime'] = df['epoch'].astype('datetime64[s]')
+  except Exception as e:
+    print e
+    print "Could not read data for group %s, skipping" % group_id
+    continue
+
+  print "plot for group %s" % group_id 
+
+  print "there are %d lines " % len(df['epoch'])
+
+  no_cohorts = df["member_cohort"].max()
+  print "there are cohorts numbered 0 to %d" % no_cohorts
+
+  cohort_counts = [  np.zeros(no_cohorts+1, dtype=np.uint32)  for i in range( no_cohorts + 1 ) ]
+  bottom = np.zeros(no_cohorts+1, dtype=np.uint32)  
+
+  this_event = None
+  event_no = -1
+  t = []
+  for i in range( len(df['epoch']) ):
+    row = df.iloc[i]
+    if not this_event == row["event_id"]:
+      this_event = row["event_id"]
+      t.append(row["datetime"].strftime("%Y-%m-%d"))
+      event_no += 1
+      cohort_counts.append( Counter() )
+      print "New Event %s" % ( row["event_name"])
+    cohort_counts[ row["member_cohort"] ][ event_no ] += 1
+    #print row["member_cohort"], ",", 
+
+  print cohort_counts
+
+  plt.title("Cohorts of group %s" % group_id)
+  for i in range(event_no):
+    if i < event_no-1:
+      print "Cohort no %d" % i
+      print range(len(cohort_counts[i]))
+      print cohort_counts[i]
+      print bottom
+      print 
+      # plt.bar( range( len( cohort_counts[i])), cohort_counts[i],  label="Cohort %d" % i, color=cm.Accent(1.*i/event_no), bottom=bottom)
+      plt.stackplot( range( len( cohort_counts[i])), cohort_counts[i],  label="Cohort %d" % i, color=cm.Accent(1.*i/event_no))
+      bottom += cohort_counts[i]
+
+  plt.xticks(range(len(t)), t, size='small', rotation=65)
+  fig = plt.gcf()
+  fig.subplots_adjust(bottom=0.2)
+  # plt.legend(loc=2)
+
+  fig = matplotlib.pyplot.gcf()
+  fig.set_size_inches(10,6)
+  fig.savefig("group_%s_cohorts.png" % group_id)
