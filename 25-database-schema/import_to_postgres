@@ -2,8 +2,9 @@
 
 from glob import glob
 import sys
-sys.path.insert(0, '../20-exploring/')
-from utilities import VenuesReader, GroupMemberReader
+import json
+sys.path.insert(0, '.')
+from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader
 import  psycopg2, psycopg2.extras
 
 data_dir = "../10-data/"
@@ -22,18 +23,66 @@ print all_groups
 if False:
   for df in VenuesReader( all_groups , do_max = True):
     if not 'id_venue' in df.columns:
-      print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+      print "skipping venue df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
     else:
       df.to_sql('venues', engine, if_exists = 'append', index = False)
 
   # manual fixes:  lat + lon cannot be null in python dataframes, have to find nulls again in postgres:    
   db_cursor.execute("update venues set lat=null,lon=null where lat=0.0 and lon=0.0")
+  db_cursor.execute("select count(*) as c from venues")
+  print "%d venues inserted" % db_cursor.fetchone()['c']
+
+
+if False:
+  db_cursor.execute("delete from members")
+  for df in MemberReader( all_groups, do_max = True):
+    if 'status' in df.columns:
+      del( df['status'] )
+    if not 'id_member' in df.columns:
+      print "skipping member df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.to_sql('members', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from members")
+  m1 = db_cursor.fetchone()['c']
+  print "%d members inserted" % m1
+
+if False:
+  db_cursor.execute("select count(*) as c from members")
+  m1 = db_cursor.fetchone()['c']
+  orgas = json.load(open(data_dir + "organizers.json"))
+  for o in orgas:
+    db_cursor.execute("""INSERT INTO members (id_member) 
+                          SELECT %(id)s
+                          WHERE NOT EXISTS (
+                            SELECT 1 FROM members WHERE id_member=%(id)s
+                          )""", { 'id': str( o['member_id'] )} )
+  db_cursor.execute("select count(*) as c from members")
+  m2 = db_cursor.fetchone()['c']
+  print "%d more organizser inserted" % (m2 - m1)
+  print "%d members in all" % m2
+
+
+if False:
+  db_cursor.execute("delete from groups")
+  for df in GroupReader( do_max = True):
+    if not 'id_group' in df.columns or not 'member_id_organizer' in df.columns:
+      print "skipping group df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.rename(columns = {'member_id_organizer': 'id_organizer', 'members': 'no_members'}, inplace=True)
+      df.to_sql('groups', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from groups")
+  print "%d groups inserted" % db_cursor.fetchone()['c']
 
 
 
-db_cursor.execute("delete from members")
-for df in GroupMemberReader( all_groups, do_max = True):
-  if not 'id_member' in df.columns:
-    print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
-  else:
-    df.to_sql('members', engine, if_exists = 'append', index = False)
+if False:
+  db_cursor.execute("delete from members")
+  for df in GroupMemberReader( all_groups, do_max = True):
+    if 'status' in df.columns:
+      del( df['status'] )
+    if not 'id_member' in df.columns:
+      print "skipping df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.to_sql('members', engine, if_exists = 'append', index = False)
+
+
