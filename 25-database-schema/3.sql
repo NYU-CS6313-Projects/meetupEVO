@@ -128,12 +128,12 @@ COMMENT ON COLUMN events.utc_offset IS 'The local offset from UTC time, in milli
 CREATE TABLE rsvps (
   rsvp_id BIGINT primary key NULL,
   /* this is a join table between member and event */
-  id_member VARCHAR(30) REFERENCES members (id_member),
-  id_event VARCHAR(30) REFERENCES events (id_event),
+  id_member VARCHAR(30) NULL, /* REFERENCES members (id_member), */
+  id_event VARCHAR(30) NULL, /* REFERENCES events (id_event), */
   /* core attributes */
   response VARCHAR(20)  NULL,
   watching BOOLEAN  NULL,
-  comments VARCHAR(250)  NULL,
+  comments VARCHAR(1000)  NULL,
   guests BIGINT  NULL,
   /* time */
   created TIMESTAMP NULL,
