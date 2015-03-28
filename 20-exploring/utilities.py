@@ -3,7 +3,6 @@ from numpy import dtype
 import pandas as pd
 import os
 from glob import glob
-from collections import Counter
 
 
 def date_time_col(df, col):
@@ -227,7 +226,7 @@ class VenuesReader:
     self.ext = ext
     self.do_max = do_max
     self.max_columns = max_columns
-    self.venue_ids = Counter()
+    self.used_ids = set()
 
   def __iter__(self):
     return self
@@ -246,25 +245,37 @@ class VenuesReader:
     df = pd.read_json(filename)
     if len(df) == 0:
         return df
+
     df = flatten_col(df, "venue") 
     for oldname,newname in { 'address_1_venue': 'address_1', 
-	'address_2_venue': 'address_2', 
-	'city_venue': 'city',
-	'country_venue': 'country',
-	'lat_venue': 'lat',
-	'lon_venue': 'lon',
-	'name_venue': 'name',
-	'phone_venue': 'phone',
-	'repinned_venue': 'repinned',
-	'state_venue': 'state',
-	'zip_venue': 'zip' }.items():
+              'address_2_venue': 'address_2', 
+              'city_venue': 'city',
+              'country_venue': 'country',
+              'lat_venue': 'lat',
+              'lon_venue': 'lon',
+              'name_venue': 'name',
+              'phone_venue': 'phone',
+              'repinned_venue': 'repinned',
+              'state_venue': 'state',
+              'zip_venue': 'zip' }.items():
         if oldname in df.columns:
-	  df.rename(columns={ oldname: newname }, inplace=True)
+            df.rename(columns={ oldname: newname }, inplace=True)
 
     for colname in df.columns:
        if colname not in [ 'address_1', 'address_2', 'city', 'country', 'id_venue',
 	    'lat', 'lon', 'name', 'phone', 'repinned', 'state', 'zip' ]:
           del( df[colname] )
+
+    for i in self.used_ids:
+      df = df[ df.id_venue != i ]
+
+    df.drop_duplicates(subset = ['id_venue'], inplace = True)
+    df.dropna(subset = ['id_venue'], inplace = True)
+    self.used_ids.update( df.id_venue.values )
+
+    if len(df.id_venue.unique()) != len(df.index):
+      print "ERROR: we need to delete non-uniq"
+
 
     if not self.do_max:
       return df
@@ -275,8 +286,8 @@ class VenuesReader:
     full_df = pd.DataFrame(dict)
 
     for k in self.max_columns.keys():
-	if k in df.columns:
-	   full_df[k] = df[k]
+      if k in df.columns:
+        full_df[k] = df[k]
     return full_df
     
 

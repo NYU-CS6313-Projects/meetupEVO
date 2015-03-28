@@ -1,0 +1,24 @@
+#!/bin/env python
+
+from glob import glob
+import sys
+sys.path.insert(0, '../20-exploring/')
+from utilities import VenuesReader, GroupMemberReader
+import  psycopg2, psycopg2.extras
+
+data_dir = "../10-data/"
+
+# db_conn = psycopg2.connect("dbname='infovis_meetup'")
+#db_conn.autocommit = True
+#db_cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+from sqlalchemy import create_engine
+engine = create_engine('postgresql://bjelline@localhost:5432/infovis_meetup')
+
+all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json","") for path in glob("%s/events_updated/*.json" % data_dir) ]
+print all_groups
+
+for df in VenuesReader( all_groups , do_max = True):
+  df.to_sql('venues', engine, if_exists = 'append', index = False)
+    
+

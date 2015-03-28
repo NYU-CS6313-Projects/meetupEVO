@@ -1,5 +1,8 @@
 #!/bin/env python
 
+import sys
+sys.path.insert(0, '../20-exploring/')
+
 from utilities import GroupsReader, GroupsReaderCOLUMNS, EventReaderCOLUMNS, RsvpReaderCOLUMNS, MemberCOLUMNS
 from numpy import dtype
 # import  psycopg2, psycopg2.extras

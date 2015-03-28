@@ -9,8 +9,8 @@ DROP TABLE venues;
 CREATE TABLE venues (
   id_venue BIGINT primary key NULL,
   name VARCHAR(100)  NULL,
-  address_1 VARCHAR(100)  NULL,
-  address_2 VARCHAR(100)  NULL,
+  address_1 VARCHAR(200)  NULL,
+  address_2 VARCHAR(200)  NULL,
   phone VARCHAR(100)  NULL,
   lon FLOAT  NULL,
   lat FLOAT  NULL,
