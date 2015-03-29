@@ -27,14 +27,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="pull-left" href="#"><img src="{{ url_for('static', filename='logo-2x.png') }}" style="max-width:50px; margin-top: 7px; margin-right: 20px;"></a>
-          <a class="navbar-brand" href="#">Evolution of Meetup Groups</a>
+          <a class="pull-left" href="/"><img src="{{ url_for('static', filename='logo-2x.png') }}" style="max-width:50px; margin-top: 7px; margin-right: 20px;"></a>
+          <a class="navbar-brand" href="/">Evolution of Meetup Groups</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="#">Something</a></li>
-            <li><a href="#">Other</a></li>
-            <li><a href="#">Another</a></li>
+            <li><a href="/groups/count_states.html">Groups in States</a></li>
+            <li><a href="/groups/count_cities.html">Groups in Cities</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if current_user %}
