@@ -293,23 +293,23 @@ class VenuesReader:
     return full_df
     
 
-EventReaderCOLUMNS = {
+EventCOLUMNS = {
     'accepts_fee': dtype('O'),
     'amount_fee': dtype('float64'),
     'average_rating': dtype('float64'),
-    'count_rating': dtype('float64'),
+    'count_rating': dtype('int64'),
     'created': dtype('<M8[ns]'),
     'created_wday': dtype('int64'),
     'currency_fee': dtype('O'),
     'description': dtype('O'),
     'description_fee': dtype('O'),
-    'duration': dtype('float64'),
+    'duration': dtype('O'),
     'event_url': dtype('O'),
     'headcount': dtype('int64'),
     'how_to_find_us': dtype('O'),
     'id_event': dtype('int64'),
     'id_group': dtype('int64'),
-    'id_venue': dtype('float64'),
+    'id_venue': dtype('int64'),
     'label_fee': dtype('O'),
     'maybe_rsvp_count': dtype('int64'),
     'name': dtype('O'),
@@ -330,7 +330,7 @@ EventReaderCOLUMNS = {
   }
 
 class EventReader:
-  def __init__(self,group_ids, dir="../10-data/events_updated/", ext=".json", do_max = False, max_columns = EventReaderCOLUMNS):
+  def __init__(self,group_ids, dir="../10-data/events_updated/", ext=".json", do_max = False, max_columns = EventCOLUMNS):
     self.filenames = [ dir + f.strip() + ext for f in group_ids]
     self.cursor = 0
     self.dir = dir

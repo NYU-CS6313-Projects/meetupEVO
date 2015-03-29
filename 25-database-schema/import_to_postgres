@@ -1,11 +1,13 @@
 #!/bin/env python
 
+
+from numpy import dtype
 from glob import glob
 import sys
 import json
 import pandas as pd
 sys.path.insert(0, '.')
-from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader, EventReader, RsvpReaderCOLUMNS
+from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader, EventReader, RsvpReaderCOLUMNS, EventCOLUMNS
 import  psycopg2, psycopg2.extras
 from collections import Counter
 
@@ -19,7 +21,7 @@ from sqlalchemy import create_engine
 engine = create_engine('postgresql+psycopg2:///infovis_meetup')
 
 all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json","") for path in glob("%s/events_updated/*.json" % data_dir) ]
-print all_groups
+print "importing for %d groups" % len(all_groups)
 
 
 if False:
@@ -43,13 +45,12 @@ if False:
     if not 'id_member' in df.columns:
       print "skipping member df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
     else:
-      print df[ df['id_member'] == 104699912 ]
       df.to_sql('members', engine, if_exists = 'append', index = False)
   db_cursor.execute("select count(*) as c from members")
   m1 = db_cursor.fetchone()['c']
   print "%d members inserted" % m1
 
-if False:
+if False: # organizers from sub-json
   db_cursor.execute("select count(*) as c from members")
   m1 = db_cursor.fetchone()['c']
   orgas = json.load(open(data_dir + "organizers.json"))
@@ -101,9 +102,67 @@ if False:
   print "%d event inserted" % db_cursor.fetchone()['c']
 
 
-
+#    'created_wday': dtype('int64'),
+#    'headcount': dtype('int64'),
+#    'id_event': dtype('int64'),
+#    'id_group': dtype('int64'),
+#    'id_venue': dtype('int64'),
+#    'maybe_rsvp_count': dtype('int64'),
+#    'time_wday': dtype('int64'),
+#    'updated_wday': dtype('int64'),
+#    'updated': dtype('int64'),
+#    'utc_offset': dtype('int64'),
+#    'waitlist_count': dtype('int64'),
+#    'yes_rsvp_count': dtype('int64'),
 
 if True:
+  db_cursor.execute("delete from events")
+  cols = EventCOLUMNS
+  cols['created_wday'] = dtype('O')
+  cols['id_rsvp'] = dtype('O')
+  del(cols['created'])
+  del(cols['time'])
+  # del(cols['updated'])
+  reader = pd.read_csv(data_dir + 'events.csv', iterator=True, chunksize=1, dtype = cols, parse_dates = ['created', 'time'])
+  for df in reader:
+    col='updated'
+    df[col] = pd.to_datetime(df[col],unit='ms') 
+    df[col + "_wday"] = df[col].apply(lambda x: x.weekday())
+
+    del(df["Unnamed: 0"])
+    del(df["name_venue"])
+    del(df["phone_venue"])
+    del(df["repinned_venue"])
+    del(df["address_1_venue"])
+    del(df["address_2_venue"])
+    del(df["city_venue"])
+    del(df["state_venue"])
+    del(df["country_venue"])
+    del(df["zip_venue"])
+    del(df["lat_venue"])
+    del(df["lon_venue"])
+    del(df["lat_group"])
+    del(df["lon_group"])
+    del(df["name_group"])
+    del(df["urlname_group"])
+    del(df["group"])
+    del(df["id"])
+    del(df["id_main"])
+    del(df["id_rsvp"])
+    del(df["who_group"])
+    del(df["created_group"])
+    del(df["created_group_wday"])
+    del(df["join_mode_group"])
+    del(df["filename"])
+    df.rename(columns = {'visibility': 'venue_visibility', 'created_main': 'created', 'name_main':'name'}, inplace=True)
+    df.to_sql('events', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from events")
+  print "%d events inserted" % db_cursor.fetchone()['c']
+
+
+
+
+if False:
   db_cursor.execute("delete from rsvps")
   used_ids = Counter()
   cols = RsvpReaderCOLUMNS
