@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Evolution of Meetup Groups</title>
+    <title>Evolution of Meetup Groups: {{ title }}</title>
     <meta name="mobile-web-app-capable" content="yes">
 
 
@@ -28,22 +28,16 @@
             <span class="icon-bar"></span>
           </button>
           <a class="pull-left" href="/"><img src="{{ url_for('static', filename='logo-2x.png') }}" style="max-width:50px; margin-top: 7px; margin-right: 20px;"></a>
-          <a class="navbar-brand" href="/">Evolution of Meetup Groups</a>
+          <a class="navbar-brand" href="/">Evolution <small>of Meetup Groups</small></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="/groups/count_states.html">Groups in States</a></li>
             <li><a href="/groups/count_cities.html">Groups in Cities</a></li>
+            <li><a href="/map.html">Vector Map</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            {% if current_user %}
-            <li><a href="#">Backend</a></li>
-            {% endif %}
-            {% if not current_user %}
-            <li><a href="#">Log In</a></li>
-            {% else %}
-            <li><a href="#">Log Out</a></li>
-            {% endif %}
+            <li><a href="/about.html">About</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -65,6 +59,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="{{ url_for('static', filename='d3.geo.tile.v0.min.js') }}"></script>
     {% block javascript %}{% endblock %}
     <script>
       $(function(){

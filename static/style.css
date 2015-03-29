@@ -13,6 +13,7 @@ body {
 
 .main.container {
   background-color: white;
+  padding-top: 10px;
   padding-bottom: 40px;
   border: 1px #DDD solid;
   border-radius: 3px;

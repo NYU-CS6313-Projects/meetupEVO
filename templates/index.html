@@ -6,20 +6,30 @@
 
   <div class="row">
     <div class="col-md-4">
-      <h2>{{ db.no_venues }} Venues</h2>
-      <h2>{{ db.no_events }} Events</h2>
-      <h2>{{ db.no_groups }} Groups</h2>
-      <h2>{{ db.no_members }} Members</h2>
-      <h2>{{ db.no_rsvps }} Rsvps</h2>
+      <h2>Meetup Groups <small>in New York</small></h2>
+      <h3>{{ counts.no_venues }} Venues</h3>
+      <h3>{{ counts.no_events }} Events</h3>
+      <h3>{{ counts.no_groups }} Groups</h3>
+      <h3>{{ counts.no_members }} Members</h3>
+      <h3>{{ counts.no_rsvps }} Rsvps</h3>
 
-      {% if db.no_rsvps < 600000 %}
+      {% if counts.no_rsvps < 600000 %}
       <p class="alert alert-danger">This is just a small sample of the data we have.
       We don't have a server to host the full data yet.</p>
       {% endif %}
     </div>
     <div class="col-md-8">
-      <h2>Trend</h2>
-      <p>Some Graph here!</p>
+      <style>
+        .word_cloud { margin-bottom: 20px; }
+        .word_cloud span { line-height: 0.8; color: #A94442; }
+      </style>
+      <div class="word_cloud">
+      {% for w in word_counter_keys %} 
+        <span style="font-size: {{ word_counter[w] *  5 }}em;">{{ w }}</span>
+      {% endfor %} 
+      
+      </div>
+      <p>(most common words from the titles of a random 1% sample of our groups.<br>english stop words and new york, nyc not shown.)</p>
     </div>
   </div>
 {% endblock %}
