@@ -1,6 +1,9 @@
 all: rsvps.list events_updated.list groups_new.list members_updated.list
 	wc -l *.list | grep -v total
 
+pg_dump:
+	pg_dump -Fc --no-acl --no-owner  infovis_meetup > infovis_meetup.dump
+
 clean: 
 	rm *.list
 
@@ -12,8 +15,17 @@ organizers.json:
 	jq -c '.[]|.organizer' groups_new/category_* | sort | uniq | sed -e "s/$$/,/" >> organizers.json
 	echo "{}]" >> organizers.json
 
+id_group.txt:
+	jq -c '.[]|.id' groups_new/category_*.json | grep -v null | sort -n | uniq > id_group.txt
+	wc -l id_group.txt
+
 id_venue.txt:
 	jq ".[]|.venue.id" events_updated/*.json | grep -v null | sort -n | uniq > id_venue.txt
+	wc -l id_venue.txt
+
+id_event.txt:
+	jq -c '.[]|.id' events_updated/*.json | grep -v null | sort -n | uniq > id_event.txt
+	wc -l id_event.txt
 
 count_id_member.txt:
 	jq ".[]|.id" members_updated/*.json | grep -v null | sort -n | uniq -c > count_id_member.txt
