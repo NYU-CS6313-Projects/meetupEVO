@@ -127,7 +127,7 @@ COMMENT ON COLUMN events.utc_offset IS 'The local offset from UTC time, in milli
 
 
 CREATE TABLE rsvps (
-  rsvp_id BIGINT primary key NULL,
+  id_rsvp BIGINT NOT NULL,
   /* this is a join table between member and event */
   id_member VARCHAR(30) NULL, /* REFERENCES members (id_member), */
   id_event VARCHAR(30) NULL, /* REFERENCES events (id_event), */
@@ -144,3 +144,4 @@ CREATE TABLE rsvps (
   mtime_time TIME NULL,
   mtime_wday SMALLINT  NULL
 );
+CREATE INDEX id_rsvp_index ON rsvps (id_rsvp);

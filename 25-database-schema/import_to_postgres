@@ -113,7 +113,7 @@ if False: # members of groups from members.csv
   print "%d memberships inserted" % m1
 
 
-if True:
+if False:
   db_cursor.execute("delete from events")
   cols = EventCOLUMNS
   for c,t in cols.items():
@@ -164,21 +164,14 @@ if True:
 
 
 
-
-if False:
+if True:
   db_cursor.execute("delete from rsvps")
-  used_ids = Counter()
-  cols = RsvpReaderCOLUMNS
-  del(cols['created'])
-  del(cols['mtime'])
-  reader = pd.read_csv(data_dir + 'rsvps.csv', iterator=True, chunksize=50000, dtype = RsvpReaderCOLUMNS, parse_dates = ['created', 'mtime'])
+  reader = pd.read_csv(data_dir + 'rsvps.csv', iterator=True, chunksize=1000, parse_dates = ['created', 'mtime'])
   for df in reader:
-    del(df['Unnamed: 0'])
-    del(df['name_member'])
-    df.drop_duplicates(subset = ['rsvp_id'], inplace = True)
-    df['watching'] = df['watching'].astype('bool')
+    # df.rename(columns = {'visibility': 'venue_visibility', 'name_main':'name', 'id_main': 'id_event'}, inplace=True)
+    # df['count_rating'] = df['count_rating'].apply( lambda s: float(s) )
+    # df['id_venue'] = df['id_venue'].apply( lambda s: float(s) )
     df.to_sql('rsvps', engine, if_exists = 'append', index = False)
   db_cursor.execute("select count(*) as c from rsvps")
   print "%d rsvps inserted" % db_cursor.fetchone()['c']
-
 
