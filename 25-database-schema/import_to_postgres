@@ -76,7 +76,7 @@ if False:
   print "%d groups inserted" % db_cursor.fetchone()['c']
 
 
-if True: # members of groups from members.csv
+if False: # members of groups from members.csv
   db_cursor.execute("delete from is_member_of")
   cols = [
     "id_member",
@@ -113,19 +113,7 @@ if True: # members of groups from members.csv
   print "%d memberships inserted" % m1
 
 
-
-if False:
-  db_cursor.execute("delete from events")
-  for df in EventReader( all_groups, do_max = True):
-    if  not ('id_event' in df.columns):
-      print "skipping event df with len=%d, columns %s" % ( len(df.index), df.columns.values ) 
-    else:
-      df.to_sql('events', engine, if_exists = 'append', index = False)
-  db_cursor.execute("select count(*) as c from events")
-  print "%d event inserted" % db_cursor.fetchone()['c']
-
-
-if False:
+if True:
   db_cursor.execute("delete from events")
   cols = EventCOLUMNS
   for c,t in cols.items():
