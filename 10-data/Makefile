@@ -1,8 +1,16 @@
 all: rsvps.list events_updated.list groups_new.list members_updated.list
 	wc -l *.list | grep -v total
 
+members-small.csv: members.csv
+	csvcut -C 1,2,5,7,9,10,13,15,16,18,20 members.csv > members-small.csv
+
+members-small-uniq.csv: members-small.csv
+	head -1 members-small.csv > members-small-uniq.csv
+	tail -n +2 members-small.csv | sort | uniq >> members-small-uniq.csv
+
 pg_dump:
 	pg_dump -Fc --no-acl --no-owner  infovis_meetup > infovis_meetup.dump
+	cp  infovis_meetup.dump ~/Dropbox/Public/
 
 clean: 
 	rm *.list

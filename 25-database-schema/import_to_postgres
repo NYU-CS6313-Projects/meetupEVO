@@ -7,7 +7,7 @@ import sys
 import json
 import pandas as pd
 sys.path.insert(0, '.')
-from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader, EventReader, RsvpReaderCOLUMNS, EventCOLUMNS
+from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader, EventReader, RsvpReaderCOLUMNS, EventCOLUMNS, MemberCOLUMNS
 import  psycopg2, psycopg2.extras
 from collections import Counter
 
@@ -37,7 +37,7 @@ if False:
   print "%d venues inserted" % db_cursor.fetchone()['c']
 
 
-if False:
+if False: # members of groups from json
   db_cursor.execute("delete from members")
   for df in MemberReader( all_groups, do_max = True):
     if 'status' in df.columns:
@@ -46,6 +46,27 @@ if False:
       print "skipping member df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
     else:
       df.to_sql('members', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from members")
+  m1 = db_cursor.fetchone()['c']
+  print "%d members inserted" % m1
+
+if True: # members of groups from members.csv
+  db_cursor.execute("delete from members")
+  used_ids = Counter()
+  cols = MemberCOLUMNS
+  reader = pd.read_csv(data_dir + 'members-small-uniq.csv', iterator=True, chunksize=2, dtype = cols)
+  for df in reader:
+    if 'status' in df.columns:
+      del( df['status'] )
+    if not 'id_member' in df.columns:
+      print "skipping member df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.to_sql('members', engine, if_exists = 'append', index = False)
+      df.drop_duplicates(subset = ['id_member'], inplace = True)
+      for i in df['id_member'].values:
+        if i in used_ids:
+          del(df[df['id_member']==i])
+      used_ids.update( df['id_member'].values )
   db_cursor.execute("select count(*) as c from members")
   m1 = db_cursor.fetchone()['c']
   print "%d members inserted" % m1
@@ -102,20 +123,7 @@ if False:
   print "%d event inserted" % db_cursor.fetchone()['c']
 
 
-#    'created_wday': dtype('int64'),
-#    'headcount': dtype('int64'),
-#    'id_event': dtype('int64'),
-#    'id_group': dtype('int64'),
-#    'id_venue': dtype('int64'),
-#    'maybe_rsvp_count': dtype('int64'),
-#    'time_wday': dtype('int64'),
-#    'updated_wday': dtype('int64'),
-#    'updated': dtype('int64'),
-#    'utc_offset': dtype('int64'),
-#    'waitlist_count': dtype('int64'),
-#    'yes_rsvp_count': dtype('int64'),
-
-if True:
+if False:
   db_cursor.execute("delete from events")
   cols = EventCOLUMNS
   for c,t in cols.items():
