@@ -5,9 +5,21 @@
   <p>By O., B. and L.</p>
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-4">
+      <h2>{{ db.no_venues }} Venues</h2>
+      <h2>{{ db.no_events }} Events</h2>
+      <h2>{{ db.no_groups }} Groups</h2>
+      <h2>{{ db.no_members }} Members</h2>
+      <h2>{{ db.no_rsvps }} Rsvps</h2>
+
+      {% if db.no_rsvps < 600000 %}
+      <p class="alert alert-danger">This is just a small sample of the data we have.
+      We don't have a server to host the full data yet.</p>
+      {% endif %}
     </div>
-    <div class="col-md-6">
+    <div class="col-md-8">
+      <h2>Trend</h2>
+      <p>Some Graph here!</p>
     </div>
   </div>
 {% endblock %}
