@@ -39,7 +39,10 @@ count_id_member.txt:
 	jq ".[]|.id" members_updated/*.json | grep -v null | sort -n | uniq -c > count_id_member.txt
 
 id_member.txt: count_id_member.txt
-	cut -c6- count_id_member.txt > id_member.txt
+	cut -c9- count_id_member.txt > id_member.txt
+
+id_organizer.txt: organizers.json
+	jq '.[].member_id' organizers.json | sort | uniq > id_organizer.txt
 
 rsvps.list:
 	ls -U rsvps/ | grep .json > rsvps.list
