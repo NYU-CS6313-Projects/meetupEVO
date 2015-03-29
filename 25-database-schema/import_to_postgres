@@ -118,19 +118,19 @@ if False:
 if True:
   db_cursor.execute("delete from events")
   cols = EventCOLUMNS
-  cols['created_wday'] = dtype('O')
+  for c,t in cols.items():
+    if t ==  dtype('int64'):
+      cols[c] = dtype('O')
   cols['id_rsvp'] = dtype('O')
   del(cols['created'])
   del(cols['time'])
   # del(cols['updated'])
-  reader = pd.read_csv(data_dir + 'events.csv', iterator=True, chunksize=1, dtype = cols, parse_dates = ['created', 'time'])
+  reader = pd.read_csv(data_dir + 'events.csv', iterator=True, chunksize=100, dtype = cols, parse_dates = ['created', 'time', 'created_main'])
   for df in reader:
-    col='updated'
-    df[col] = pd.to_datetime(df[col],unit='ms') 
-    df[col + "_wday"] = df[col].apply(lambda x: x.weekday())
 
     del(df["Unnamed: 0"])
     del(df["name_venue"])
+    del(df["created_main"])
     del(df["phone_venue"])
     del(df["repinned_venue"])
     del(df["address_1_venue"])
@@ -147,14 +147,19 @@ if True:
     del(df["urlname_group"])
     del(df["group"])
     del(df["id"])
-    del(df["id_main"])
     del(df["id_rsvp"])
     del(df["who_group"])
     del(df["created_group"])
     del(df["created_group_wday"])
     del(df["join_mode_group"])
     del(df["filename"])
-    df.rename(columns = {'visibility': 'venue_visibility', 'created_main': 'created', 'name_main':'name'}, inplace=True)
+    df.rename(columns = {'visibility': 'venue_visibility', 'name_main':'name', 'id_main': 'id_event'}, inplace=True)
+
+    df['count_rating'] = df['count_rating'].apply( lambda s: float(s) )
+    df['id_venue'] = df['id_venue'].apply( lambda s: float(s) )
+    df['updated'] = df['updated'].apply( lambda s: int(s) )
+    df['updated'] = pd.to_datetime(df['updated'],unit='ms') 
+
     df.to_sql('events', engine, if_exists = 'append', index = False)
   db_cursor.execute("select count(*) as c from events")
   print "%d events inserted" % db_cursor.fetchone()['c']
