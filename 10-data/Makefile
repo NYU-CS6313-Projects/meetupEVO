@@ -47,6 +47,16 @@ id_organizer.txt: organizers.json
 rsvps.list:
 	ls -U rsvps/ | grep .json > rsvps.list
 
+rsvps.csv:
+	cp rsvps.parts/rsvp.1.csv rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.2.csv >> rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.3.csv >> rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.4.csv >> rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.5.csv >> rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.6.csv >> rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.7.csv >> rsvps.csv
+	tail -n +2 rsvps.parts/rsvp.8.csv >> rsvps.csv
+
 events_updated.list:
 	ls -U events_updated/ | grep .json > events_updated.list
 

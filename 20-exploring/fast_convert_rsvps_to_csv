@@ -1,0 +1,70 @@
+#!/bin/env python
+
+import os, sys, csv, json, zipfile, datetime
+
+data_dir = "../10-data/rsvps/"
+
+max = 627415
+count = 0
+perc_step = 0
+
+COPY_COL = [ "created", "mtime", "guests", "response","watching" ]
+COL = [ "id_rsvp", "id_member", "id_event" ] + COPY_COL + [ "created_wday", "mtime_wday", "created_time", "mtime_time" ]
+
+print "Reading Rsvps for %d files" % max
+print "." * 100
+
+def date_convert( i ):
+    dt = datetime.datetime.fromtimestamp( i / 1000.0 )
+    w  = dt.weekday()
+    t  = dt.time()
+    return dt, w, t
+
+file_no = 1
+fp = open("rsvp.%d.csv" % file_no, "w")
+writer = csv.writer( fp, quoting=csv.QUOTE_NONNUMERIC )
+writer.writerow( COL )
+
+z = zipfile.ZipFile("/home/cusp/bj707/InfoVis/rsvps.zip")
+for info in z.infolist():
+  if ".json" in info.filename:
+    count += 1
+    if int(100.0*count/max) > perc_step:
+	print ".",
+	perc_step = int(100.0*count/max)
+    content = z.read( info.filename )
+    data = json.loads(content)
+    for rsvp in data:
+	row = {}
+        if 'rsvp_id' in rsvp.keys():
+	  row['id_rsvp'] = rsvp['rsvp_id']
+	else:
+	  print "no id_rsvp in ", rsvp.keys()
+	  continue
+        if 'member' in rsvp.keys() and 'member_id' in rsvp['member'].keys():
+	  row['id_member'] = rsvp['member']['member_id']
+	else:
+	  print "no member.id in ", rsvp.keys()
+	  continue
+        if 'event' in rsvp.keys() and 'id' in rsvp['event'].keys():
+	  row['id_event'] = rsvp['event']['id']
+	else:
+	  print "no event.id in ", rsvp.keys()
+	  continue
+	for c in COPY_COL:
+	   if c in rsvp.keys():
+		row[c] = rsvp[c] 
+	   else:
+		row[c] = None
+	c = "created"
+	row[c], row[c + "_wday"], row[c + "_time"] = date_convert( rsvp[c] ) 
+	c = "mtime"
+	row[c], row[c + "_wday"], row[c + "_time"] = date_convert( rsvp[c] ) 
+	writer.writerow( [ row[c] for c in COL] )
+  if count % 100000 == 0:
+      fp.close()
+      file_no += 1
+      fp = open("rsvp.%d.csv" % file_no, "w")
+      writer = csv.writer( fp, quoting=csv.QUOTE_NONNUMERIC )
+      writer.writerow( COL )
+fp.close()
