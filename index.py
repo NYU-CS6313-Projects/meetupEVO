@@ -19,7 +19,8 @@ def before_request():
 def about():
   return render_template("about.html", title = "About this Site")
 
-# ====================================================================================
+# ======== this version of map does not work: openstreetmap only served on http ======
+# ======== not https, so is not loaded :( 
 @app.route('/map.html')
 def map():
   return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
