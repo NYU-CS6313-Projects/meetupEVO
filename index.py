@@ -20,9 +20,9 @@ def before_request():
 def about():
   return render_template("about.html", title = "About this Site")
 
-@app.route('/circle.html')
+@app.route('/rsvps/weekday_histogram.html')
 def circle():
-  return render_template("circle.html", title = "This is a circle")
+  return render_template("rsvp_weekday_histogram.html", title = "Histogram of RSVPs on Weekdays")
 
 
 # ======== this version of map does not work: openstreetmap only served on http ======
