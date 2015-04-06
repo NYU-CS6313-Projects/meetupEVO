@@ -7,9 +7,23 @@
 
 {% block javascript %}
 <script>
-var svgContainer = d3.select("p").append("svg").attr("width", 50).attr("height", 50);
-    svgContainer.append("circle").attr("cx", 25).attr("cy", 25).attr("r", 25).style("fill", "purple");
-    svgContainer.append("text").text("d3").style("fill", "white").attr("x",10).attr("y",30);
+var chart = d3.select("p").append("svg").attr("width", 1000).attr("height", 200);
 
+d3.json("/rsvps/weekday_histogram.json", function(error, whole_json) {
+	console.log("I got me some JSON!")
+	console.dir(whole_json);
+	var all_my_groups = chart.selectAll("g")
+          .data(whole_json['data'])
+          .enter().append("g")
+          .attr("transform", function(d, i) { return "translate(" + i * 100 + ",100)"; });
+
+      all_my_groups.append("circle")
+          .style("fill", "purple")
+          .attr("r", function(d) { return d[1] / 2000; });
+
+      all_my_groups.append("text")
+          .attr("x", "middle")
+          .text(function(d) { return d[1]; });
+})
 </script>
 {% endblock %}

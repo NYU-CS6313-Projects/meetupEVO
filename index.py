@@ -73,6 +73,28 @@ def groups_count_states_tsv():
 def map():
   return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
 
+@app.route('/rsvps/weekday_histogram.json')
+def rsvps_weekday_histogram_json():
+    try: 
+      g.db_cursor.execute("""
+        select created_wday, count(*) from rsvps group by created_wday
+        """)
+      resp = jsonify({ 
+          'status': 200, 
+          'color': 'purple',
+          'message': 'ok', 
+          'x_label': 'day of the week', 
+          'y_label': 'number of rsvps on this day', 
+          'data':  g.db_cursor.fetchall() 
+      })
+      resp.status_code = 200
+    except Exceptions as ex:
+      app.logger.error('Error: could not read from database %s' % ex)
+      resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
+      resp.status_code = 500
+    return resp  
+
+
 @app.route('/groups/group_size_histogram.json')
 def group_size_histogram_json():
     try: 
