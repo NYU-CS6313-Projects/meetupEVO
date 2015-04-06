@@ -12,12 +12,18 @@ def before_request():
     g.db.autocommit = True
     g.db_cursor = g.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
   except Exception as inst:
-    app.logger.error('Error: %s' % inst)
+    app.logger.error('Error connecting to %s' % os.environ['DATABASE_URL'])
+    app.logger.error(inst)
     abort(500)
 # ====================================================================================
 @app.route('/about.html')
 def about():
   return render_template("about.html", title = "About this Site")
+
+@app.route('/circle.html')
+def circle():
+  return render_template("circle.html", title = "This is a circle")
+
 
 # ======== this version of map does not work: openstreetmap only served on http ======
 # ======== not https, so is not loaded :( 

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+<h1>{{ title }}</h1>
+
+  <p>This is a cirlce</p>
+{% endblock %}
+
+{% block javascript %}
+<script>
+var svgContainer = d3.select("p").append("svg").attr("width", 50).attr("height", 50);
+    svgContainer.append("circle").attr("cx", 25).attr("cy", 25).attr("r", 25).style("fill", "purple");
+    svgContainer.append("text").text("d3").style("fill", "white").attr("x",10).attr("y",30);
+
+</script>
+{% endblock %}
