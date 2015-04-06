@@ -88,7 +88,7 @@ def rsvps_weekday_histogram_json():
           'data':  g.db_cursor.fetchall() 
       })
       resp.status_code = 200
-    except Exceptions as ex:
+    except Exception as ex:
       app.logger.error('Error: could not read from database %s' % ex)
       resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
       resp.status_code = 500
@@ -109,7 +109,7 @@ def group_size_histogram_json():
           'data':  g.db_cursor.fetchall() 
       })
       resp.status_code = 200
-    except Exceptions as ex:
+    except Exception as ex:
       app.logger.error('Error: could not read from database %s' % ex)
       resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
       resp.status_code = 500
