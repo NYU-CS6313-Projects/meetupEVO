@@ -1,8 +1,11 @@
 import os, psycopg2, psycopg2.extras, json, re, random
+import flask
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify
 from collections import Counter
 
 app = Flask(__name__)
+
+print "I am using flask version %s" % flask.__version__
 
 # ====================================================================================
 @app.before_request
@@ -23,6 +26,13 @@ def about():
 @app.route('/rsvps/weekday_histogram.html')
 def circle():
   return render_template("rsvp_weekday_histogram.html", title = "Histogram of RSVPs on Weekdays")
+
+
+# Ouafa Trying Out!
+# ====================================================================================
+@app.route('/events/Timeseries_group_Evolution_by_RSVP.html')
+def line():
+  return render_template("Timeseries_group_Evolution_by_RSVP.html", title = "Timeline of group evolution by Event RSVPs")
 
 
 # ======== this version of map does not work: openstreetmap only served on http ======
@@ -88,11 +98,36 @@ def rsvps_weekday_histogram_json():
           'data':  g.db_cursor.fetchall() 
       })
       resp.status_code = 200
-    except Exceptions as ex:
+    except Exception as ex:
       app.logger.error('Error: could not read from database %s' % ex)
       resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
       resp.status_code = 500
     return resp  
+
+
+###Timeline series data
+@app.route('/events/group_evolution_timeseries.json')
+def events_group_evoltution_timeseries_json():
+    try: 
+      g.db_cursor.execute("""
+        select extract(year from created) "year", id_group, SUM(yes_rsvp_count) from events group by year, id_group order by id_group
+        """)
+      resp = jsonify({ 
+          'status': 200, 
+          'color': 'pink',
+          'message': 'ok', 
+          'x_label': 'year', 
+          'y_label': 'number of rsvps on this year', 
+          'data':  g.db_cursor.fetchall() 
+      })
+      resp.status_code = 200
+    except Exception as ex:
+      app.logger.error('Error: could not read from database %s' % ex)
+      resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
+      resp.status_code = 500
+    return resp
+
+
 
 
 @app.route('/groups/group_size_histogram.json')
@@ -109,7 +144,7 @@ def group_size_histogram_json():
           'data':  g.db_cursor.fetchall() 
       })
       resp.status_code = 200
-    except Exceptions as ex:
+    except Exception as ex:
       app.logger.error('Error: could not read from database %s' % ex)
       resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
       resp.status_code = 500
