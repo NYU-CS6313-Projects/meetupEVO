@@ -55,6 +55,12 @@ CREATE TABLE groups (
   country VARCHAR(100)  NULL,
   timezone VARCHAR(100)  NULL
 );
+CREATE INDEX index_groups_id_category  ON groups(id_category);
+CREATE INDEX index_groups_id_organizer ON groups(id_organizer);
+CREATE INDEX index_groups_created      ON groups(created);
+CREATE INDEX index_groups_created_wday ON groups(created_wday);
+CREATE INDEX index_groups_created_time ON groups(created_time);
+
 CREATE TABLE is_member_of (
   id_member VARCHAR(20) REFERENCES members(id_member) NOT NULL,
   id_group VARCHAR(20)  REFERENCES groups(id_group) NOT NULL,
@@ -81,6 +87,12 @@ CREATE TABLE is_member_of (
   joined_wday SMALLINT  NULL,
   joined_time TIME  NULL
 );
+CREATE INDEX index_of_id_member   ON is_member_of(id_member);
+CREATE INDEX index_of_id_group    ON is_member_of(id_group);
+CREATE INDEX index_of_joined      ON is_member_of(joined);
+CREATE INDEX index_of_joined_wday ON is_member_of(joined_wday);
+CREATE INDEX index_of_joined_time ON is_member_of(joined_time);
+
 CREATE TABLE events (
   id_event VARCHAR(30) primary key NULL,
   /* belongs to one group */
@@ -120,6 +132,13 @@ CREATE TABLE events (
   average_rating FLOAT  NULL,
   headcount BIGINT  NULL
 );
+CREATE INDEX index_events_id_group  ON events(id_group);
+CREATE INDEX index_events_time      ON events(time);
+CREATE INDEX index_events_time_wday ON events(time_wday);
+CREATE INDEX index_events_created      ON events(created);
+CREATE INDEX index_events_created_time ON events(created_time);
+CREATE INDEX index_events_created_wday ON events(created_wday);
+
 COMMENT ON COLUMN events.duration IS 'Event duration in milliseconds';
 COMMENT ON COLUMN events.why IS 'We should do this because...';
 COMMENT ON COLUMN events.venue_visibility IS 'Controls the visibility of venue. May be one of "public" or "members"';
@@ -129,8 +148,8 @@ COMMENT ON COLUMN events.utc_offset IS 'The local offset from UTC time, in milli
 CREATE TABLE rsvps (
   id_rsvp BIGINT NOT NULL,
   /* this is a join table between member and event */
-  id_member VARCHAR(30) NULL, /* REFERENCES members (id_member), */
-  id_event VARCHAR(30) NULL, /* REFERENCES events (id_event), */
+  id_member VARCHAR(30) NULL REFERENCES members (id_member), 
+  id_event VARCHAR(30) NULL REFERENCES events (id_event),
   /* core attributes */
   response VARCHAR(20)  NULL,
   watching BOOLEAN  NULL,
@@ -144,4 +163,13 @@ CREATE TABLE rsvps (
   mtime_time TIME NULL,
   mtime_wday SMALLINT  NULL
 );
-CREATE INDEX id_rsvp_index ON rsvps (id_rsvp);
+CREATE INDEX index_rsvps_id_rsvp   ON rsvps(id_rsvp);
+CREATE INDEX index_rsvps_id_event  ON rsvps(id_event);
+CREATE INDEX index_rsvps_id_member ON rsvps(id_member);
+CREATE INDEX index_rsvps_created      ON rsvps(created);
+CREATE INDEX index_rsvps_created_time ON rsvps(created_time);
+CREATE INDEX index_rsvps_created_wday ON rsvps(created_wday);
+CREATE INDEX index_rsvps_mtime      ON rsvps(mtime);
+CREATE INDEX index_rsvps_mtime_time ON rsvps(mtime_time);
+CREATE INDEX index_rsvps_mtime_wday ON rsvps(mtime_wday);
+
