@@ -400,7 +400,7 @@ class EventReader:
 	   full_df[k] = df[k]
     return full_df
     
-MemberCOLUMNS = {
+GroupMemberCOLUMNS = {
   'bio': dtype('O'),
   'city': dtype('O'),
   'country': dtype('O'),
@@ -410,6 +410,8 @@ MemberCOLUMNS = {
   'id_member': dtype('int64'),
   'id_photo': dtype('float64'),
   'joined': dtype('int64'),
+  'joined_time': dtype('O'),
+  'joined_wday': dtype('int64'),
   'lat': dtype('float64'),
   'link': dtype('O'),
   'link_photo': dtype('O'),
@@ -421,7 +423,7 @@ MemberCOLUMNS = {
   'visited': dtype('int64')
 }
 class GroupMemberReader:
-  def __init__(self,group_ids, members_dir="../10-data/members_updated/", ext=".json", do_max = False, max_columns = MemberCOLUMNS):
+  def __init__(self,group_ids, members_dir="../10-data/members_updated/", ext=".json", do_max = False, max_columns = GroupMemberCOLUMNS):
     self.filenames = [ members_dir + f.strip() + ext for f in group_ids]
     self.cursor = 0
     self.members_dir = members_dir
@@ -451,8 +453,75 @@ class GroupMemberReader:
     del(df['self'])
     del(df['other_services'])
     df = flatten_col(df, "photo")
-    df = date_col(df, "joined") 
+    df = date_time_col(df, "joined") 
+    df = date_time_col(df, "visited") 
     
+    if not self.do_max:
+      return df
+    
+    full_df = empty_df_of_type(self.max_columns)
+   
+    for k in self.max_columns.keys():
+	if k in df.columns:
+	   full_df[k] = df[k]
+    return full_df
+    
+MemberCOLUMNS = {
+  'city': dtype('O'),
+  'country': dtype('O'),
+  'highres_link_photo': dtype('O'),
+  'hometown': dtype('O'),
+  'id_member': dtype('int64'),
+  'id_photo': dtype('float64'),
+  'lat': dtype('float64'),
+  'link': dtype('O'),
+  'link_photo': dtype('O'),
+  'lon': dtype('float64'),
+  'state': dtype('O'),
+  'thumb_link_photo': dtype('O')
+}
+
+class MemberReader:
+  def __init__(self,group_ids, members_dir="../10-data/members_updated/", ext=".json", do_max = False, max_columns = MemberCOLUMNS):
+    self.filenames = [ members_dir + f.strip() + ext for f in group_ids]
+    self.cursor = 0
+    self.members_dir = members_dir
+    self.ext = ext
+    self.do_max = do_max
+    self.max_columns = max_columns
+    self.used_ids = set()
+
+  def __iter__(self):
+    return self
+
+  def next(self):
+    # find the next (non-empty) file on my list, or stop
+    while self.cursor < len( self.filenames ) and os.path.getsize(self.filenames[self.cursor])==0:
+      self.cursor += 1
+    if self.cursor >= len( self.filenames ):
+      raise StopIteration
+
+    # found a file
+    filename = self.filenames[ self.cursor ] 
+    self.cursor += 1
+ 
+    df = pd.read_json(filename)
+    if len(df) == 0:
+        return df
+    df[u'id_group'] = filename.replace(self.ext,"").replace(self.members_dir,"")
+    df.rename(columns={'id': 'id_member'}, inplace=True)
+    del(df['self'])
+    del(df['other_services'])
+    df = flatten_col(df, "photo")
+    df = date_time_col(df, "joined") 
+    
+    for i in self.used_ids:
+      df = df[ df.id_member != i ]
+
+    df.drop_duplicates(subset = ['id_member'], inplace = True)
+    df.dropna(subset = ['id_member'], inplace = True)
+    self.used_ids.update( df.id_member.values )
+
     if not self.do_max:
       return df
     
