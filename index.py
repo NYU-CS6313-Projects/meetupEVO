@@ -1,6 +1,5 @@
 import os, psycopg2, psycopg2.extras, json, re, random
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
-import flask.ext.restful.representations.json
 from collections import Counter
 
 app = Flask(__name__)
