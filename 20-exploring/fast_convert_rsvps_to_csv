@@ -9,7 +9,7 @@ count = 0
 perc_step = 0
 
 COPY_COL = [ "created", "mtime", "guests", "response","watching" ]
-GROUP_COL= [ "join_mode_group", "created_group", "lon_group", "lat_group", "urlname_group", "id_group" ]
+GROUP_COL= [ "join_mode_group", "created_group", "group_lon_group", "group_lat_group", "urlname_group", "id_group" ]
 EVENT_COL= [ "id_event", "name_event", "time_event" ]
 
 COL = [ "id_rsvp", "id_member" ] + EVENT_COL + GROUP_COL + COPY_COL + [ "created_wday", "mtime_wday", "created_time", "mtime_time" ]
