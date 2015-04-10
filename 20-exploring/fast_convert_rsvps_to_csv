@@ -5,7 +5,6 @@ import os, sys, csv, json, zipfile, datetime
 data_dir = "../10-data/rsvps/"
 
 max = 627415
-max = 100
 count = 0
 perc_step = 0
 
