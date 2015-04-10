@@ -1,11 +1,13 @@
 import os, psycopg2, psycopg2.extras, json, re, random
-import flask
-from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify
+from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
+import flask.ext.restful.representations.json
 from collections import Counter
 
 app = Flask(__name__)
 
-print "I am using flask version %s" % flask.__version__
+app.json_encoder =  json.JSONEncoder
+app.config['JSON_AS_ASCII'] = True
+app.config['JSON_SORT_KEYS'] = True
 
 # ====================================================================================
 @app.before_request
