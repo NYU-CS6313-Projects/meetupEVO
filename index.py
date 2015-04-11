@@ -154,6 +154,7 @@ def group_size_histogram_json():
 # ====================================================================================
 @app.route('/')
 def index():
+  try:
     g.db_cursor.execute("""select a.no_groups, b.no_events, c.no_members, d.no_venues, e.no_rsvps from 
       (select count(*) as no_groups from groups) AS a, 
       (select count(*) as no_events from events) AS b,
@@ -162,7 +163,7 @@ def index():
       (select count(*) as no_rsvps from rsvps) AS e
       """)
     counts = g.db_cursor.fetchone()
-    g.db_cursor.execute("""select name from groups where random() < 1""")
+    g.db_cursor.execute("""select name from groups where name is not null and random() < 1""")
     word_counter = Counter()
     total_count = 0
     for name in g.db_cursor.fetchall():
@@ -177,9 +178,12 @@ def index():
       p = 100.0 * word_counter[ w ]  / total_count
       if p > 0.2:
         word_weight[ w ] = p 
-    word_counter_keys = word_weight.keys()
-    random.shuffle(word_counter_keys)
-    return render_template("index.html", counts = counts, word_counter = word_weight, word_counter_keys = word_counter_keys )
+  except Exception as ex:
+    counts = { 'no_groups': 0, 'no_events': 0, 'no_members': 0, 'no_venues': 0, 'no_rsvps': 0 }
+    word_weight = { 'error': 0.70, 'no': 0.1, 'database': 0.3, 'sorry': 0.2, 'broken': 0.3, 'sad': 0.4 }
+  word_counter_keys = word_weight.keys()
+  random.shuffle(word_counter_keys)
+  return render_template("index.html", counts = counts, word_counter = word_weight, word_counter_keys = word_counter_keys )
 # ====================================================================================
 if __name__ == '__main__':
   app.run(debug=True)
