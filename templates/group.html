@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1>{{ title }} </h1>
+
+
+  <table class="table">
+    <tr>
+      <th>Created</th>
+      <th>Join mode</th>
+      <th>Number of Members</th>
+      <th>Max Attendees at one Event</th>
+      <th>Total distinct Attendees</th>
+      <th>History</th>
+    </tr>
+    <tr>
+      <td>
+        {% if group["created"] != None  %}
+          {{ group["created"].strftime('%Y') }}
+        {% endif %}
+      </td>
+      <td>
+        {{ group["join_mode"] }}
+      </td>
+      <td>
+        {{ group["no_members"] }}
+      </td>
+      <td>
+        {{ group["max_yes_at_one_event"] }}
+      </td>
+      <td>
+        {{ group["no_member_who_ever_rsvpd_yes"] }}
+      </td>
+      <td>
+        {% if group["number_of_events"] > 0 %}
+          {{  group["number_of_events"]  }} events
+          {{ group["first_event_time"].strftime('%b %Y') }} to {{ group["last_event_time"].strftime('%b %Y') }}
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+  
+
+
+  <h2>Events</h2>
+  <table class="table">
+    <tr>
+      <th>Date </th>
+      <th>Time</th>
+      <th>Name</th>
+      <th>Fee</th>
+      <th>Rsvps: Yes</th>
+      <th>Rsvps: Waitlisted</th>
+      <th>Rsvps: No</th>
+      <th>Rating</th>
+    </tr>
+  {% for e in events %} 
+    <tr>
+      <td>
+        {{ e["time"].strftime('%d. %b %Y') }}
+      </td>
+      <td>
+        {{ e["time"].strftime('%l:%M%p').lower() }}
+      </td>
+      <td>
+        {{ e["name"].decode('utf8') }}
+      </td>
+      <td>
+        {% if e["required_fee"] != None %}
+          {{ e["amount_fee"] }} {{ e["currency_fee"] }}
+        {% endif %}
+      </td>
+      <td>
+        {{ e["yes_rsvp_count_from_rsvps"] }} Yes
+      </td>
+      <td>
+        {{ e["waitlist_rsvp_count_from_rsvps"] }} Waitlisted
+      </td>
+      <td>
+        {{ e["no_rsvp_count_from_rsvps"] }} No
+      </td>
+      <td>
+        {% if e["average_rating"] != None %}
+          {{ e["average_rating"] }} by
+          {{ e["count_rating"] }} members
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %} 
+  </table>
+  
+{% endblock %}

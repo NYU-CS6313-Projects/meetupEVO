@@ -64,14 +64,17 @@ def groups_count_cities_tsv():
 # ====================================================================================
 @app.route('/groups/')
 def groups_index_html():
-  g.db_cursor.execute("""   
-    select 
-      id_group, name, urlname, join_mode, no_members,created, visibility, 
-      number_of_events , first_event_time, last_event_time, max_yes_at_one_event, no_member_who_ever_rsvpd_yes
-    from groups
-    order by name""")
+  g.db_cursor.execute("""select * from groups order by name""")
   list_of_groups = g.db_cursor.fetchall()
   return render_template("groups-index.html", title = "List of Groups", groups = list_of_groups)
+
+@app.route('/groups/<id_group>')
+def groups_events(id_group):
+  g.db_cursor.execute("""select * from groups where id_group=%(id)s""", { 'id': id_group })
+  this_group = g.db_cursor.fetchone()
+  g.db_cursor.execute("""select * from events where id_group=%(id)s order by time""", { 'id': id_group })
+  list_of_events = g.db_cursor.fetchall()
+  return render_template("group.html", title = "Group %s" % this_group["name"], group = this_group, events = list_of_events)
 
 @app.route('/groups/count_states.html')
 def groups_count_states_html():
