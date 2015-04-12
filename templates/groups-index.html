@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1>List <small>of meetup groups</small></h1>
+
+  <table class="table">
+    <tr>
+      <th>Created</th>
+      <th>Name</th>
+      <th>Join mode</th>
+      <th>Number of Members</th>
+      <th>History</th>
+    </tr>
+  {% for g in groups %} 
+    <tr>
+      <td>
+        {% if g["created"] != None  %}
+          {{ g["created"].strftime('%Y') }}
+        {% endif %}
+      </td>
+      <td>
+        {% if g["name"] == None %}
+        {{ g["urlname"].decode('utf8') }}
+        {% else %}
+        {{ g["name"].decode('utf8') }}
+        {% endif %}
+      </td>
+      <td>
+        {{ g["join_mode"] }}
+      </td>
+      <td>
+        {{ g["no_members"] }}
+      </td>
+      <td>
+        {% if g["number_of_events"] > 0 %}
+          {{  g["number_of_events"]  }} events:
+          {{ g["first_event_time"].strftime('%b %Y') }} and {{ g["last_event_time"].strftime('%b %Y') }}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %} 
+  </table>
+  
+{% endblock %}

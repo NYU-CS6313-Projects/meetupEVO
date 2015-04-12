@@ -62,6 +62,17 @@ def groups_count_cities_tsv():
     return Response(result, mimetype='text/plain')
 
 # ====================================================================================
+@app.route('/groups/')
+def groups_index_html():
+  g.db_cursor.execute("""   
+    select 
+      id_group, name, urlname, join_mode, no_members,created, visibility, 
+      number_of_events , first_event_time, last_event_time, max_yes_at_one_event, no_member_who_ever_rsvpd_yes
+    from groups
+    order by name""")
+  list_of_groups = g.db_cursor.fetchall()
+  return render_template("groups-index.html", title = "List of Groups", groups = list_of_groups)
+
 @app.route('/groups/count_states.html')
 def groups_count_states_html():
   return render_template("horizontal-barchart-tsv.html", 
