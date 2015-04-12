@@ -14,7 +14,7 @@ def before_request():
   try:
     g.db = psycopg2.connect(os.environ['DATABASE_URL'])
     g.db.autocommit = True
-    g.db_cursor = g.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    g.db_cursor = g.db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
   except Exception as inst:
     app.logger.error('Error connecting to %s' % os.environ['DATABASE_URL'])
     app.logger.error(inst)
@@ -62,19 +62,39 @@ def groups_count_cities_tsv():
     return Response(result, mimetype='text/plain')
 
 # ====================================================================================
-@app.route('/groups/')
-def groups_index_html():
+@app.route('/groups/index.html')
+def groups():
   g.db_cursor.execute("""select * from groups order by name""")
   list_of_groups = g.db_cursor.fetchall()
-  return render_template("groups-index.html", title = "List of Groups", groups = list_of_groups)
+  return render_template("groups.html", title = "List of Groups", groups = list_of_groups)
 
-@app.route('/groups/<id_group>')
-def groups_events(id_group):
+@app.route('/group/<id_group>')
+def group(id_group):
   g.db_cursor.execute("""select * from groups where id_group=%(id)s""", { 'id': id_group })
   this_group = g.db_cursor.fetchone()
   g.db_cursor.execute("""select * from events where id_group=%(id)s order by time""", { 'id': id_group })
   list_of_events = g.db_cursor.fetchall()
-  return render_template("group.html", title = "Group %s" % this_group["name"], group = this_group, events = list_of_events)
+  app.logger.error(this_group['name'])
+  g.db_cursor.execute("""
+      SELECT
+        EXTRACT(EPOCH FROM time) AS starting_time, 
+        EXTRACT(EPOCH FROM time) + COALESCE(duration,0) AS ending_time,  
+        yes_rsvp_count_from_rsvps AS yes,
+        yes_rsvp_count_from_rsvps/max_yes_at_one_event AS size
+      FROM 
+        events LEFT JOIN groups USING (id_group)
+      WHERE events.id_group=%(id)s 
+      ORDER BY time""", { 'id': id_group })
+  timeline=[]
+  for t in g.db_cursor.fetchall():
+    timeline.append(t)
+  app.logger.error(timeline)
+  return render_template("group.html", 
+      title = "Group %s" % this_group["name"], 
+      group = this_group, 
+      events = list_of_events, 
+      timeline_json=json.dumps(timeline)
+  )
 
 @app.route('/groups/count_states.html')
 def groups_count_states_html():

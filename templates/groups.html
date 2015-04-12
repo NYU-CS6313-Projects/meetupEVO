@@ -20,11 +20,11 @@
         {% endif %}
       </td>
       <td>
-        <a href="/events/?id_group={{ group['id_group'] }}">
-          {% if group["name"] == None %}
-          {{ group["urlname"].decode('utf8') }}
+        <a href="/group/{{ g['id_group'] }}">
+          {% if g["name"] == None %}
+          {{ g["urlname"].decode('utf8') }}
           {% else %}
-          {{ group["name"].decode('utf8') }}
+          {{ g["name"].decode('utf8') }}
           {% endif %}
         </a>
       </td>
