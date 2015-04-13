@@ -145,7 +145,7 @@ def rsvps_weekday_histogram_json():
 def events_group_evoltution_timeseries_json():
     try: 
       g.db_cursor.execute("""
-        select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count) from events 
+        select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
         group by year, id_group 
         order by id_group, "year"
         limit 200
