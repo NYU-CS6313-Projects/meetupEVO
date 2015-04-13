@@ -1,169 +1,121 @@
 {% extends "layout.html" %}
 {% block body %}
-  <style>
-    body {
-      margin: 0;
-    }
-    .map {
-      position: relative;
-      overflow: hidden;
-    }
+ <style>
 
-    .layer {
-      position: absolute;
-    }
+path {
+  stroke-width: 1px;
+  stroke: white;
+  fill: #c0c0c0;
+  cursor: pointer;
+}
 
-    .tile {
-      position: absolute;
-      width: 256px;
-      height: 256px;
-    }
+path:hover, path.highlighted {
+  fill: tomato;
+}
 
-    .tile path {
-      fill: none;
-      stroke: #000;
-      stroke-linejoin: round;
-      stroke-linecap: round;
-    }
+div.tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  color: black;
+  font-weight: bold;
+  padding: 4px 8px;
+  display: none;
+}
 
-    .tile .major_road { stroke: #776; }
-    .tile .minor_road { stroke: #ccb; }
-    .tile .highway { stroke: #f39; stroke-width: 1.5px; }
-    .tile .rail { stroke: #7de; }
-
-    .info {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-    }
-  </style>
+</style>
   <h1>{{ title }}</h1>
   <p>{{ description }}</p>
   <div id="map"></div>
 {% endblock %}
 {% block javascript %}
+  
   <script>
-    var mapcontainer = 'div#map';
+    var width = 600,
+    height = 598;
 
-    var width = $(mapcontainer).width(),
-        height = Math.max(500, $(mapcontainer).height()),
-        prefix = prefixMatch(["webkit", "ms", "Moz", "O"]);
+//Map projection
+var projection = d3.geo.mercator()
+    .scale(58782.6717252481)
+    .center([-73.97779999999999,40.706154172786455]) //projection center
+    .translate([width/2,height/2]) //translate to center the map in view
 
-    console.log("initial size is " + width + " x " + height);
+//Generate paths based on projection
+var path = d3.geo.path()
+    .projection(projection);
 
-    var tile = d3.geo.tile()
-        .size([width, height]);
+//Create an SVG
+var svg = d3.select("div.main").append("svg")
+    .attr("width", width)
+    .attr("height", height);
 
-    var projection = d3.geo.mercator()
-        .scale((1 << 21) / 2 / Math.PI)
-        .translate([-width / 2, -height / 2]); // just temporary
+//Group for the map features
+var features = svg.append("g")
+    .attr("class","features");
 
-    var tileProjection = d3.geo.mercator();
+//Create zoom/pan listener
+//Change [1,Infinity] to adjust the min/max zoom scale
+var zoom = d3.behavior.zoom()
+    .scaleExtent([1, Infinity])
+    .on("zoom",zoomed);
 
-    var tilePath = d3.geo.path()
-        .projection(tileProjection);
+svg.call(zoom);
 
-    var zoom = d3.behavior.zoom()
-        .scale(projection.scale() * 2 * Math.PI)
-        .scaleExtent([1 << 20, 1 << 23])
-        .translate(projection([-74.0064, 40.7142]).map(function(x) { return -x; }))
-        .on("zoom", zoomed);
+//Create a tooltip, hidden at the start
+var tooltip = d3.select("body").append("div").attr("class","tooltip");
 
-    var map = d3.select("div.main.container").append("div")
-        .attr("class", "map")
-        .style("width", width + "px")
-        .style("height", height + "px")
-        .call(zoom)
-        .on("mousemove", mousemoved);
+d3.json("{{url_for("static", filename= "nycity.geojson")}}",function(error,geodata) {
+  if (error) return console.log(error); //unknown error, check the console
 
-    var layer = map.append("div")
-        .attr("class", "layer");
+  //Create a path for each map feature in the data
+  features.selectAll("path")
+    .data(geodata.features)
+    .enter()
+    .append("path")
+    .attr("d",path)
+    .on("mouseover",showTooltip)
+    .on("mousemove",moveTooltip)
+    .on("mouseout",hideTooltip)
+    .on("click",clicked);
 
-    var info = map.append("div")
-        .attr("class", "info");
+});
 
-    zoomed();
+// Add optional onClick events for features here
+// d.properties contains the attributes (e.g. d.properties.name, d.properties.population)
+function clicked(d,i) {
 
-    function zoomed() {
-      var tiles = tile
-          .scale(zoom.scale())
-          .translate(zoom.translate())
-          ();
+}
 
-      projection
-          .scale(zoom.scale() / 2 / Math.PI)
-          .translate(zoom.translate());
 
-      var image = layer
-          .style(prefix + "transform", matrix3d(tiles.scale, tiles.translate))
-        .selectAll(".tile")
-          .data(tiles, function(d) { return d; });
+//Update map on zoom/pan
+function zoomed() {
+  features.attr("transform", "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")")
+      .selectAll("path").style("stroke-width", 1 / zoom.scale() + "px" );
+}
 
-      image.exit()
-          .each(function(d) { this._xhr.abort(); })
-          .remove();
 
-      image.enter().append("svg")
-          .attr("class", "tile")
-          .style("left", function(d) { return d[0] * 256 + "px"; })
-          .style("top", function(d) { return d[1] * 256 + "px"; })
-          .each(function(d) {
-            var svg = d3.select(this);
-            var open_streetmap_url = "http://" + ["a", "b", "c"][(d[0] * 31 + d[1]) % 3] + ".tile.openstreetmap.us/vectiles-highroad/" + d[2] + "/" + d[0] + "/" + d[1] + ".json";
-            this._xhr = d3.json( open_streetmap_url, function(error, json) {
-              var k = Math.pow(2, d[2]) * 256; // size of the world in pixels
+//Position of the tooltip relative to the cursor
+var tooltipOffset = {x: 5, y: -25};
 
-              tilePath.projection()
-                  .translate([k / 2 - d[0] * 256, k / 2 - d[1] * 256]) // [0°,0°] in pixels
-                  .scale(k / 2 / Math.PI);
+//Create a tooltip, hidden at the start
+function showTooltip(d) {
+  moveTooltip();
 
-              svg.selectAll("path")
-                  .data(json.features.sort(function(a, b) { return a.properties.sort_key - b.properties.sort_key; }))
-                .enter().append("path")
-                  .attr("class", function(d) { return d.properties.kind; })
-                  .attr("d", tilePath);
-            });
-          });
-    }
+  tooltip.style("display","block")
+      .text(d.properties.name);
+}
 
-    function mousemoved() {
-      info.text(formatLocation(projection.invert(d3.mouse(this)), zoom.scale()));
-    }
+//Move the tooltip to track the mouse
+function moveTooltip() {
+  tooltip.style("top",(d3.event.pageY+tooltipOffset.y)+"px")
+      .style("left",(d3.event.pageX+tooltipOffset.x)+"px");
+}
 
-    function matrix3d(scale, translate) {
-      var k = scale / 256, r = scale % 1 ? Number : Math.round;
-      return "matrix3d(" + [k, 0, 0, 0, 0, k, 0, 0, 0, 0, k, 0, r(translate[0] * scale), r(translate[1] * scale), 0, 1 ] + ")";
-    }
+//Create a tooltip, hidden at the start
+function hideTooltip() {
+  tooltip.style("display","none");
+}
+</script>
 
-    function prefixMatch(p) {
-      var i = -1, n = p.length, s = document.body.style;
-      while (++i < n) if (p[i] + "Transform" in s) return "-" + p[i].toLowerCase() + "-";
-      return "";
-    }
-
-    function formatLocation(p, k) {
-      var format = d3.format("." + Math.floor(Math.log(k) / 2 - 2) + "f");
-      return (p[1] < 0 ? format(-p[1]) + "°S" : format(p[1]) + "°N") + " "
-          + (p[0] < 0 ? format(-p[0]) + "°W" : format(p[0]) + "°E");
-    }
-
-    d3.select(window).on('resize', resize); 
-
-    function resize() {
-      // change some global vars to new values:
-
-      width = $(mapcontainer).width();
-      height = $(mapcontainer).height();
-
-      console.log("resize to " + width + " x " + height);
-
-      d3.select('div.map')
-          .style("width", width + "px")
-          .style("height", height + "px");
-      console.log("width of map is now " + d3.select('div.map').style("width") );
-      
-      tile.size([width, height]);
-
-    }
     </script>
 {% endblock %}
