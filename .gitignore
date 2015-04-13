@@ -1,1 +1,7 @@
 **/.DS_Store
+*~
+*.bak
+.ipynb_checkpoints
+*.py[co]
+__pycache__
+10-data

@@ -1,0 +1,21 @@
+#!/bin/env python
+
+import matplotlib
+import sys
+import fileinput
+
+from utilities import flatten_col, GroupsReader
+
+# read list of json-files to work on from stdin
+group_ids = [ f.strip() for f in fileinput.input() ]
+
+# all_the_columns = set()
+types_of_columns = {}
+
+onlyOnFirstFile = True
+for df in GroupsReader():
+  d = df.dtypes.to_dict()
+  types_of_columns.update( d )
+
+print repr( types_of_columns ).replace(", ", ",\n")
+

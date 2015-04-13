@@ -1,0 +1,27 @@
+#!/bin/env python
+
+import matplotlib
+import sys
+import fileinput
+import json
+
+from utilities import flatten_col, RsvpReader
+
+types_of_columns = {}
+
+onlyOnFirstFile = True
+count = 0
+for df in RsvpReader():
+  count += 1
+  d = df.dtypes.to_dict()
+  types_of_columns.update( d )
+  print ". ",
+  if count > 10:
+	break
+
+s = repr( types_of_columns ).replace(", ", ",\n")
+
+print s
+
+    
+

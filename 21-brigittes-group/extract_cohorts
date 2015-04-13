@@ -1,0 +1,81 @@
+#!/usr/local/bin/env python
+
+# -*- coding: utf-8 -*-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+import fileinput, json, csv, os, time, codecs
+from collections import Counter
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from matplotlib import cm
+
+for group_id in fileinput.input():
+  group_id = group_id.strip()
+  try:
+    group  = json.load( codecs.open( "group_%s.json" % group_id , encoding='iso-8859-1')  )['results'][0]
+    events = json.load( codecs.open( "group_%s_events.json" % group_id, encoding='iso-8859-1' )  )['results']
+    att    = json.load( codecs.open( "group_%s_attendance.json" % group_id, encoding='utf-8' )  )
+  except Exception as e:
+    print e
+    print "Could not read data for group %s, skipping" % group_id
+    continue
+
+  print "Group %s" % group['name']
+  print "Found %d Events" % len(events)
+  print "Found %d Events with attendees" % len( att['events'] )
+
+  cohort_of = {}
+
+  col_time = []
+  col_event_id = []
+  col_event_name = []
+  col_member_id = []
+  col_member_name = []
+  col_member_cohort = []
+
+  for i in range( len( events ) ):
+    event = events[i]
+    t0 = int(event['time']/1000)
+
+    date = time.strftime('%d.%m.%Y', time.localtime(t0))
+    event_id = event['id']
+
+    if type(att['events'][i]['attendees']) == dict:
+      print "skipping event because of errors"
+      continue
+    print
+    print "%s,%s,%s" % ( t0, event_id, event['name'] )
+    check_event_id = att['events'][i]['event_id']
+    if not check_event_id  == event_id:
+      print "                  %15s! skipping" %check_event_id
+      break
+    attendees = att['events'][i]['attendees']
+
+    for a in attendees:
+      member_id = a['member']['id']
+      if not ( member_id in cohort_of.keys() ):
+        cohort_of[member_id] = i
+
+      col_time.append(t0)
+      col_event_id.append(event['id'])
+      col_event_name.append(event['name'])
+      col_member_id.append(a['member']['id'])
+      col_member_name.append(a['member']['name'])
+      col_member_cohort.append( cohort_of[member_id] )
+      print "                  %s,%s,%d" % (a['member']['id'], a['member']['name'], cohort_of[member_id])
+
+
+
+df = pd.DataFrame( data = { "epoch": col_time, 
+                            "event_id": col_event_id, 
+                            "event_name": col_event_name, 
+                            "member_id": col_member_id, 
+                            "member_name": col_member_name, 
+                            "member_cohort": col_member_cohort } )
+
+# df['datetime'] = df['epoch'].astype('datetime64[s]')
+
+df.to_csv("group_%s_cohorts.csv" % group_id)

@@ -1,0 +1,45 @@
+#!/bin/env python
+
+# matplotlib must be imported first
+# and set to a non-GUI backend
+import matplotlib
+matplotlib.use('Agg')
+
+import sys
+import fileinput
+from utilities import flatten_col, EventReader
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+# read list of json-files to work on from stdin
+list_of_files = [ f.strip() for f in fileinput.input() ]
+
+print """<!DOCTYPE HTML>
+<head>
+  <title>Evolution of Groups</title>
+</head>
+<body>
+  <h1>Evolution of Groups</h1>
+"""
+
+for df in EventReader( list_of_files ):
+    if u"name_group" not in df.columns:
+	print "skipping one"
+        continue
+    group_name = df[u"name_group"][0].encode('utf-8')
+    event_attendees =  df["yes_rsvp_count"].values.tolist()
+
+    numbers_as_string =  repr( event_attendees ).replace("[", "").replace("]", "")
+    print '<p>%s: %d events <span class="inlinesparkline">%s</span></p>' % (group_name, len( event_attendees), numbers_as_string)
+   
+
+print """
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
+  <script>
+      $('.inlinesparkline').sparkline(); 
+  </script>
+</body>
+</html>
+""" 

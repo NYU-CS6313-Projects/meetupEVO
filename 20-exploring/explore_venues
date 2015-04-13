@@ -1,0 +1,25 @@
+#!/bin/env python
+
+import matplotlib
+import sys
+import fileinput
+
+from utilities import flatten_col, VenuesReader
+
+# read list of json-files to work on from stdin
+group_ids = [ f.strip() for f in fileinput.input() ]
+
+# all_the_columns = set()
+types_of_columns = {}
+
+onlyOnFirstFile = True
+for df in VenuesReader( group_ids ):
+  d = df.dtypes.to_dict()
+  types_of_columns.update( d )
+
+s = repr( types_of_columns ).replace(", ", ",\n")
+
+print s
+
+    
+

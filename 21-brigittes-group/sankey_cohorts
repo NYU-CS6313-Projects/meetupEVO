@@ -1,0 +1,74 @@
+#!/usr/local/bin/env python
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
+import fileinput, json, csv, os, time, codecs
+from collections import Counter
+import pandas as pd
+
+
+for group_id in fileinput.input():
+  group_id = group_id.strip()
+  try:
+    df = pd.read_csv("group_%s_cohorts.csv" % group_id)
+    df['datetime'] = df['epoch'].astype('datetime64[s]')
+  except Exception as e:
+    print e
+    print "Could not read data for group %s, skipping" % group_id
+    continue
+
+  print "saneky for group %s" % group_id 
+
+  no_cohorts = df["member_cohort"].max()
+  print "there are cohorts numbered 0 to %d" % no_cohorts
+
+  characters = open("characters.xml", "w")
+  characters.write("<characters>")
+
+  scenes = open("narrative.json", "w")
+  scenes.write('{ "panels": 409, "scenes": [\n')
+
+
+  no_for_member = {}
+  no_for_event = {}
+  next_no = 0
+  next_event_no = 0
+
+
+  this_event = None
+  event_no = -1
+  t = []
+  chars = []
+  for i in range( len(df['epoch']) ):
+    row = df.iloc[i]
+    if row["event_id"] in no_for_event.keys():
+      pass
+    else:
+      no_for_event[ row["event_id"] ] = next_event_no
+      next_event_no += 1
+    if row["member_id"] in no_for_member.keys():
+      pass # old character
+    else:
+      no_for_member[row["member_id"]] = next_no
+      characters.write('<character group="%s" id="%s" name="%s" />\n' % ( row["member_cohort"], next_no, row["member_name"]) )
+      next_no += 1
+
+
+    if not this_event == row["event_id"]:
+      if this_event is not None:
+        scenes.write('{ "duration": 1, "start": %s, "chars": %s, "id": %s },\n' % ( 3 * no_for_event[this_event], repr(sorted(chars)), no_for_event[this_event] ) )
+      this_event = row["event_id"]
+      chars = []
+      t.append(row["datetime"].strftime("%Y-%m-%d"))
+      event_no += 1
+      print "New Event %s" % ( row["event_name"])
+    chars.append( no_for_member[row["member_id"]] )
+
+  characters.write("</characters>")
+  characters.close()
+
+  scenes.write('{ "duration": 1, "start": 407, "chars": [ ], "id": 999 } ] }') 
+

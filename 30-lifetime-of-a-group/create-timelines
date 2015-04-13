@@ -1,0 +1,16 @@
+#!/bin/env python
+
+from numpy import dtype
+from glob import glob
+import sys
+import json
+import pandas as pd
+sys.path.insert(0, '.')
+import  psycopg2, psycopg2.extras
+from collections import Counter
+
+db_conn = psycopg2.connect("dbname='infovis_meetup'")
+db_conn.autocommit = True
+db_cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+# select id_group, time, yes_rsvp_count from events order by id_group, time limit 10;

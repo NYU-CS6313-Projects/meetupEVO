@@ -1,0 +1,232 @@
+#!/bin/env python
+
+
+from numpy import dtype
+from glob import glob
+import sys
+import json
+import pandas as pd
+sys.path.insert(0, '.')
+from pg_utilities import VenuesReader, MemberReader, GroupReader, GroupMemberReader, EventReader, RsvpReaderCOLUMNS, EventCOLUMNS, date_time_col
+import  psycopg2, psycopg2.extras
+from collections import Counter
+
+data_dir = "../10-data/"
+
+db_conn = psycopg2.connect("dbname='infovis_meetup'")
+db_conn.autocommit = True
+db_cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+from sqlalchemy import create_engine
+engine = create_engine('postgresql+psycopg2:///infovis_meetup')
+
+all_groups = [ path.replace("%s/events_updated/" % data_dir, "").replace(".json","") for path in glob("%s/events_updated/*.json" % data_dir) ]
+# print "importing for %d groups" % len(all_groups)
+
+
+if False:
+  for df in VenuesReader( all_groups , do_max = True):
+    if not 'id_venue' in df.columns:
+      print "skipping venue df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.to_sql('venues', engine, if_exists = 'append', index = False)
+
+  # manual fixes:  lat + lon cannot be null in python dataframes, have to find nulls again in postgres:    
+  db_cursor.execute("update venues set lat=null,lon=null where lat=0.0 and lon=0.0")
+  db_cursor.execute("select count(*) as c from venues")
+  print "%d venues inserted" % db_cursor.fetchone()['c']
+
+
+if False: # members of groups from members.csv
+  db_cursor.execute("delete from members")
+  used_ids = Counter()
+  cols = MemberCOLUMNS
+  reader = pd.read_csv(data_dir + 'members-small-uniq.csv', iterator=True, chunksize=1000, dtype = cols)
+  for df in reader:
+      df.to_sql('members', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from members")
+  m1 = db_cursor.fetchone()['c']
+  print "%d members inserted" % m1
+
+if False: # organizers from sub-json
+  db_cursor.execute("select count(*) as c from members")
+  m1 = db_cursor.fetchone()['c']
+  orgas = json.load(open(data_dir + "organizers.json"))
+  for o in orgas:
+    db_cursor.execute("""INSERT INTO members (id_member) 
+                          SELECT %(id)s
+                          WHERE NOT EXISTS (
+                            SELECT 1 FROM members WHERE id_member=%(id)s
+                          )""", { 'id': str( o['member_id'] )} )
+  db_cursor.execute("select count(*) as c from members")
+  m2 = db_cursor.fetchone()['c']
+  print "%d more organizers inserted" % (m2 - m1)
+  print "%d members in all" % m2
+
+
+if False:
+  db_cursor.execute("delete from groups")
+  for df in GroupReader( do_max = True):
+    if not 'id_group' in df.columns or not 'member_id_organizer' in df.columns:
+      print "skipping group df with len=%d, columns %s" % ( len(df.index), df.columns.values) 
+    else:
+      df.rename(columns = {'member_id_organizer': 'id_organizer', 'members': 'no_members'}, inplace=True)
+      df.to_sql('groups', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from groups")
+  print "%d groups inserted" % db_cursor.fetchone()['c']
+
+
+if False: # members of groups from members.csv
+  db_cursor.execute("delete from is_member_of")
+  cols = [
+    "id_member",
+    "id_group",
+    "name",
+    "bio",
+    "city",
+    "lon",
+    "lat",
+    "state",
+    "country",
+    "hometown",
+    "id_photo",
+    "link_photo",
+    "thumb_link_photo",
+    "highres_link_photo",
+    "visited",
+    "visited_wday",
+    "visited_time",
+    "joined",
+    "joined_wday",
+    "joined_time"]
+  reader = pd.read_csv(data_dir + 'members.csv', iterator=True, chunksize=1, parse_dates = ['visited', 'joined'])
+  for df in reader:
+    del(df["Unnamed: 0"])
+    del(df["link"])
+    del(df["other_services"])
+    del(df["status"])
+    df['visited'] = df['visited'].apply( lambda s: int(s) )
+    df = date_time_col(df, 'visited')
+    df.to_sql('is_member_of', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from is_member_of")
+  m1 = db_cursor.fetchone()['c']
+  print "%d memberships inserted" % m1
+
+
+if False:
+  db_cursor.execute("delete from events")
+  cols = EventCOLUMNS
+  for c,t in cols.items():
+    if t ==  dtype('int64'):
+      cols[c] = dtype('O')
+  cols['id_rsvp'] = dtype('O')
+  del(cols['created'])
+  del(cols['time'])
+  # del(cols['updated'])
+  reader = pd.read_csv(data_dir + 'events.csv', iterator=True, chunksize=100, dtype = cols, parse_dates = ['created', 'time', 'created_main'])
+  for df in reader:
+
+    del(df["Unnamed: 0"])
+    del(df["name_venue"])
+    del(df["created_main"])
+    del(df["phone_venue"])
+    del(df["repinned_venue"])
+    del(df["address_1_venue"])
+    del(df["address_2_venue"])
+    del(df["city_venue"])
+    del(df["state_venue"])
+    del(df["country_venue"])
+    del(df["zip_venue"])
+    del(df["lat_venue"])
+    del(df["lon_venue"])
+    del(df["lat_group"])
+    del(df["lon_group"])
+    del(df["name_group"])
+    del(df["urlname_group"])
+    del(df["group"])
+    del(df["id"])
+    del(df["id_rsvp"])
+    del(df["who_group"])
+    del(df["created_group"])
+    del(df["created_group_wday"])
+    del(df["join_mode_group"])
+    del(df["filename"])
+    df.rename(columns = {'visibility': 'venue_visibility', 'name_main':'name', 'id_main': 'id_event'}, inplace=True)
+
+    df['count_rating'] = df['count_rating'].apply( lambda s: float(s) )
+    df['id_venue'] = df['id_venue'].apply( lambda s: float(s) )
+    df['updated'] = df['updated'].apply( lambda s: int(s) )
+    df['updated'] = pd.to_datetime(df['updated'],unit='ms') 
+
+    df.to_sql('events', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from events")
+  print "%d events inserted" % db_cursor.fetchone()['c']
+
+def date_time_col(df, col):
+    if not col in df.columns:
+      return df
+    df[col] = pd.to_datetime(df[col],unit='ms')  # just guessing here
+    df[col + "_wday"] = df[col].apply(lambda x: x.weekday())
+    df[col + "_time"] = df[col].apply(lambda x: x.time())
+    return df
+
+if True:
+  db_cursor.execute("delete from rsvps")
+  chunk = 100
+  reader = pd.read_csv(data_dir + 'rsvps.csv', iterator=True, chunksize=chunk, parse_dates = ['created', 'mtime'])
+  counter = 0
+  for df in reader:
+    df = date_time_col(df, 'time_event')
+    df = date_time_col(df, 'created_group')
+    df.rename(columns={ 
+		'group_lat_group': 'lat_group',
+		'group_lon_group': 'lon_group'
+	}, inplace=True)
+    df.to_sql('rsvps', engine, if_exists = 'append', index = False)
+
+    # missing groups
+    group_ids = tuple([ str(x) for x in df["id_group"].unique() ])
+    db_cursor.execute("SELECT id_group FROM groups WHERE id_group in %s", ( group_ids, ))
+    known_group_ids = [ row['id_group'] for row in db_cursor.fetchall() ]
+    new_group_ids = [ int(x) for x in set( group_ids ) - set ( known_group_ids ) ]
+    if len(new_group_ids) > 0:
+      print "groups: %s currently unknown" % ( new_group_ids )
+      group_df = df[ df['id_group'].isin(new_group_ids)  ][[
+		"id_group","urlname_group","join_mode_group",
+		"created_group", "created_group_time", "created_group_wday",
+		"lon_group", "lat_group"]].drop_duplicates()
+      group_df.rename(columns={ 
+		'urlname_group':   'urlname', 
+		'join_mode_group': 'join_mode', 
+		'created_group':   'created',
+		'created_group_time':   'created_time',
+		'created_group_wday':   'created_wday',
+		'lat_group': 'lat',
+		'lon_group': 'lon'
+	}, inplace=True)
+      del(group_df['created_time'])
+      group_df.to_sql('groups', engine, if_exists = 'append', index = False)
+      print "added %d new groups" % len(group_df.index)
+      counter += len(new_group_ids)
+
+    # missing events
+    event_ids = tuple([ str(x) for x in df["id_event"].unique() ])
+    db_cursor.execute("SELECT id_event FROM events WHERE id_event in %s", ( event_ids, ))
+    known_event_ids = [ row['id_event'] for row in db_cursor.fetchall() ]
+    new_event_ids = [ str(x) for x in set( event_ids ) - set ( known_event_ids ) ]
+    if len(new_event_ids) > 0:
+      print "events: %s are unknown ... inserting" %  new_event_ids
+      event_df = df[ df['id_event'].isin(new_event_ids)  ][["id_event","name_event","time_event","time_event_wday","id_group"]].drop_duplicates()
+      event_df.rename(columns={ 'name_event': 'name', 'time_event': 'time', 'time_event_wday': 'time_wday'}, inplace=True)
+      event_df.set_index("id_event", inplace=True)
+      counts_df = df[ df['id_event'].isin(new_event_ids)  ][["id_event","response"]]
+      counts_df = counts_df.groupby(["id_event","response"]).size().unstack().fillna(0)
+      if "yes" in counts_df.columns:
+	event_df["yes_rsvp_count"] = counts_df["yes"]
+      else:
+	event_df["yes_rsvp_count"] = 0
+      event_df['id_event'] = event_df.index
+      event_df.to_sql('events', engine, if_exists = 'append', index = False)
+  db_cursor.execute("select count(*) as c from rsvps")
+  print "%d rsvps inserted" % db_cursor.fetchone()['c']
+

@@ -1,0 +1,71 @@
+#!/bin/env python
+
+import os, sys , fileinput , csv , json , zipfile
+
+data_dir = "../10-data/rsvps/"
+
+import os, time, glob
+
+
+if '--glob' in sys.argv:
+  print "comparing os.listdir to glob.glob"
+
+  n, t = 0, time.time()
+  res = os.listdir(data_dir)
+  n = len(res)
+  t = time.time() - t
+  print "os.listdir: %.4fs, %d files found" % (t, n)
+
+  n, t = 0, time.time()
+  res = glob.glob(data_dir + "*")
+  n = len(res)
+  t = time.time() - t
+  print "glob.glob: %.4fs, %d files found" % (t, n)
+
+  n, t = 0, time.time()
+  for fn in glob.iglob(data_dir + "*"):
+    n += 1
+  t = time.time() - t
+  print "glob.iglob: %.4fs, %d files found" % (t, n)
+
+# os.listdir: 0.5213s, 627416 files found
+# glob.glob: 2.0537s, 627416 files found
+# glob.iglob: 2.1882s, 627416 files found
+
+
+if '--json' in sys.argv:
+  print "comparing ways to read 600,000 files, using os.listdir" 
+
+  for max_n in [ 1000, 2000, 3000 ]:
+
+    a, n, t = 0, 0, time.time()
+    for filename in os.listdir(data_dir):
+      fp = open(data_dir + filename, 'r')
+      content = fp.read()
+      data = json.loads(content)
+      a += len(data)
+      n += 1
+      if n > max_n:
+	break
+      fp.close()
+    t = time.time() - t
+    s = 627415.0 * t / max_n
+    m = s / 60.0
+    h = m / 60.0
+    print "max %d json-files: %.4fs, %d json array elements found. %.4f seconds = %.4f minutes = %.4f hours for all files" % (max_n, t, a, s, m, h)
+
+    a, n, t = 0, 0, time.time()
+    z = zipfile.ZipFile("/home/cusp/bj707/InfoVis/rsvps.zip")
+    for info in z.infolist():
+      if ".json" in info.filename:
+	content = z.read( info.filename )
+	data = json.loads(content)
+	a += len(data)
+	n += 1
+	if n > max_n:
+	  break
+    t = time.time() - t
+    s = 627415.0 * t / max_n
+    m = s / 60.0
+    h = m / 60.0
+    print "max %d files from zip: %.4fs, %d json array elements found. %.4f seconds = %.4f minutes = %.4f hours for all files" % (max_n, t, a, s, m, h)
