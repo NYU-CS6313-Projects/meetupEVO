@@ -112,6 +112,7 @@
   {% endblock %}
   {% block javascript %}
   <script>
+    // display the timeline with https://github.com/jiahuang/d3-timeline
     var t = {{ timeline_json|safe }} ;
     var testData = [ {"label": "events", "times": t } ];
 
