@@ -1,0 +1,27 @@
+/* for fixed navbar: margins and paddings */
+
+body {
+  padding-bottom: 20px;
+  background-color: #F2F2F2;
+}
+
+.navbar {
+  margin-bottom: 20px;
+  background-image: None;
+  background-color: white;
+}
+
+.main.container {
+  background-color: white;
+  padding-top: 10px;
+  padding-bottom: 40px;
+  border: 1px #DDD solid;
+  border-radius: 3px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Ubuntu';
+  }
+p, div {
+  font-family: 'Open Sans';
+}
