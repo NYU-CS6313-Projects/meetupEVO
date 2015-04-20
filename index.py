@@ -144,14 +144,28 @@ def rsvps_weekday_histogram_json():
 @app.route('/events/group_evolution_timeseries.json')
 def events_group_evoltution_timeseries_json():
     try: 
-      g.db_cursor.execute("""
-        select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
-        group by year, id_group 
-        order by id_group, "year"
-        limit 500
-        )t 
-        Where t."year" is not null
-        """)
+      c = request.args.get("category")
+
+      if c is None or c == '' or c = '*':
+        g.db_cursor.execute("""
+          select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
+          group by year, id_group 
+          order by id_group, "year"
+          limit 500
+          )t 
+          Where t."year" is not null
+          """)
+      else:
+        g.db_cursor.execute("""
+          select t.year, t.id_group, t.sum  from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
+          group by year, id_group 
+          order by id_group, "year"
+          limit 500
+          ) t LEFT JOIN groups USING (id_group)
+          where t."year" is not null
+          AND groups.name_category = %(category)s
+          """, { "category": c } )
+
       resp = jsonify({ 
           'status': 200, 
           'color': 'pink',

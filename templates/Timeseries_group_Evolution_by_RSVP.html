@@ -2,7 +2,12 @@
 {% block body %}
 <h1>{{ title }}</h1>
 
-  <p>A rough sketch of group evlution timeseries</p>
+<p>A rough sketch of group evlution timeseries</p>
+
+<input type="button" value="show only category tech" class="category_button"  id="tech">
+<input type="button" value="show only category women" class="category_button" id="women">
+<input type="button" value="show all categories" class="category_button"      id="*">
+
 {% endblock %}
 
 {% block javascript %}
@@ -50,10 +55,11 @@
 
 
         <script type="text/javascript">
-                var padding = 50;
+            var padding = 50;
+            var svg2 = d3.select("div.main").append("svg").attr("width", 1000).attr("height", 1000);
 
             // Load the line.json file
-            d3.json('/events/group_evolution_timeseries.json', function(error, data) {
+            function handle_new_json_data(error, data) {
                 if(error) {
                     return console.warn(error);
                 }
@@ -70,7 +76,6 @@
                 })
                 
                 // Creating the main SVG
-                var svg2 = d3.select("div.main").append("svg").attr("width", 1000).attr("height", 1000);
 
                 // Creating the Scales
                 // x scale
@@ -190,6 +195,14 @@
                     });
                 });
                 
+            }
+
+            d3.json('/events/group_evolution_timeseries.json', handle_new_json_data);
+
+
+            $('.category_button').on('click', function() {
+               console.log("make a new query looking for category " + this.id);
+               d3.json('/events/group_evolution_timeseries.json?category=' + this.id, handle_new_json_data);
             });
 
 </script>
