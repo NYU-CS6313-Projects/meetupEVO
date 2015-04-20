@@ -148,7 +148,7 @@ def events_group_evoltution_timeseries_json():
         select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
         group by year, id_group 
         order by id_group, "year"
-        limit 200
+        limit 500
         )t 
         Where t."year" is not null
         """)

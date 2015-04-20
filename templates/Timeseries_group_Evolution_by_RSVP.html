@@ -28,6 +28,14 @@
                     stroke: #777;
                     shape-rendering: crispEdges;
             }
+            
+            .label {
+                    stroke: #777;
+                    fontStyle: italic;
+                    shape-rendering: crispEdges;  
+                    stroke-width:0.7px;
+                    font-size: large;
+            }
 /*
             .axis text {
                     fill: none;
@@ -43,94 +51,146 @@
 
         <script type="text/javascript">
                 var padding = 50;
-        
 
             // Load the line.json file
             d3.json('/events/group_evolution_timeseries.json', function(error, data) {
                 if(error) {
                     return console.warn(error);
                 }
-                else{
-               // console.log(data['data'])
-                }
-                // Calculate the extents of the data (i.e. min and max)
-                var extentX = d3.extent(data['data'], function(d) {
-                    return parseInt(d.year);
-                })
 
+                // Calculate the extents of the data (i.e. min and max)
+                // extents along the horizontal line
+                var extentX = d3.extent(data['data'], function(d) {
+                    return parseFloat(d.year);
+                })
+                
+                // extents along the vertica line
                 var extentY = d3.extent(data['data'], function(d) {
                     return parseInt(d.sum);
                 })
-
                 
-                // Create an SVG
+                // Creating the main SVG
                 var svg2 = d3.select("div.main").append("svg").attr("width", 1000).attr("height", 1000);
 
-                // Now the scales!
-
-                // The x scale, nothing special here
-                var x = d3.scale.linear().domain(extentX).range([padding,750]);
+                // Creating the Scales
+                // x scale
+                var xStretch = 950
+                var x = d3.scale.linear().domain(extentX).range([padding,xStretch]);
                 
-                // The y scale, again nothing special
-                var y2 = d3.scale.linear().domain(extentY).range([padding,750]);
-                
-                // A second y scale? Note the range; the arguments are swapped!
-                // This creates an inverted scale
-                var y = d3.scale.linear().domain(extentY).range([750,padding]);
-
-                // Create and draw the axis
-                var xAxis = d3.svg.axis().scale(x).orient("bottom");
-                var yAxis = d3.svg.axis().scale(y).orient("right");
-                svg2.append("g").attr("class", "axis").call(xAxis);
-                svg2.append("g").attr("class", "axis").call(yAxis);
-                // Because we used the inverted scale, the lower values will
-                // be on the bottom of the SVG (opposite the origin)
+                // Inverted y scale
+                var yStretch = 750
+                var y = d3.scale.linear().domain(extentY).range([yStretch,padding]);
 
                 
-                // Creating a multi line blala
+                // Creating and draw the axis
+                // xAxis variable
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom")
+                    .tickFormat(d3.format("d"));
+                
+                // yAxis variable
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
+                
+                
+                // Putting the axeses into the diagram by calling the variable up there (xAxis and yAxis)
+                // Drawing the x-axis
+                svg2.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(0," + (yStretch) + ")")
+//                    .attr("transform", "translate(0," + (yStretch + padding) + ")")
+                    .call(xAxis);
+                
+                // Drawing the y-axis
+                svg2.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(" + padding + ",0)")
+                    .call(yAxis);
+                
+                // Labelling x-axis
+                svg2.append("text")
+                    .attr("class", "label")
+                    .attr("text-anchor", "end")
+                    .attr("x", xStretch)
+                    .attr("y", yStretch + 100)
+                    .attr("y", yStretch + 50)
+                    .text("Year");
+                
+                // Labelling the y-axis
+                svg2.append("text")
+                    .attr("class", "label")
+                    .attr("text-anchor", "end")
+                    .attr("y", padding+10)
+                    .attr("x", -padding)
+                    .attr("dy", ".75em")
+                    .attr("transform", "rotate(-90)")
+                    .text("Sum of RSVPs");
+                
+                // Creating a function that will nest our ID groups into; so our json file is clustered by group instead
+                // of having just a list of all the information.
                 var dataGroup = d3.nest()
                     .key(function(d) {
                         return d.id_group;
                     })
                     .entries(data['data']);
-                console.log(dataGroup);
-                // Create a path
+                
+                
+                // Creating a path function that will load in years as the x values and rsvps as y values. 
+                // This will allows the tool to know where to connect the lines
+                // The interpolate function allows for curved lines
                 var theLine = d3.svg.line()
                     .x(function (d, i) {
-                        //console.log(JSON.stringify(d));
                         return x(d.year);
                     })
                     .y(function (d) {
                         return y(d.sum);
-                    });
-
+                    })
+                    .interpolate("basis"); 
                 
+                var tooltip = d3.select("body")
+                    .append("div")
+                    .style("position", "absolute")
+                    .style("z-index", "10")
+                    .style("visibility", "hidden")
+                    .text("a simple tooltip");
+                
+                // Creating a function that moves the selected line to the front
+                d3.selection.prototype.moveToFront = function() { 
+                    return this.each(function() { 
+                        this.parentNode.appendChild(this); 
+                        }); 
+                    };
+
+                // Creating the graph
+                // Creating a colouring function
+                // This function allows us to create random colours for each different group ID
                 dataGroup.forEach(function(d, i) {
                     svg2.append('svg:path')
                         .attr('d', theLine(d.values))
                         .attr('stroke', function(d, j) {
-                            return "hsl(" + Math.random() * 360 + ",100%,50%)";
+                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
                         })
                         .attr('stroke-width', 2)
-                        .attr('fill', 'none');
+                        .attr('opacity', 0.35)
+                        .attr('fill', 'none')
+                        .on('mouseover', function(d){
+                            d3.select(this)
+                            .style('stroke-width', '6px')
+                            .attr('opacity', 1)
+                            .moveToFront();
+                    })
+                        .on('mouseout', function(d){
+                            d3.select(this)
+                            .style('stroke-width', '2px')
+                            .attr('opacity', 0.35)
+                            .transition()
+                            .duration(750);
+                    });
                 });
                 
-                
-                
-                
-//                // Draw a path using that line generator
-//                svg2.append("path") 
-//                    //Style the line, see the CSS above
-//                    .attr("class", "lineChart")
-//                    //Assign the data using the path generator
-//                    .attr("d",  theLine(data['data']));
-//                    //console.log(theLine(data['data']));
-//
-//                    
-//
             });
-
-
 
 </script>
 
