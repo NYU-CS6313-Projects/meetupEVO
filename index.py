@@ -146,7 +146,7 @@ def events_group_evoltution_timeseries_json():
     try: 
       c = request.args.get("category")
 
-      if c is None or c == '' or c = '*':
+      if c is None or c == '' or c == '*':
         g.db_cursor.execute("""
           select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
           group by year, id_group 
