@@ -98,6 +98,10 @@ def groups_count_cities_tsv():
 def groups():
   return render_template("groups.html", title = "List of Groups")
 
+@app.route('/groups/simple.html')
+def groups_simple():
+  return render_template("groups_simple.html", title = "List of Groups")
+
 @app.route('/groups/static.html')
 def groups_static():
   g.db_cursor.execute("""select * from groups order by name""")
