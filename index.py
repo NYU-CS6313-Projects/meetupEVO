@@ -244,8 +244,8 @@ def group_size_histogram_json():
     return resp
 
 # ====================================================================================
-@app.route('/')
-def index():
+@app.route('/intro.html')
+def intro():
   try:
     g.db_cursor.execute("""select a.no_groups, b.no_events, c.no_members, d.no_venues, e.no_rsvps from 
       (select count(*) as no_groups from groups) AS a, 
@@ -275,7 +275,24 @@ def index():
     word_weight = { 'error': 0.70, 'no': 0.1, 'database': 0.3, 'sorry': 0.2, 'broken': 0.3, 'sad': 0.4 }
   word_counter_keys = word_weight.keys()
   random.shuffle(word_counter_keys)
-  return render_template("index.html", counts = counts, word_counter = word_weight, word_counter_keys = word_counter_keys )
+  return render_template("intro.html", counts = counts, word_counter = word_weight, word_counter_keys = word_counter_keys )
+
+@app.route('/')
+def index():
+  return render_template("index.html")
+
+@app.route('/o.html')
+def o():
+  return render_template("o.html")
+
+@app.route('/l.html')
+def l():
+  return render_template("l.html")
+
+@app.route('/b.html')
+def b():
+  return render_template("b.html")
+
 # ====================================================================================
 @app.errorhandler(404)
 def page_not_found(e):
