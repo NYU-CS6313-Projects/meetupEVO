@@ -2,8 +2,18 @@
 {% block body %}
 <h1>{{ title }}</h1>
 
+<p> Select the type of aggregation for the Timeseries plot:
+<ul class="checkbox-grid">
+<li><input type="radio" value="year" class="timeseries_button"  id="year" name="time" checked> By Year </li>
+<li><input type="radio" value="month" class="timeseries_button"  id="month" name="time" checked> By Month </li>
+<li><input type="radio" value="year/month" class="timeseries_button"  id="year/month" name="time" checked> By Year/Month </li>
+<li><input type="radio" value="week" class="timeseries_button"  id="week" name="time" checked> By Week </li>
+</ul>
+<br>
+<br>
+<!--<input type="radio" name="sex" value="male" checked> Year-->
+    
 <p>Select one of the following categories:</p>
-
 <!--Adding all categories for selection-->
 <ul class="checkbox-grid">
 <li><input type="checkbox" value="Tech" class="category_button"  id="tech" name="#a6cee3"> Tech</li>
