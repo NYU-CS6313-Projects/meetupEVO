@@ -1,121 +1,78 @@
 {% extends "layout.html" %}
 {% block body %}
- <style>
+ <head>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css'
+      rel='stylesheet' type='text/css'/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+</head>
 
-path {
-  stroke-width: 1px;
-  stroke: white;
-  fill: #c0c0c0;
-  cursor: pointer;
-}
-
-path:hover, path.highlighted {
-  fill: tomato;
-}
-
-div.tooltip {
-  position: absolute;
-  background-color: white;
-  border: 1px solid black;
-  color: black;
-  font-weight: bold;
-  padding: 4px 8px;
-  display: none;
-}
-
-</style>
   <h1>{{ title }}</h1>
   <p>{{ description }}</p>
-  <div id="map"></div>
+  <div id="map" style="width: 600px; height: 600px"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.9/d3.min.js"></script>
+  <script src="L.D3SvgLeaflet.min.js"></script>
+  
 {% endblock %}
 {% block javascript %}
   
   <script>
-    var width = 600,
-    height = 598;
+   var map = L.map('map',{center:[40.7127, -74.0059], zoom:9});
 
-//Map projection
-var projection = d3.geo.mercator()
-    .scale(58782.6717252481)
-    .center([-73.97779999999999,40.706154172786455]) //projection center
-    .translate([width/2,height/2]) //translate to center the map in view
+// add an OpenStreetMap tile layer
+L.tileLayer('https://{s}.tiles.mapbox.com/v3/cwhong.map-hziyh867/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
-//Generate paths based on projection
-var path = d3.geo.path()
-    .projection(projection);
 
-//Create an SVG
-var svg = d3.select("div.main").append("svg")
-    .attr("width", width)
-    .attr("height", height);
+/* Initialize the SVG layer */
+  map._initPathRoot()    
 
-//Group for the map features
-var features = svg.append("g")
-    .attr("class","features");
+  /* We simply pick up the SVG from the map object */
+  var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+    g = svg.append("g").attr("class", "leaflet-zoom-hide");
+  
+  d3.json("groups.geojson", function(collection) {
+  var transform = d3.geo.transform({point: projectPoint}),
+      path = d3.geo.path().projection(transform)
+    /* Add a LatLng object to each item in the dataset */
+  var feature = g.selectAll("path")
+      .data(collection.features)
+      .enter().append("path")
+      //.style("stroke", "white")  
+    .style("fill-opacity", .05) 
+    .style("fill", "magenta")
+    .attr("r", .1);  
 
-//Create zoom/pan listener
-//Change [1,Infinity] to adjust the min/max zoom scale
-var zoom = d3.behavior.zoom()
-    .scaleExtent([1, Infinity])
-    .on("zoom",zoomed);
+  map.on("viewreset", reset);
+  reset();
 
-svg.call(zoom);
+  // Reposition the SVG to cover the features.
+  function reset() {
+    var bounds = path.bounds(collection),
+        topLeft = bounds[0],
+        bottomRight = bounds[1];
 
-//Create a tooltip, hidden at the start
-var tooltip = d3.select("body").append("div").attr("class","tooltip");
+    svg .attr("width", bottomRight[0] - topLeft[0])
+        .attr("height", bottomRight[1] - topLeft[1])
+        .style("left", topLeft[0] + "px")
+        .style("top", topLeft[1] + "px");
 
-d3.json("{{url_for("static", filename= "nycity.geojson")}}",function(error,geodata) {
-  if (error) return console.log(error); //unknown error, check the console
+    g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 
-  //Create a path for each map feature in the data
-  features.selectAll("path")
-    .data(geodata.features)
-    .enter()
-    .append("path")
-    .attr("d",path)
-    .on("mouseover",showTooltip)
-    .on("mousemove",moveTooltip)
-    .on("mouseout",hideTooltip)
-    .on("click",clicked);
+    feature.attr("d", path);
+  }
 
+  // Use Leaflet to implement a D3 geometric transformation.
+  function projectPoint(x, y) {
+    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+    this.stream.point(point.x, point.y);
+  }
 });
-
-// Add optional onClick events for features here
-// d.properties contains the attributes (e.g. d.properties.name, d.properties.population)
-function clicked(d,i) {
-
-}
-
-
-//Update map on zoom/pan
-function zoomed() {
-  features.attr("transform", "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")")
-      .selectAll("path").style("stroke-width", 1 / zoom.scale() + "px" );
-}
-
-
-//Position of the tooltip relative to the cursor
-var tooltipOffset = {x: 5, y: -25};
-
-//Create a tooltip, hidden at the start
-function showTooltip(d) {
-  moveTooltip();
-
-  tooltip.style("display","block")
-      .text(d.properties.name);
-}
-
-//Move the tooltip to track the mouse
-function moveTooltip() {
-  tooltip.style("top",(d3.event.pageY+tooltipOffset.y)+"px")
-      .style("left",(d3.event.pageX+tooltipOffset.x)+"px");
-}
-
-//Create a tooltip, hidden at the start
-function hideTooltip() {
-  tooltip.style("display","none");
-}
 </script>
 
-    </script>
 {% endblock %}
+
+
+
+

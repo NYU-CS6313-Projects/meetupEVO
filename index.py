@@ -116,7 +116,7 @@ def groups_count_states_tsv():
     
 @app.route('/map.html')
 def map():
-  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
+  return render_template("map.html", title = "Map of Locations", description = "Groups")
 
 @app.route('/rsvps/weekday_histogram.json')
 def rsvps_weekday_histogram_json():
