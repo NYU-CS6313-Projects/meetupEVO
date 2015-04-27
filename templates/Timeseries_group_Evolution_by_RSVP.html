@@ -49,7 +49,7 @@
 <li><input type="checkbox" value="Socializing" class="category_button" id="socializing" name = "#01665e"> Socializing </li>
 <li><input type="checkbox" value="Sports/Recreation" class="category_button" id="sports/recreation" name = "#80cdc1"> Sports/Recreation </li>
 <li><input type="checkbox" value="Support" class="category_button" id="support" name = "#3288bd"> Support </li>
-<li><input type="checkbox" value="All" class="category_button" id="*" name = 'black'> All </li>
+<li><input type="checkbox" value="All" class="category_button" id="*" name = 'steelblue'> All </li>
 <li><input type="checkbox" value="None" class="category_button" id="" name = 'white'> None </li>
 </ul>
 {% endblock %}
@@ -110,7 +110,7 @@
         <script type="text/javascript">
             var padding = 50;
             var svg2 = d3.select("div.main").append("svg").attr("width", 1000).attr("height", 1000);
-            var color = 'black';
+            var color = 'steelblue';
             // Load the line.json file
             function handle_new_json_data(error, data) {
                 if(error) {
@@ -262,7 +262,7 @@
                     color = this.name;  
                     d3.json('/events/group_evolution_timeseries.json?category=' + this.id, handle_new_json_data);
                 } else {
-                    color = 'black';  
+                    color = 'steelblue';  
                     svg2.selectAll("*").remove();
                     d3.json('/events/group_evolution_timeseries.json', handle_new_json_data);
                 }
