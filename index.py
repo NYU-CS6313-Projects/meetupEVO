@@ -38,9 +38,9 @@ def line():
 
 # ======== this version of map does not work: openstreetmap only served on http ======
 # ======== not https, so is not loaded :( 
-@app.route('/map.html')
-def map():
-  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
+#@app.route('/map.html')
+#def map():
+#  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
 
 # ====================================================================================
 @app.route('/groups/count_cities.html')
