@@ -1,4 +1,4 @@
-import os, psycopg2, psycopg2.extras, json, re, random
+import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
 from collections import Counter
 
@@ -11,14 +11,17 @@ app.config['JSON_SORT_KEYS'] = True
 # ====================================================================================
 @app.before_request
 def before_request():
+  g.db = None
+  g.db_cursor = None
   try:
     g.db = psycopg2.connect(os.environ['DATABASE_URL'])
     g.db.autocommit = True
     g.db_cursor = g.db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
   except Exception as inst:
     app.logger.error('Error connecting to %s' % os.environ['DATABASE_URL'])
-    app.logger.error(inst)
+    g.error_message = "Could not connect to database."
     abort(500)
+
 # ====================================================================================
 @app.route('/about.html')
 def about():
@@ -38,9 +41,9 @@ def line():
 
 # ======== this version of map does not work: openstreetmap only served on http ======
 # ======== not https, so is not loaded :( 
-#@app.route('/map.html')
-#def map():
-#  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
+@app.route('/map.html')
+def map():
+  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
 
 # ====================================================================================
 @app.route('/groups/count_cities.html')
@@ -48,6 +51,38 @@ def groups_count_cities_html():
   return render_template("horizontal-barchart-tsv.html", 
       data_url = request.path.replace('.html', '.tsv'), 
       title = "Count Groups in Cities" )
+
+@app.route('/groups/all.csv')
+def groups_all_csv():
+    result = io.BytesIO()
+    writer = csv.writer(result, quoting=csv.QUOTE_NONNUMERIC)
+    try: 
+      all_columns = [
+          "id_group", "id_organizer", "name_organizer", "id_category", "name_category", "shortname_category",
+          "name", "description", "link", "who", "join_mode", "created", "created_wday",
+          "urlname", "visibility", "no_members",
+          "rating",
+          "city", "lat", "lon", "state", "country", "timezone",
+          "number_of_events", "first_event_time", "last_event_time",
+          "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
+          ]
+      columns = [
+          "id_group", "id_organizer", "name_organizer", "id_category", "name_category", "shortname_category",
+          "name", "link", "join_mode", "created", 
+          "no_members", "rating",
+          "city", "lat", "lon", "state", "country", "timezone",
+          "number_of_events", "first_event_time", "last_event_time",
+          "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
+      ]
+      writer.writerow( columns )
+      g.db_cursor.execute("select " + ",".join(columns) + " from groups where created is not null limit 300")
+      for row in g.db_cursor.fetchall():
+        writer.writerow( [ row[c] for c in columns ] )
+    except Exception as ex:
+      exc_type, exc_obj, exc_tb = sys.exc_info()
+      app.logger.error('exception %s in line %d' % (ex, exc_tb.tb_lineno))
+      pass
+    return Response(result.getvalue(), mimetype='text/plain')
 
 @app.route('/groups/count_cities.tsv')
 def groups_count_cities_tsv():
@@ -64,9 +99,17 @@ def groups_count_cities_tsv():
 # ====================================================================================
 @app.route('/groups/index.html')
 def groups():
+  return render_template("groups.html", title = "List of Groups")
+
+@app.route('/groups/simple.html')
+def groups_simple():
+  return render_template("groups_simple.html", title = "List of Groups")
+
+@app.route('/groups/static.html')
+def groups_static():
   g.db_cursor.execute("""select * from groups order by name""")
   list_of_groups = g.db_cursor.fetchall()
-  return render_template("groups.html", title = "List of Groups", groups = list_of_groups)
+  return render_template("groups-static.html", title = "List of Groups", groups = list_of_groups)
 
 @app.route('/group/<id_group>')
 def group(id_group):
@@ -114,10 +157,6 @@ def groups_count_states_tsv():
       pass
     return Response(result, mimetype='text/plain')
     
-@app.route('/map.html')
-def map():
-  return render_template("map.html", title = "Map of Locations", description = "Groups")
-
 @app.route('/rsvps/weekday_histogram.json')
 def rsvps_weekday_histogram_json():
     try: 
@@ -238,6 +277,16 @@ def index():
   random.shuffle(word_counter_keys)
   return render_template("index.html", counts = counts, word_counter = word_weight, word_counter_keys = word_counter_keys )
 # ====================================================================================
+@app.errorhandler(404)
+def page_not_found(e):
+  return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_rror(e):
+  app.logger.error('Internal Server Error:')
+  return render_template('500.html'), 500
+# ====================================================================================
 if __name__ == '__main__':
   app.run(debug=True)
 # ====================================================================================
+

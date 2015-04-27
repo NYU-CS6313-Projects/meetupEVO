@@ -49,7 +49,7 @@
     width: 260px;
   }
 
-  #no-members-chart {
+  #delay-chart {
     width: 230px;
   }
 
@@ -70,7 +70,7 @@
     margin-bottom: .4em;
   }
 
-  #groups-list .group {
+  #groups-list .flight {
     line-height: 1.5em;
     background: #eee;
     width: 640px;
@@ -81,13 +81,13 @@
     color: #999;
   }
 
-  #groups-list .group div {
+  #groups-list .flight div {
     display: inline-block;
     width: 100px;
   }
 
   #groups-list div.distance,
-  #groups-list div.no-member {
+  #groups-list div.delay {
     width: 160px;
     padding-right: 10px;
     text-align: right;
@@ -108,19 +108,9 @@
 
 <h1>List <small>of meetup groups</small></h1>
 
-
 <div id="charts">
-  <div id="hour-chart" class="chart">
-    <div class="title">Time of day group was created</div>
-  </div>
-  <div id="no-members-chart" class="chart">
-    <div class="title">Number of Members</div>
-  </div>
-  <div id="distance-chart" class="no-chart">
-    <div class="title">Distance (mi.)</div>
-  </div>
   <div id="date-chart" class="chart">
-    <div class="title">Date group was created</div>
+    <div class="title">Date</div>
   </div>
 </div>
 
@@ -160,7 +150,7 @@
     formatDate = d3.time.format("%B %d, %Y");
     formatTime = d3.time.format("%I:%M %p");
 
-    // A nest operator, for grouping the group list.
+    // A nest operator, for grouping the flight list.
     nestByDate = d3.nest()
     .key(function(d) { return d3.time.day( d.date ); });
 
@@ -177,42 +167,20 @@
     dates = date.group(d3.time.day),
     hour = group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
     hours = hour.group(Math.floor),
-    no_member = group.dimension(function(d) { return d.no_members })
-    no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; }),
-    distance = group.dimension(function(d) { 2000 });
+    delay = group.dimension(function(d) { return 100 })
+    delays = delay.group(function(d) { return Math.floor(d / 10) * 10; }),
+    distance = flight.dimension(function(d) { 2000 });
     distances = distance.group(function(d) { return Math.floor(d / 50) * 50; });
 
     var charts = [
-    barChart()
-    .dimension(hour)
-    .group(hours)
-    .x(d3.scale.linear()
-    .domain([0, 24])
-    .rangeRound([0, 10 * 24])),
-
-    barChart()
-    .dimension(no_member)
-    .group(no_members)
-    .x(d3.scale.linear()
-    .domain([0, 41000])
-    .rangeRound([0, 10 * 21])),
-/*
-    barChart()
-    .dimension(distance)
-    .group(distances)
-    .x(d3.scale.linear()
-    .domain([0, 2000])
-    .rangeRound([0, 10 * 40])),
-*/
-    barChart()
-    .dimension(date)
-    .group(dates)
-    .round(d3.time.day.round)
-    .x(d3.time.scale()
-    .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
-    .rangeRound([0, 10 * 90]))
-    .filter([new Date(2001, 1, 1), new Date(2015, 2, 1)])
-
+      barChart()
+        .dimension(date)
+        .group(dates)
+        .round(d3.time.day.round)
+        .x(d3.time.scale()
+        .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
+        .rangeRound([0, 10 * 90]))
+        .filter([new Date(2001, 1, 1), new Date(2015, 2, 1)])
     ];
 
     // Given our array of charts, which we assume are in the same order as the
@@ -220,10 +188,7 @@
     // We also listen to the chart's brush events to update the display.
     var chart = d3.selectAll(".chart")
     .data(charts)
-    .each(function(chart) { 
-      console.log("setting up brushing for chart " + chart);
-      chart.on("brush", renderAll).on("brushend", renderAll); 
-    });
+    .each(function(chart) { chart.on("brush", renderAll).on("brushend", renderAll); });
 
     // Render the initial lists.
     var list = d3.selectAll(".list")
@@ -231,7 +196,7 @@
 
     // Render the total.
     d3.selectAll("#total")
-    .text(formatNumber(group.size()));
+    .text(formatNumber(flight.size()));
 
     renderAll();
 
@@ -281,36 +246,36 @@
 
         date.exit().remove();
 
-        var group = date.order().selectAll(".group")
+        var flight = date.order().selectAll(".flight")
         .data(function(d) { return d.values; }, function(d) { return d.index; });
 
-        var groupEnter = group.enter().append("div")
-        .attr("class", "group");
+        var flightEnter = flight.enter().append("div")
+        .attr("class", "flight");
 
-        groupEnter.append("div")
+        flightEnter.append("div")
         .attr("class", "time")
         .text(function(d) { return formatTime(d.date); });
 
-        groupEnter.append("div")
+        flightEnter.append("div")
         .attr("class", "origin")
         .text(function(d) { return d.origin; });
 
-        groupEnter.append("div")
+        flightEnter.append("div")
         .attr("class", "destination")
         .text(function(d) { return d.destination; });
 
-        groupEnter.append("div")
+        flightEnter.append("div")
         .attr("class", "distance")
         .text(function(d) { return formatNumber(d.distance) + " mi."; });
 
-        groupEnter.append("div")
-        .attr("class", "no-member")
-        .classed("mall", function(d) { return d.no_member < 10 })
-        .text(function(d) { return formatChange(d.no_member) + " people."; });
+        flightEnter.append("div")
+        .attr("class", "delay")
+        .classed("early", function(d) { return d.delay < 0; })
+        .text(function(d) { return formatChange(d.delay) + " min."; });
 
-        group.exit().remove();
+        flight.exit().remove();
 
-        group.order();
+        flight.order();
       });
     }
 
@@ -318,17 +283,18 @@
       if (!barChart.id) barChart.id = 0;
 
       var margin = {top: 10, right: 10, bottom: 20, left: 10},
-      x,
-      y = d3.scale.linear().range([100, 0]),
-      id = barChart.id++,
-      axis = d3.svg.axis().orient("bottom"),
-      brush = d3.svg.brush(),
-      brushDirty,
-      dimension,
-      group,
-      round;
+        x,
+        y = d3.scale.linear().range([100, 0]),
+        id = barChart.id++,
+        axis = d3.svg.axis().orient("bottom"),
+        brush = d3.svg.brush(),
+        brushDirty,
+        dimension,
+        group,
+        round;
 
       function chart(div) {
+        console.log("chart(div) was called with div " + div);
         var width = x.range()[1],
         height = y.range()[0];
 
@@ -376,23 +342,6 @@
             var gBrush = g.append("g").attr("class", "brush").call(brush);
             gBrush.selectAll("rect").attr("height", height);
             gBrush.selectAll(".resize").append("path").attr("d", resizePath);
-          }
-
-          // Only redraw the brush if set externally.
-          if (brushDirty) {
-            brushDirty = false;
-            g.selectAll(".brush").call(brush);
-            div.select(".title a").style("display", brush.empty() ? "none" : null);
-            if (brush.empty()) {
-              g.selectAll("#clip-" + id + " rect")
-              .attr("x", 0)
-              .attr("width", width);
-              } else {
-              var extent = brush.extent();
-              g.selectAll("#clip-" + id + " rect")
-              .attr("x", x(extent[0]))
-              .attr("width", x(extent[1]) - x(extent[0]));
-            }
           }
 
           g.selectAll(".bar").attr("d", barPath);
