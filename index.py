@@ -11,14 +11,17 @@ app.config['JSON_SORT_KEYS'] = True
 # ====================================================================================
 @app.before_request
 def before_request():
+  g.db = None
+  g.db_cursor = None
   try:
     g.db = psycopg2.connect(os.environ['DATABASE_URL'])
     g.db.autocommit = True
     g.db_cursor = g.db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
   except Exception as inst:
     app.logger.error('Error connecting to %s' % os.environ['DATABASE_URL'])
-    app.logger.error(inst)
+    g.error_message = "Could not connect to database."
     abort(500)
+
 # ====================================================================================
 @app.route('/about.html')
 def about():
@@ -38,9 +41,9 @@ def line():
 
 # ======== this version of map does not work: openstreetmap only served on http ======
 # ======== not https, so is not loaded :( 
-#@app.route('/map.html')
-#def map():
-#  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
+@app.route('/map.html')
+def map():
+  return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
 
 # ====================================================================================
 @app.route('/groups/count_cities.html')
@@ -72,7 +75,7 @@ def groups_all_csv():
           "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
       ]
       writer.writerow( columns )
-      g.db_cursor.execute("select " + ",".join(columns) + " from groups limit 300")
+      g.db_cursor.execute("select " + ",".join(columns) + " from groups where created is not null limit 300")
       for row in g.db_cursor.fetchall():
         writer.writerow( [ row[c] for c in columns ] )
     except Exception as ex:
@@ -273,6 +276,15 @@ def index():
   word_counter_keys = word_weight.keys()
   random.shuffle(word_counter_keys)
   return render_template("index.html", counts = counts, word_counter = word_weight, word_counter_keys = word_counter_keys )
+# ====================================================================================
+@app.errorhandler(404)
+def page_not_found(e):
+  return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_rror(e):
+  app.logger.error('Internal Server Error:')
+  return render_template('500.html'), 500
 # ====================================================================================
 if __name__ == '__main__':
   app.run(debug=True)

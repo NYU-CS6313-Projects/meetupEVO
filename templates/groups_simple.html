@@ -283,17 +283,18 @@
       if (!barChart.id) barChart.id = 0;
 
       var margin = {top: 10, right: 10, bottom: 20, left: 10},
-      x,
-      y = d3.scale.linear().range([100, 0]),
-      id = barChart.id++,
-      axis = d3.svg.axis().orient("bottom"),
-      brush = d3.svg.brush(),
-      brushDirty,
-      dimension,
-      group,
-      round;
+        x,
+        y = d3.scale.linear().range([100, 0]),
+        id = barChart.id++,
+        axis = d3.svg.axis().orient("bottom"),
+        brush = d3.svg.brush(),
+        brushDirty,
+        dimension,
+        group,
+        round;
 
       function chart(div) {
+        console.log("chart(div) was called with div " + div);
         var width = x.range()[1],
         height = y.range()[0];
 
@@ -341,23 +342,6 @@
             var gBrush = g.append("g").attr("class", "brush").call(brush);
             gBrush.selectAll("rect").attr("height", height);
             gBrush.selectAll(".resize").append("path").attr("d", resizePath);
-          }
-
-          // Only redraw the brush if set externally.
-          if (brushDirty) {
-            brushDirty = false;
-            g.selectAll(".brush").call(brush);
-            div.select(".title a").style("display", brush.empty() ? "none" : null);
-            if (brush.empty()) {
-              g.selectAll("#clip-" + id + " rect")
-              .attr("x", 0)
-              .attr("width", width);
-              } else {
-              var extent = brush.extent();
-              g.selectAll("#clip-" + id + " rect")
-              .attr("x", x(extent[0]))
-              .attr("width", x(extent[1]) - x(extent[0]));
-            }
           }
 
           g.selectAll(".bar").attr("d", barPath);
