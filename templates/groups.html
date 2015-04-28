@@ -66,7 +66,7 @@
     line-height: 1.5em;
   }
 
-  .list div {
+  #groups-list div {
     border-left: 2px #ddd solid;
   }
 
@@ -84,7 +84,6 @@
 
   .list .group {
     background: #eee;
-    width: 1040px;
     margin-bottom: 1px;
   }
 
@@ -127,8 +126,11 @@
 
 
 <div id="charts">
+  <div id="rating-chart" class="chart">
+    <div class="title">Rating</div>
+  </div>
   <div id="no-members-chart" class="chart">
-    <div class="title">Number of Members</div>
+    <div class="title">Number of Attendees</div>
   </div>
   <div id="no-events-chart" class="chart">
     <div class="title">Number of Events</div>
@@ -146,6 +148,7 @@
       <div class="month">Month group was founded</div>
       <div class="group">
         <div class="name">Group Name</div>
+        <div class="rating">Avg. Rating</div>
         <div class="join_mode">Join Mode</div>
         <div class="no_members">Nominal Number of Members</div>
         <div class="max_yes_at_one_event">Max Attendees at one Event</div>
@@ -191,6 +194,7 @@
       d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
       d.max_yes_at_one_event = +d.max_yes_at_one_event;
       d.rating = parseFloat(d.rating);
+      if (d.rating == 0.0) d.rating = null;
     });
 
     // Create the crossfilter for the relevant dimensions and groups.
@@ -201,12 +205,19 @@
     dates = date.group(d3.time.day);
     hour = group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
     hours = hour.group(Math.floor);
-    no_member = group.dimension(function(d) { return d.no_members })
+    rating = group.dimension(function(d) { return d.rating })
+    ratings = rating.group(function(d) { return Math.floor(d * 4) / 4; });
+    no_member = group.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
     no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; });
     no_event   = group.dimension(function(d) { return d.number_of_events });
     no_events  = no_event.group(function(d) { return Math.floor(d / 10) * 10; });
 
     var charts = [
+    barChart()
+    .dimension(rating)
+    .group(ratings)
+    .x(d3.scale.linear().domain([0, 5.25]).rangeRound([0, 10 * 21])),
+
     barChart()
     .dimension(no_member)
     .group(no_members)
@@ -301,6 +312,10 @@
         groupEnter.append("div")
         .attr("class", "name")
         .text(function(d) { return d.name; });
+
+        groupEnter.append("div")
+        .attr("class", "rating")
+        .text(function(d) { return d.rating; });
 
         groupEnter.append("div")
         .attr("class", "join_mode")
