@@ -1,4 +1,4 @@
-import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys
+import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys, numpy
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
 from collections import Counter
 
@@ -292,6 +292,13 @@ def l():
 @app.route('/b.html')
 def b():
   return render_template("b.html")
+
+@app.route('/histo.html')
+def histo():
+  g.db_cursor.execute("""select * from event_rsvps_by_year order by id_group""")
+
+
+  return render_template("histo.html", data =  g.db_cursor.fetchall())
 
 # ====================================================================================
 @app.errorhandler(404)
