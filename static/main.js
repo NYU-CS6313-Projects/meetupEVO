@@ -1,5 +1,3 @@
-  // =============================== code for timeseries ===================
-
   var margin = {top: 10, right: 0, bottom: 10, left: 10}
   , available_width = parseInt(d3.select('div#panel2').style('width'), 10)
   , width_timeseries = available_width - margin.left - margin.right
@@ -145,13 +143,6 @@
 
     d3.json('/events/group_evolution_timeseries.json', handle_new_json_data);
 
-//            $('.category_button').on('click', function() {
-//               svg2.selectAll("*").remove();
-//               console.log("make a new query looking for category " + this.id);
-//                color = this.name;  
-//               d3.json('/events/group_evolution_timeseries.json?category=' + this.id, handle_new_json_data); 
-//            });
-
     $('.category_button').click(function() {
         if ($(this).is(':checked')) {
             svg2.selectAll("*").remove();
@@ -166,57 +157,3 @@
 });
 
 
-// =============================== code for the map ===================
-var map = L.map('map',{center:[40.7127, -74.0059], zoom:9});
-
-// add an OpenStreetMap tile layer
-// L.tileLayer('https://{s}.tiles.mapbox.com/v3/cwhong.map-hziyh867/{z}/{x}/{y}.png', {
-L.tileLayer('http://{s}.tiles.mapbolllllx.com/watercolor/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
-
-
-/* Initialize the SVG layer */
-  map._initPathRoot()    
-
-  /* We simply pick up the SVG from the map object */
-  var svg = d3.select(map.getPanes().overlayPane).append("svg"),
-    g = svg.append("g").attr("class", "leaflet-zoom-hide");
-  
-  d3.json("{{ url_for('static', filename='groups.geojson') }}", function(collection) {
-  var transform = d3.geo.transform({point: projectPoint}),
-      path = d3.geo.path().projection(transform)
-    /* Add a LatLng object to each item in the dataset */
-  var feature = g.selectAll("path")
-      .data(collection.features)
-      .enter().append("path")
-      //.style("stroke", "white")  
-    .style("fill-opacity", .05) 
-    .style("fill", "magenta")
-    .attr("r", .1);  
-
-  map.on("viewreset", reset);
-  reset();
-
-  // Reposition the SVG to cover the features.
-  function reset() {
-    var bounds = path.bounds(collection),
-        topLeft = bounds[0],
-        bottomRight = bounds[1];
-
-    svg .attr("width", bottomRight[0] - topLeft[0])
-        .attr("height", bottomRight[1] - topLeft[1])
-        .style("left", topLeft[0] + "px")
-        .style("top", topLeft[1] + "px");
-
-    g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-    feature.attr("d", path);
-  }
-
-  // Use Leaflet to implement a D3 geometric transformation.
-  function projectPoint(x, y) {
-    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-    this.stream.point(point.x, point.y);
-  }
-});
