@@ -61,47 +61,64 @@
     width: 920px;
   }
 
+
+  .list {
+    line-height: 1.5em;
+  }
+
+  .list div {
+    border-left: 2px #ddd solid;
+  }
+
+  #groups-headers {
+    height: 80px;
+  }
   #groups-list {
     min-height: 1024px;
   }
 
-  #groups-list .date,
-  #groups-list .day {
+  .list .date,
+  .list .day {
     margin-bottom: .4em;
   }
 
-  #groups-list .group {
-    line-height: 1.5em;
+  .list .group {
     background: #eee;
-    width: 640px;
+    width: 1040px;
     margin-bottom: 1px;
   }
 
-  #groups-list .time {
+  .list .name {
+    color: #000;
+  }
+  #groups-list  {
     color: #999;
   }
 
-  #groups-list .group div {
+  .list .group div {
     display: inline-block;
+    height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     width: 100px;
   }
+  .list .group div.name {
+    width: 300px;
+  }
 
-  #groups-list div.distance,
-  #groups-list div.no-member {
+  .list div.distance,
+  .list div.no-member {
     width: 160px;
     padding-right: 10px;
     text-align: right;
   }
 
-  #groups-list .early {
+  .list .early {
     color: green;
   }
 
   aside {
-    position: absolute;
-    left: 740px;
-    font-size: smaller;
-    width: 220px;
+    margin: 30px;
   }
 
 </style>
@@ -110,14 +127,11 @@
 
 
 <div id="charts">
-  <div id="hour-chart" class="chart">
-    <div class="title">Time of day group was created</div>
-  </div>
   <div id="no-members-chart" class="chart">
     <div class="title">Number of Members</div>
   </div>
-  <div id="distance-chart" class="no-chart">
-    <div class="title">Distance (mi.)</div>
+  <div id="no-events-chart" class="chart">
+    <div class="title">Number of Events</div>
   </div>
   <div id="date-chart" class="chart">
     <div class="title">Date group was created</div>
@@ -127,28 +141,29 @@
 <aside id="totals"><span id="active">-</span> of <span id="total">-</span> groups selected.</aside>
 
 <div id="lists">
+  <div id="groups-headers" class="list">
+    <div class="date">
+      <div class="month">Month group was founded</div>
+      <div class="group">
+        <div class="name">Group Name</div>
+        <div class="join_mode">Join Mode</div>
+        <div class="no_members">Nominal Number of Members</div>
+        <div class="max_yes_at_one_event">Max Attendees at one Event</div>
+        <div class="no_member_who_ever_rsvpd_yes">Overall Unique Attendees</div>
+        <div class="first_event_time">First Event</div>
+        <div class="no_events">Number of Events</div>
+        <div class="last_event_time">Last Event</div>
+      </div>
+    </div>
+  </div>
   <div id="groups-list" class="list"></div>
 </div>
-
-<table class="table">
-  <tr>
-    <th>Created</th>
-    <th>Name</th>
-    <th>Join mode</th>
-    <th>Number of Members</th>
-    <th>Max Attendees at one Event</th>
-    <th>Total distinct Attendees</th>
-    <th>History</th>
-  </tr>
-  <tbody>
-  </tbody>
-</table>
 
 {% endblock %}
 {% block javascript %}
 <script>
   var groups, nestByDate; // make global for debugging
-  var formatNumber, formatChange, formatCreated, formatDate, formatTime;
+  var formatNumber, formatChange, formatCreated, formatDate, formatMonth, formatTime;
 
   d3.csv("/groups/all.csv", function(error, g) {
     groups = g;
@@ -157,53 +172,51 @@
     formatNumber = d3.format(",d");
     formatChange = d3.format("+,d");
     formatCreated = d3.time.format("%Y-%m-%d %H:%M:%S");
-    formatDate = d3.time.format("%B %d, %Y");
+    formatDate = d3.time.format("%Y-%m-%d");
+    formatMonth = d3.time.format("%Y, %b");
     formatTime = d3.time.format("%I:%M %p");
 
     // A nest operator, for grouping the group list.
     nestByDate = d3.nest()
-    .key(function(d) { return d3.time.day( d.date ); });
+    .key(function(d) { return d3.time.month( d.date ); });
 
     // A little coercion, since the CSV is untyped.
     groups.forEach(function(d, i) {
       d.index = i;
       d.date = formatCreated.parse( d.created );
+      d.first_event_time = formatCreated.parse( d.first_event_time );
+      d.last_event_time = formatCreated.parse( d.last_event_time );
+      d.no_members = +d.no_members;
+      d.number_of_events = +d.number_of_events;
+      d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
+      d.max_yes_at_one_event = +d.max_yes_at_one_event;
+      d.rating = parseFloat(d.rating);
     });
 
     // Create the crossfilter for the relevant dimensions and groups.
-    var group = crossfilter(groups),
-    all = group.groupAll(),
-    date = group.dimension(function(d) { return d.date; }),
-    dates = date.group(d3.time.day),
-    hour = group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
-    hours = hour.group(Math.floor),
+    // var 
+    group = crossfilter(groups);
+    all = group.groupAll();
+    date = group.dimension(function(d) { return d.date; });
+    dates = date.group(d3.time.day);
+    hour = group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
+    hours = hour.group(Math.floor);
     no_member = group.dimension(function(d) { return d.no_members })
-    no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; }),
-    distance = group.dimension(function(d) { 2000 });
-    distances = distance.group(function(d) { return Math.floor(d / 50) * 50; });
+    no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; });
+    no_event   = group.dimension(function(d) { return d.number_of_events });
+    no_events  = no_event.group(function(d) { return Math.floor(d / 10) * 10; });
 
     var charts = [
     barChart()
-    .dimension(hour)
-    .group(hours)
-    .x(d3.scale.linear()
-    .domain([0, 24])
-    .rangeRound([0, 10 * 24])),
-
-    barChart()
     .dimension(no_member)
     .group(no_members)
-    .x(d3.scale.linear()
-    .domain([0, 41000])
-    .rangeRound([0, 10 * 21])),
-/*
+    .x(d3.scale.linear().domain([0, 1500]).rangeRound([0, 10 * 21])),
+
     barChart()
-    .dimension(distance)
-    .group(distances)
-    .x(d3.scale.linear()
-    .domain([0, 2000])
-    .rangeRound([0, 10 * 40])),
-*/
+    .dimension(no_event)
+    .group(no_events)
+    .x(d3.scale.linear().domain([1, 200]).rangeRound([0, 10 * 20])),
+
     barChart()
     .dimension(date)
     .group(dates)
@@ -221,17 +234,14 @@
     var chart = d3.selectAll(".chart")
     .data(charts)
     .each(function(chart) { 
-      console.log("setting up brushing for chart " + chart);
       chart.on("brush", renderAll).on("brushend", renderAll); 
     });
 
     // Render the initial lists.
-    var list = d3.selectAll(".list")
-    .data([groupList]);
+    var list = d3.selectAll("#groups-list").data([groupList]);
 
     // Render the total.
-    d3.selectAll("#total")
-    .text(formatNumber(group.size()));
+    d3.selectAll("#total").text(formatNumber(group.size()));
 
     renderAll();
 
@@ -270,43 +280,55 @@
       var groupsByDate = nestByDate.entries(date.top(40));
 
       div.each(function() {
+        console.log("will display list of groups in");
+        console.log(this);
         var date = d3.select(this).selectAll(".date")
         .data(groupsByDate, function(d) { return d.key; });
 
         date.enter().append("div")
         .attr("class", "date")
         .append("div")
-        .attr("class", "day")
-        .text(function(d) { return formatDate(d.values[0].date); });
+        .attr("class", "month")
+        .text(function(d) { return formatMonth(d.values[0].date); });
 
         date.exit().remove();
 
         var group = date.order().selectAll(".group")
         .data(function(d) { return d.values; }, function(d) { return d.index; });
 
-        var groupEnter = group.enter().append("div")
-        .attr("class", "group");
+        var groupEnter = group.enter().append("div").attr("class", "group");
 
         groupEnter.append("div")
-        .attr("class", "time")
-        .text(function(d) { return formatTime(d.date); });
+        .attr("class", "name")
+        .text(function(d) { return d.name; });
 
         groupEnter.append("div")
-        .attr("class", "origin")
-        .text(function(d) { return d.origin; });
+        .attr("class", "join_mode")
+        .text(function(d) { return d.join_mode; });
 
         groupEnter.append("div")
-        .attr("class", "destination")
-        .text(function(d) { return d.destination; });
+        .attr("class", "no_members")
+        .text(function(d) { return d.no_members; });
 
         groupEnter.append("div")
-        .attr("class", "distance")
-        .text(function(d) { return formatNumber(d.distance) + " mi."; });
+        .attr("class", "max_yes_at_one_event")
+        .text(function(d) { return d.max_yes_at_one_event; });
 
         groupEnter.append("div")
-        .attr("class", "no-member")
-        .classed("mall", function(d) { return d.no_member < 10 })
-        .text(function(d) { return formatChange(d.no_member) + " people."; });
+        .attr("class", "no_member_who_ever_rsvpd_yes")
+        .text(function(d) { return d.no_member_who_ever_rsvpd_yes; });
+
+        groupEnter.append("div")
+        .attr("class", "first_event_time")
+        .text(function(d) { return formatDate(d.first_event_time) ; });
+
+        groupEnter.append("div")
+        .attr("class", "no_events")
+        .text(function(d) { return d.number_of_events; });
+        
+        groupEnter.append("div")
+        .attr("class", "last_event_time")
+        .text(function(d) { return formatDate(d.last_event_time) ; });
 
         group.exit().remove();
 

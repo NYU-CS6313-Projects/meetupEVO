@@ -75,7 +75,7 @@ def groups_all_csv():
           "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
       ]
       writer.writerow( columns )
-      g.db_cursor.execute("select " + ",".join(columns) + " from groups where created is not null limit 300")
+      g.db_cursor.execute("select " + ",".join(columns) + " from groups where created is not null and number_of_events > 0 limit 3000")
       for row in g.db_cursor.fetchall():
         writer.writerow( [ row[c] for c in columns ] )
     except Exception as ex:
