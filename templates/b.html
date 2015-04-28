@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <style type="text/css">
+  body { background-color: white; }
     .red { fill: red; }
     .blue { fill: blue; }
     .lineChart {
@@ -44,12 +45,17 @@
 </style>
 <div class="row">
   <div class="col-md-10">
+    <div id="panel5">
+      <br>
+      <h1>Evolution <small>of Meetup Groups</small></h1>
+      <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+      <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+      <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+      <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+    </div>
     <div id="panel2">
     </div>
-    <div id="panel5">
-      <div id="map" style="width:350px; height:350px;">
-      </div>
-    </div>
+      <img src="{{ url_for('static', filename='created.png') }}" style="width: 1000px; height: 80px;">
   </div>
   <div class="col-md-2">
     <div id="panel3">

@@ -1,4 +1,4 @@
-import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys, numpy
+import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys, numpy, pandas
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
 from collections import Counter
 
@@ -295,10 +295,11 @@ def b():
 
 @app.route('/histo.html')
 def histo():
-  g.db_cursor.execute("""select * from event_rsvps_by_year order by id_group""")
+  group_df = pd.read_sql("SELECT * from groups", g.db, index_col='id_group')
+  rsvp_df  = pd.read_sql("SELECT * from event_rsvps_by_year", g.db)
 
-
-  return render_template("histo.html", data =  g.db_cursor.fetchall())
+  rsvp_df.groupby('id_group')
+  return render_template("histo.html", data =  [])
 
 # ====================================================================================
 @app.errorhandler(404)

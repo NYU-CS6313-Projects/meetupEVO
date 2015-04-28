@@ -5,7 +5,7 @@
   , width_timeseries = available_width - margin.left - margin.right
 
   var padding = 50;
-  var height_timeseries = 350;
+  var height_timeseries = 450;
     var svg2 = d3.select("div#panel2").append("svg").attr("width", width_timeseries).attr("height", height_timeseries);
     var color = 'steelblue';
     // Load the line.json file
@@ -170,7 +170,8 @@
 var map = L.map('map',{center:[40.7127, -74.0059], zoom:9});
 
 // add an OpenStreetMap tile layer
-L.tileLayer('https://{s}.tiles.mapbox.com/v3/cwhong.map-hziyh867/{z}/{x}/{y}.png', {
+// L.tileLayer('https://{s}.tiles.mapbox.com/v3/cwhong.map-hziyh867/{z}/{x}/{y}.png', {
+L.tileLayer('http://{s}.tiles.mapbolllllx.com/watercolor/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
