@@ -1,0 +1,141 @@
+{% extends "flex_layout.html" %}
+{% block body %}
+<style>
+    * {
+      box-sizing: border-box;
+    }
+      /*This just stops me getting horizontal scrolling if anything overflows the width*/
+    body {
+      overflow-x: hidden;
+    }
+    body.flexbox {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    #flex_row {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    #left_col { flex: 1 }
+    #right_col { 
+      flex: 0 0 300px;
+      flex-direction: row;
+    }
+    #panel3 { 
+      flex: 0 0 300px;
+      background-color: white;
+    }
+    #panel1 { 
+      flex: 1; 
+      overflow: scroll;
+    }
+  </style>
+  <div id="flex_row">
+    <div id="left_col">
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+      <p>
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
+      </p>
+    </div>
+    <div id="right_col">
+
+      <div id="panel3">
+        Ratings:<br>
+        <img src="{{ url_for('static', filename='brush.png') }}" style="width: 200px; height: 80px;">
+        Group Size:<br>
+        <img src="{{ url_for('static', filename='brush.png') }}" style="width: 200px; height: 80px;">
+      </div> 
+      <div id="panel1">
+        <p>Select one of the following categories:</p>
+        <!--Adding all categories for selection-->
+        <ul>
+          <li><input type="checkbox" value="Tech" class="category_button"  id="tech" name="#a6cee3"> Tech</li>
+          <li><input type="checkbox" value="Women" class="category_button" id="women" name = "#1f78b4"> Women</li>
+          <li><input type="checkbox" value="Alternative lifesyle" class="category_button" id="alternative lifestyle" name = "#b2df8a"> Alternative lifesyle</li>
+          <li><input type="checkbox" value="Career/Business" class="category_button" id="career/business" name = "#33a02c"> Career/Business</li>
+          <li><input type="checkbox" value="Cars/Motorcycles" class="category_button" id="cars/motorcycles" name = "#fb9a99"> Cars/Motorcycles</li>
+          <li><input type="checkbox" value="Community/Environment" class="category_button" id="community/environment" name = "#e31a1c"> Community/Environment </li>
+          <li><input type="checkbox" value="dancing" class="category_button" id="dancing" name = "#fdbf6f"> Dancing </li>
+          <li><input type="checkbox" value="Education/Learning" class="category_button" id="education/learning" name = "#ff7f00"> Education/Learning </li>
+          <li><input type="checkbox" value="Fashion/Beauty" class="category_button" id="fashion/beauty" name = "#cab2d6"> Fashion/Beauty </li>
+          <li><input type="checkbox" value="Fine Arts/Culture" class="category_button" id="fine arts/culture" name = "#6a3d9a"> Fine Arts/Culture</li>
+          <li><input type="checkbox" value="Fitness" class="category_button" id="fitness" name = "#ffff99"> Fitness </li>
+          <li><input type="checkbox" value="Food/Drink" class="category_button" id="food/drink" name = "#b15928"> Food/Drink </li>
+          <li><input type="checkbox" value="Games" class="category_button" id="games" name = "#8dd3c7"> Games </li>
+          <li><input type="checkbox" value="Health/Wellbeing" class="category_button" id="health/wellbeing" name = "#ffffb3"> Health/Wellbeing </li>
+          <li><input type="checkbox" value="Hobbies/Crafts" class="category_button" id="hobbies/crafts" name = "#bebada"> Hobbies/Crafts </li>
+          <li><input type="checkbox" value="Language/Ethnic Identity" class="category_button" id="language/Ethnic identity" name = "#cab2d6"> Language/Ethnic Identity </li>
+          <li><input type="checkbox" value="LGBT" class="category_button" id="LGBT" name = "#fb8072"> LGBT </li>
+          <li><input type="checkbox" value="Literature/Writing" class="category_button" id="literature/writing" name = "#80b1d3"> Literature/Writing </li>
+          <li><input type="checkbox" value="Movements/Politics" class="category_button" id="movements/politics" name = "#fdb462"> Movements/Politics </li>
+          <li><input type="checkbox" value="Movies/Film" class="category_button" id="movies/film" name = "#b3de69 "> Movies/Film </li>
+          <li><input type="checkbox" value="Music" class="category_button" id="music" name = "#fccde5"> Music </li>
+          <li><input type="checkbox" value="New Age/Spirituality" class="category_button" id="new age/spirituality" name = "#d9d9d9 "> New Age/Spirituality </li>
+          <li><input type="checkbox" value="Outdoors/Adventure" class="category_button" id="outdoors/adventure" name = "#bc80bd"> Outdoors/Adventure </li>
+          <li><input type="checkbox" value="Paranormal" class="category_button" id="paranormal" name = "#ccebc5"> Paranormal </li>
+          <li><input type="checkbox" value="Parents/Family" class="category_button" id="parents/family" name = "#ffed6fs"> Parents/Family </li>
+          <li><input type="checkbox" value="Pets/Animals" class="category_button" id="pets/animals" name = "#bf812d"> Pets/Animals </li>
+          <li><input type="checkbox" value="Photography" class="category_button" id="photography" name = "#f6e8c3"> Photography </li>
+          <li><input type="checkbox" value="Religion/Beliefs" class="category_button" id="religion/beliefs" name = "#c51b7d"> Religion/Beliefs </li>
+          <li><input type="checkbox" value="Sci-Fi/Fantasy" class="category_button" id="sci-fi/fantasy" name = "#f1b6da"> Sci-Fi/Fantasy </li>
+          <li><input type="checkbox" value="Singles" class="category_button" id="singles" name = "#e6f598"> Singles </li>
+          <li><input type="checkbox" value="Socializing" class="category_button" id="socializing" name = "#01665e"> Socializing </li>
+          <li><input type="checkbox" value="Sports/Recreation" class="category_button" id="sports/recreation" name = "#80cdc1"> Sports/Recreation </li>
+          <li><input type="checkbox" value="Support" class="category_button" id="support" name = "#3288bd"> Support </li>
+          <li><input type="checkbox" value="All" class="category_button" id="*" name = 'steelblue'> All </li>
+          <li><input type="checkbox" value="None" class="category_button" id="" name = 'white'> None </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+{% endblock %}

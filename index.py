@@ -168,6 +168,10 @@ def intro():
 def index():
   return render_template("index.html")
 
+@app.route('/sketch.html')
+def sketch():
+  return render_template("sketch.html")
+
 @app.route('/build-csv')
 def build_csv():
   db = g.db
