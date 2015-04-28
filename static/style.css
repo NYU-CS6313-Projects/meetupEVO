@@ -1,7 +1,8 @@
 /* for fixed navbar: margins and paddings */
 
 body {
-  padding-bottom: 20px;
+  margin-top: 0;
+  padding-top: 0;
   background-color: #F2F2F2;
 }
 

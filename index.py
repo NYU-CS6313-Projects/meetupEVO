@@ -190,20 +190,20 @@ def events_group_evoltution_timeseries_json():
           select * from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
           group by year, id_group 
           order by id_group, "year"
-          limit 500
           )t 
           Where t."year" is not null
           """)
+          #limit 500
       else:
         g.db_cursor.execute("""
           select t.year, t.id_group, t.sum  from (select extract(year from created) "year", id_group, SUM(yes_rsvp_count_from_rsvps) from events 
           group by year, id_group 
           order by id_group, "year"
-          limit 500
           ) t LEFT JOIN groups USING (id_group)
           where t."year" is not null
           AND groups.name_category = %(category)s
           """, { "category": c } )
+          # limit 500
 
       resp = jsonify({ 
           'status': 200, 
