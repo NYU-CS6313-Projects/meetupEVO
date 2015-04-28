@@ -33,11 +33,19 @@
       overflow: auto;
       background-color: #dfd;
     }
+    #panel5 {
+      flex: 0 0 300px;
+      background-color: #ddF;
+    }
+    #panel2 {
+      flex: 1;
+    }
+
+    #panel5 h1, #panel3 h1 { margin-top: 0px; line-height: 90%;}
   </style>
   <div id="flex_row">
     <div id="left_col">
       <div id="panel5">
-        <br>
         <h1>Evolution <small>of Meetup Groups</small></h1>
         <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
         <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
@@ -51,6 +59,7 @@
     <div id="right_col">
 
       <div id="panel3">
+        <h1>Filter</h1>
         Ratings:<br>
         <img src="{{ url_for('static', filename='brush.png') }}" style="width: 200px; height: 80px;">
         Group Size:<br>
