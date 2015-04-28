@@ -33,6 +33,6 @@ p, div {
   padding-top: 5px;
   text-decoration:none;
 }
-.drawer-controls{
-  padding: 0px;
+.drawer-right .drawer-controls{
+  margin-left:-60px;
 }

@@ -18,7 +18,7 @@
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body class="has-drawer">
-    <div id="drawerMenu" class="drawer dw-xs-8 dw-sm-4 dw-md-2 fold" aria-labelledby="drawerMenu">
+    <div id="drawerMenu" class="drawer dw-xs-8 dw-sm-4 dw-md-2 fold drawer-right" aria-labelledby="drawerMenu">
         <div class="drawer-controls">
           <a href="#drawerMenu" data-toggle="drawer" href="#drawerMenu" 
             aria-foldedopen="false" aria-controls="drawerMenu" 
@@ -29,13 +29,14 @@
               <h2 class="drawer-title">Evolution <small>of Meetup Groups</small></h2>
             </div>
             <ul class="drawer-fullnav">
+              <li><a href="/">Homepage</a></li>
               <li><a href="/o.html">Sketch Ouafa</a></li>
               <li><a href="/l.html">Sketch Lluvia</a></li>
               <li><a href="/b.html">Sketch Brigitte</a></li>
-              <li><a href="/groups/index.html">G</a></li>
-              <li><a href="/groups/static.html">G (old)</a></li>
-              <li><a href="/groups/count_states.html">States</a></li>
-              <li><a href="/groups/count_cities.html">Cities</a></li>
+              <li><a href="/groups/index.html">Groups (new)</a></li>
+              <li><a href="/groups/static.html">Groups (old)</a></li>
+              <li><a href="/groups/count_states.html">Groups by States</a></li>
+              <li><a href="/groups/count_cities.html">Groups by Cities</a></li>
               <li><a href="/map.html">Map</a></li>
               <li><a href="/events/Timeseries_group_Evolution_by_RSVP.html">Timeseries</a></li>
               <li><a href="/about.html">About</a></li>
