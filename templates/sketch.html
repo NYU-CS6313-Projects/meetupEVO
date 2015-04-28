@@ -4,86 +4,49 @@
     * {
       box-sizing: border-box;
     }
-      /*This just stops me getting horizontal scrolling if anything overflows the width*/
-    body {
-      overflow-x: hidden;
-    }
     body.flexbox {
       display: flex;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       flex-direction: column;
     }
     #flex_row {
       display: flex;
-      flex: 1;
-      overflow: hidden;
+      flex-direction: row;
     }
-    #left_col { flex: 1 }
+    #left_col { 
+      flex: 1;
+    }
     #right_col { 
       flex: 0 0 300px;
-      flex-direction: row;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 600px;
     }
     #panel3 { 
       flex: 0 0 300px;
-      background-color: white;
+      background-color: #Fdd;
     }
     #panel1 { 
-      flex: 1; 
-      overflow: scroll;
+      height: auto;
+      overflow: auto;
+      background-color: #dfd;
     }
   </style>
   <div id="flex_row">
     <div id="left_col">
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
-      <p>
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. bli bla blo plum lorem ispum drumherum. 
-      </p>
+      <div id="panel5">
+        <br>
+        <h1>Evolution <small>of Meetup Groups</small></h1>
+        <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+        <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+        <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+        <p>bla bla lorem ipsum مرحبا بالزوار الجدد ·</p>
+      </div>
+      <div id="panel2">
+        <img src="{{ url_for('static', filename='fakeevolution.png') }}" style="width: 100%; height: auto;">
+      </div>
     </div>
     <div id="right_col">
 
@@ -138,4 +101,4 @@
     </div>
   </div>
 
-{% endblock %}
+  {% endblock %}

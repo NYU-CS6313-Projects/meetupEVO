@@ -7,23 +7,10 @@
     <title>Evolution of Meetup Groups: {{ title }}</title>
     <meta name="mobile-web-app-capable" content="yes">
     <!-- We are using all the libraries from cloud, see https://cdnjs.com/ -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Ubuntu:700,500|Open+Sans&subset=latin,latin-ext">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.5/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css'>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-drawer.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body class="has-drawer flexbox">
     {% block body %}{% endblock %}
     <!-- We are using jquery and Twitter Bootstrap javascript in the cloud, see http://getbootstrap.com/getting-started/ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.11/crossfilter.min.js"></script>
-    <script src="{{ url_for('static', filename='d3.timeline.js') }}"></script>
-    <script src="{{ url_for('static', filename='drawer.min.js') }}"></script>
     {% block javascript %}{% endblock %}
   </body>
 </html>
