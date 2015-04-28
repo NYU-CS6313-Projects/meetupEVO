@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
 from collections import Counter
+import mimetypes
+
+mimetypes.add_type('text/plain', '.csv')
 
 app = Flask(__name__)
 
@@ -295,8 +298,8 @@ def l():
 def b():
   return render_template("b.html")
 
-@app.route('/groups.csv')
-def groups_csv():
+@app.route('/build-csv')
+def build_csv():
   db = g.db
   columns = [
       "id_group", "id_category", "name_category", "shortname_category",
@@ -306,7 +309,7 @@ def groups_csv():
       "number_of_events", "first_event_time", "last_event_time",
       "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
   ]
-  group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups", db, index_col='id_group')
+  group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups where created is not null", db, index_col='id_group')
 
   rsvp_by_year = pd.read_sql("SELECT * from event_rsvps_by_year", db).pivot(index='id_group', columns='time_bin', values='sum')
   rsvp_by_year.rename(columns=lambda x: "rsvps-year-%04d" % x.year, inplace=True)
@@ -317,7 +320,9 @@ def groups_csv():
   data = group_df.merge(rsvp_by_year, left_index=True, right_index=True)
   data = data.merge(rsvp_by_month, left_index=True, right_index=True)
 
-  return Response(data.to_csv(), mimetype='text/plain')
+  data.to_csv(open("static/groups.csv", "w"))
+
+  return "<h1>Created</h1><a href='static/groups.csv'>group.csv</a>"
 
 # ====================================================================================
 @app.errorhandler(404)

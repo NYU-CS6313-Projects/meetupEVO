@@ -135,6 +135,9 @@
   <div id="no-events-chart" class="chart">
     <div class="title">Number of Events</div>
   </div>
+  <div id="evolution-chart" class="chart">
+    <div class="title"><strike>Number of people who rsvped for events in this time bin</strike></div>
+  </div>
   <div id="date-chart" class="chart">
     <div class="title">Date group was created</div>
   </div>
@@ -168,7 +171,8 @@
   var groups, nestByDate; // make global for debugging
   var formatNumber, formatChange, formatCreated, formatDate, formatMonth, formatTime;
 
-  d3.csv("/groups/all.csv", function(error, g) {
+  d3.csv("/static/groups.csv", function(error, g) {
+    console.log(error);
     groups = g;
 
     // Various formatters.
@@ -233,8 +237,17 @@
     .group(dates)
     .round(d3.time.day.round)
     .x(d3.time.scale()
-    .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
-    .rangeRound([0, 10 * 90]))
+      .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
+      .rangeRound([0, 10 * 90]))
+    .filter([new Date(2001, 1, 1), new Date(2015, 2, 1)]),
+
+    barChart()
+    .dimension(date)
+    .group(dates)
+    .round(d3.time.day.round)
+    .x(d3.time.scale()
+      .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
+      .rangeRound([0, 10 * 90]))
     .filter([new Date(2001, 1, 1), new Date(2015, 2, 1)])
 
     ];
@@ -311,6 +324,8 @@
 
         groupEnter.append("div")
         .attr("class", "name")
+        .append("a")
+        .attr("href", function(d){return "/group/" + d.id_group;}) 
         .text(function(d) { return d.name; });
 
         groupEnter.append("div")
