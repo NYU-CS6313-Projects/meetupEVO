@@ -1,4 +1,6 @@
-import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys, numpy, pandas
+import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys
+import numpy as np
+import pandas as pd
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
 from collections import Counter
 
@@ -293,13 +295,29 @@ def l():
 def b():
   return render_template("b.html")
 
-@app.route('/histo.html')
-def histo():
-  group_df = pd.read_sql("SELECT * from groups", g.db, index_col='id_group')
-  rsvp_df  = pd.read_sql("SELECT * from event_rsvps_by_year", g.db)
+@app.route('/groups.csv')
+def groups_csv():
+  db = g.db
+  columns = [
+      "id_group", "id_category", "name_category", "shortname_category",
+      "name", "link", "join_mode", "created", 
+      "no_members", "rating",
+      "city", "lat", "lon", "state", "country", 
+      "number_of_events", "first_event_time", "last_event_time",
+      "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
+  ]
+  group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups", db, index_col='id_group')
 
-  rsvp_df.groupby('id_group')
-  return render_template("histo.html", data =  [])
+  rsvp_by_year = pd.read_sql("SELECT * from event_rsvps_by_year", db).pivot(index='id_group', columns='time_bin', values='sum')
+  rsvp_by_year.rename(columns=lambda x: "rsvps-year-%04d" % x.year, inplace=True)
+
+  rsvp_by_month = pd.read_sql("SELECT * from event_rsvps_by_month", db).pivot(index='id_group', columns='time_bin', values='sum')
+  rsvp_by_month.rename(columns=lambda x: "rsvps-month-%04d-%02d" % (x.year, x.month), inplace=True)
+
+  data = group_df.merge(rsvp_by_year, left_index=True, right_index=True)
+  data = data.merge(rsvp_by_month, left_index=True, right_index=True)
+
+  return Response(data.to_csv(), mimetype='text/plain')
 
 # ====================================================================================
 @app.errorhandler(404)
