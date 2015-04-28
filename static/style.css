@@ -25,3 +25,14 @@ h1, h2, h3, h4, h5, h6 {
 p, div {
   font-family: 'Open Sans';
 }
+
+.drawer-button {
+  background-color: white;
+  border: 1px #ddd solid;
+  padding: 5px;
+  padding-top: 5px;
+  text-decoration:none;
+}
+.drawer-controls{
+  padding: 0px;
+}

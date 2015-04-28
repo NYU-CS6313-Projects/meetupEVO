@@ -12,45 +12,40 @@
     <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Ubuntu:700,500|Open+Sans&subset=latin,latin-ext'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-drawer.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.5/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css'>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
   </head>
-  <body>
-    <!-- Fixed navbar -->
-    <nav class="navbar navbar-default" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="pull-left" href="/"><img src="{{ url_for('static', filename='logo-2x.png') }}" style="max-width:50px; margin-top: 7px; margin-right: 20px;"></a>
-          <a class="navbar-brand" href="/">Evolution <small>of Meetup Groups</small></a>
+  <body class="has-drawer">
+    <div id="drawerMenu" class="drawer dw-xs-8 dw-sm-4 dw-md-2 fold" aria-labelledby="drawerMenu">
+        <div class="drawer-controls">
+          <a href="#drawerMenu" data-toggle="drawer" href="#drawerMenu" 
+            aria-foldedopen="false" aria-controls="drawerMenu" 
+            class="drawer-button">Menu</a>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="/o.html">Sketch Ouafa</a></li>
-            <li><a href="/l.html">Sketch Lluvia</a></li>
-            <li><a href="/b.html">Sketch Brigitte</a></li>
-            <li><a href="/groups/index.html">G</a></li>
-            <li><a href="/groups/static.html">G (old)</a></li>
-            <li><a href="/groups/count_states.html">States</a></li>
-            <li><a href="/groups/count_cities.html">Cities</a></li>
-            <li><a href="/map.html">Map</a></li>
-            <li><a href="/events/Timeseries_group_Evolution_by_RSVP.html">Timeseries</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="/about.html">About</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
-
-    <div class="main container">
+        <div class="drawer-contents">
+            <div class="drawer-heading">
+              <h2 class="drawer-title">Evolution <small>of Meetup Groups</small></h2>
+            </div>
+            <ul class="drawer-fullnav">
+              <li><a href="/o.html">Sketch Ouafa</a></li>
+              <li><a href="/l.html">Sketch Lluvia</a></li>
+              <li><a href="/b.html">Sketch Brigitte</a></li>
+              <li><a href="/groups/index.html">G</a></li>
+              <li><a href="/groups/static.html">G (old)</a></li>
+              <li><a href="/groups/count_states.html">States</a></li>
+              <li><a href="/groups/count_cities.html">Cities</a></li>
+              <li><a href="/map.html">Map</a></li>
+              <li><a href="/events/Timeseries_group_Evolution_by_RSVP.html">Timeseries</a></li>
+              <li><a href="/about.html">About</a></li>
+            </ul>
+            <div class="drawer-footer">
+                <small>&copy; Lluvia, Brigitte, Ouafa</small>
+            </div>
+        </div>
+    </div>
+    <div class="main fluid-container">
       {% for message in get_flashed_messages() %}
       <div class="alert info fade in">
         <button class="close" data-dismiss="alert">×</button>
@@ -72,6 +67,7 @@
     <script src="{{ url_for('static', filename='d3.geo.tile.v0.min.js') }}"></script>
     <script src="{{ url_for('static', filename='d3.timeline.js') }}"></script>
     <script src="{{ url_for('static', filename='L.D3SvgLeaflet.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='drawer.min.js') }}"></script>
     {% block javascript %}{% endblock %}
     <script>
       $(function(){

@@ -20,7 +20,7 @@ def before_request():
   except Exception as inst:
     app.logger.error('Error connecting to %s' % os.environ['DATABASE_URL'])
     g.error_message = "Could not connect to database."
-    abort(500)
+    # abort(500)
 
 # ====================================================================================
 @app.route('/about.html')
