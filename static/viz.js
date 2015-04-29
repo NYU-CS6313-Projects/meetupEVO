@@ -280,7 +280,7 @@ function evolutionChart() {
     var width = x.range()[1],
     height = 400; //  y.range()[0];
 
-    y.domain([0, group.top(1)[0].value]);
+    y.domain([0, 200]); //  group.top(1)[0].value]);
 
     div.each(function(f,i) {
       console.log("iterating over all charts, now at i=" + i + ", which has id=" + this.id);
@@ -331,7 +331,6 @@ function evolutionChart() {
           d;
           while (++i < n) {
             d = groups[i];
-            console.log("now working on " + d.key + " / " + d.value);
             path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
           }
           return path.join("");
@@ -380,6 +379,7 @@ function evolutionChart() {
       }
 
       // Only redraw the brush if set externally.
+      /*
       if (brushDirty) {
         brushDirty = false;
         g.selectAll(".brush").call(brush);
@@ -395,10 +395,11 @@ function evolutionChart() {
           .attr("width", x(extent[1]) - x(extent[0]));
         }
       }
+      */
 
-      g.selectAll(".bar").attr("d", barPath);
+      // g.selectAll(".bar").attr("d", barPath);
     });
-
+/*
     function barPath(groups) {
       var path = [],
       i = -1,
@@ -410,7 +411,8 @@ function evolutionChart() {
       }
       return path.join("");
     }
-
+*/
+/*
     function resizePath(d) {
       var e = +(d == "e"),
       x = e ? 1 : -1,
@@ -425,8 +427,9 @@ function evolutionChart() {
       + "M" + (4.5 * x) + "," + (y + 8)
       + "V" + (2 * y - 8);
     }
+*/
   }
-
+/*
   brush.on("brushstart.chart", function() {
     var div = d3.select(this.parentNode.parentNode.parentNode);
     div.select(".title a").style("display", null);
@@ -453,7 +456,7 @@ function evolutionChart() {
       dimension.filterAll();
     }
   });
-
+*/
   chart.margin = function(_) {
     if (!arguments.length) return margin;
     margin = _;
@@ -476,6 +479,7 @@ function evolutionChart() {
 
   chart.dimension = function(_) {
     if (!arguments.length) return dimension;
+    console.log("setting dimension to " + _);
     dimension = _;
     return chart;
   };
