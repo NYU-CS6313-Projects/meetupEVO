@@ -1,4 +1,4 @@
-var nestByDate;
+var nestByDate, formatMonth;
 
 function groupList(div) {
   console.log("groupList(div) got called");
