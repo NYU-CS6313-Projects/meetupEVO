@@ -1,6 +1,11 @@
-import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys, numpy, pandas
+import os, psycopg2, psycopg2.extras, json, re, random, csv, io, sys
+import numpy as np
+import pandas as pd
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, render_template, flash, jsonify, json
 from collections import Counter
+import mimetypes
+
+mimetypes.add_type('text/plain', '.csv')
 
 app = Flask(__name__)
 
@@ -46,64 +51,9 @@ def map():
   return render_template("map.html", title = "Map of Locations", description = "Showing no data as of yet.")
 
 # ====================================================================================
-@app.route('/groups/count_cities.html')
-def groups_count_cities_html():
-  return render_template("horizontal-barchart-tsv.html", 
-      data_url = request.path.replace('.html', '.tsv'), 
-      title = "Count Groups in Cities" )
-
-@app.route('/groups/all.csv')
-def groups_all_csv():
-    result = io.BytesIO()
-    writer = csv.writer(result, quoting=csv.QUOTE_NONNUMERIC)
-    try: 
-      all_columns = [
-          "id_group", "id_organizer", "name_organizer", "id_category", "name_category", "shortname_category",
-          "name", "description", "link", "who", "join_mode", "created", "created_wday",
-          "urlname", "visibility", "no_members",
-          "rating",
-          "city", "lat", "lon", "state", "country", "timezone",
-          "number_of_events", "first_event_time", "last_event_time",
-          "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
-          ]
-      columns = [
-          "id_group", "id_organizer", "name_organizer", "id_category", "name_category", "shortname_category",
-          "name", "link", "join_mode", "created", 
-          "no_members", "rating",
-          "city", "lat", "lon", "state", "country", "timezone",
-          "number_of_events", "first_event_time", "last_event_time",
-          "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
-      ]
-      writer.writerow( columns )
-      g.db_cursor.execute("select " + ",".join(columns) + " from groups where created is not null and number_of_events > 0 limit 3000")
-      for row in g.db_cursor.fetchall():
-        writer.writerow( [ row[c] for c in columns ] )
-    except Exception as ex:
-      exc_type, exc_obj, exc_tb = sys.exc_info()
-      app.logger.error('exception %s in line %d' % (ex, exc_tb.tb_lineno))
-      pass
-    return Response(result.getvalue(), mimetype='text/plain')
-
-@app.route('/groups/count_cities.tsv')
-def groups_count_cities_tsv():
-    try: 
-      result = "label\tfrequency"
-      g.db_cursor.execute("""select city as label,count(*) as count from groups group by city order by count desc""")
-      for row in g.db_cursor.fetchall():
-        result += "\n%s\t%d" % ( row['label'], row['count'] )
-    except Exception as ex:
-      app.logger.error('exception %s' % ex)
-      pass
-    return Response(result, mimetype='text/plain')
-
-# ====================================================================================
 @app.route('/groups/index.html')
 def groups():
   return render_template("groups.html", title = "List of Groups")
-
-@app.route('/groups/simple.html')
-def groups_simple():
-  return render_template("groups_simple.html", title = "List of Groups")
 
 @app.route('/groups/static.html')
 def groups_static():
@@ -139,46 +89,6 @@ def group(id_group):
       timeline_json=json.dumps(timeline)
   )
 
-@app.route('/groups/count_states.html')
-def groups_count_states_html():
-  return render_template("horizontal-barchart-tsv.html", 
-      data_url = request.path.replace('.html', '.tsv'), 
-      title = "Count Groups in State")
-
-@app.route('/groups/count_states.tsv')
-def groups_count_states_tsv():
-    try: 
-      result = "label\tfrequency"
-      g.db_cursor.execute("""select state as label,count(*) as count from groups group by state order by count desc""")
-      for row in g.db_cursor.fetchall():
-        result += "\n%s\t%d" % ( row['label'], row['count'] )
-    except Exception as ex:
-      app.logger.error('exception %s' % ex)
-      pass
-    return Response(result, mimetype='text/plain')
-    
-@app.route('/rsvps/weekday_histogram.json')
-def rsvps_weekday_histogram_json():
-    try: 
-      g.db_cursor.execute("""
-        select created_wday, count(*) from rsvps group by created_wday
-        """)
-      resp = jsonify({ 
-          'status': 200, 
-          'color': 'purple',
-          'message': 'ok', 
-          'x_label': 'day of the week', 
-          'y_label': 'number of rsvps on this day', 
-          'data':  g.db_cursor.fetchall() 
-      })
-      resp.status_code = 200
-    except Exception as ex:
-      app.logger.error('Error: could not read from database %s' % ex)
-      resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
-      resp.status_code = 500
-    return resp  
-
-
 ###Timeline series data
 @app.route('/events/group_evolution_timeseries.json')
 def events_group_evoltution_timeseries_json():
@@ -211,29 +121,6 @@ def events_group_evoltution_timeseries_json():
           'message': 'ok', 
           'x_label': 'year', 
           'y_label': 'number of rsvps on this year', 
-          'data':  g.db_cursor.fetchall() 
-      })
-      resp.status_code = 200
-    except Exception as ex:
-      app.logger.error('Error: could not read from database %s' % ex)
-      resp = jsonify({ 'status': 404, 'message': 'could not read from database'})
-      resp.status_code = 500
-    return resp
-
-
-
-
-@app.route('/groups/group_size_histogram.json')
-def group_size_histogram_json():
-    try: 
-      g.db_cursor.execute("""
-        select width_bucket(no_members,0,50000,30) as bucket, count(*) as count from groups group by 1 order by 1
-        """)
-      resp = jsonify({ 
-          'status': 200, 
-          'message': 'ok', 
-          'x_label': 'number of members in group, 30 bins', 
-          'y_label': 'number of group', 
           'data':  g.db_cursor.fetchall() 
       })
       resp.status_code = 200
@@ -281,25 +168,35 @@ def intro():
 def index():
   return render_template("index.html")
 
-@app.route('/o.html')
-def o():
-  return render_template("o.html")
+@app.route('/sketch.html')
+def sketch():
+  return render_template("sketch.html")
 
-@app.route('/l.html')
-def l():
-  return render_template("l.html")
+@app.route('/build-csv')
+def build_csv():
+  db = g.db
+  columns = [
+      "id_group", "id_category", "name_category", "shortname_category",
+      "name", "link", "join_mode", "created", 
+      "no_members", "rating",
+      "city", "lat", "lon", "state", "country", 
+      "number_of_events", "first_event_time", "last_event_time",
+      "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
+  ]
+  group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups where created is not null", db, index_col='id_group')
 
-@app.route('/b.html')
-def b():
-  return render_template("b.html")
+  rsvp_by_year = pd.read_sql("SELECT * from event_rsvps_by_year", db).pivot(index='id_group', columns='time_bin', values='sum')
+  rsvp_by_year.rename(columns=lambda x: "rsvps-year-%04d" % x.year, inplace=True)
 
-@app.route('/histo.html')
-def histo():
-  group_df = pd.read_sql("SELECT * from groups", g.db, index_col='id_group')
-  rsvp_df  = pd.read_sql("SELECT * from event_rsvps_by_year", g.db)
+  rsvp_by_month = pd.read_sql("SELECT * from event_rsvps_by_month", db).pivot(index='id_group', columns='time_bin', values='sum')
+  rsvp_by_month.rename(columns=lambda x: "rsvps-month-%04d-%02d" % (x.year, x.month), inplace=True)
 
-  rsvp_df.groupby('id_group')
-  return render_template("histo.html", data =  [])
+  data = group_df.merge(rsvp_by_year, left_index=True, right_index=True)
+  data = data.merge(rsvp_by_month, left_index=True, right_index=True)
+
+  data.to_csv(open("static/groups.csv", "w"))
+
+  return "<h1>Created</h1><a href='static/groups.csv'>group.csv</a>"
 
 # ====================================================================================
 @app.errorhandler(404)
