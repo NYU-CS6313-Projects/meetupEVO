@@ -21,13 +21,12 @@
             stroke-width:0.7px;
             font-size: large;
     }
-    ul.checkbox-grid { padding: 0 }
     .checkbox-grid li {
       display: block;
       float: left;
       border: 1px transparent solid; 
       shape-rendering: crispEdges;
-      width: 33%;
+      width: 100%;
     }
     .jumbotron { 
       margin-top:24px;
@@ -43,7 +42,7 @@
 <h1>{{ title }}</h1>
 
 <div class="row">
-  <div class="col-md-6" id="panel1">
+  <div class="col-md-5" id="panel1">
     <!--
     <p> Select the type of aggregation for the Timeseries plot:
     <ul class="checkbox-grid">
@@ -53,10 +52,10 @@
     <li><input type="radio" value="week" class="timeseries_button"  id="week" name="time" checked> By Week </li>
     </ul>
     --> 
-    <p>Select one of the following categories:</p>
+<!--    <p>Select one of the following categories:</p>-->
     <!--Adding all categories for selection-->
     <ul class="checkbox-grid">
-      <li><input type="checkbox" value="Tech" class="category_button"  id="tech" name="#a6cee3"> Tech</li>
+        <li><span style="background-color:#a6cee3;"><input type="checkbox" value="Tech" class="category_button"  id="tech" name="#a6cee3" style="opacity:0;"></span> Tech</li>
       <li><input type="checkbox" value="Women" class="category_button" id="women" name = "#1f78b4"> Women</li>
       <li><input type="checkbox" value="Alternative lifesyle" class="category_button" id="alternative lifestyle" name = "#b2df8a"> Alternative lifesyle</li>
       <li><input type="checkbox" value="Career/Business" class="category_button" id="career/business" name = "#33a02c"> Career/Business</li>
@@ -93,7 +92,10 @@
       <li><input type="checkbox" value="None" class="category_button" id="" name = 'white'> None </li>
     </ul>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-2" id="panel2">
+
+  </div>
+  <div class="col-md-4">
     <div id="panel3">
       <form class="form-inline">
         <div class="input-group tags col-xs-3">
@@ -126,9 +128,11 @@
   </div>
 </div>
 <div class="row">
+<!--
   <div class="col-md-6" id="panel2">
 
   </div>
+-->
   <div class="col-md-6" id="panel5">
     <div id="map" style="width:550px; height:450px;"></div>
   </div>
@@ -141,7 +145,7 @@
   // =============================== code for timeseries ===================
 
   var padding = 50;
-  var width_timeseries = 550,
+  var width_timeseries = 800,
     height_timeseries = 550;
     var svg2 = d3.select("div#panel2").append("svg").attr("width", width_timeseries).attr("height", height_timeseries);
     var color = 'steelblue';
@@ -241,7 +245,6 @@
             .y(function (d) {
                 return y(d.sum);
             })
-            .interpolate("basis"); 
         
         // Creating a function that moves the selected line to the front
         d3.selection.prototype.moveToFront = function() { 
@@ -272,7 +275,7 @@
                 .on('mouseout', function(d){
                     d3.select(this)
                     .style('stroke-width', '2px')
-                    .attr('opacity', 0.35)
+                    .attr('opacity', 0.65)
                     .transition()
                     .duration(750);
             });
