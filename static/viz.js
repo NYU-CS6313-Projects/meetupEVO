@@ -1,4 +1,4 @@
-var nestByDate, formatMonth;
+var nestByDate, formatMonth, formatDate;
 
 function groupList(div) {
   console.log("groupList(div) got called");
@@ -276,19 +276,21 @@ function evolutionChart() {
 
   console.log("evolutionChart() got called, id=" + evolutionChart.id);
   function chart(div) {
+    console.log("evolutionChart() is now charted on " + div);
     var width = x.range()[1],
-    height = y.range()[0];
+    height = 400; //  y.range()[0];
 
     y.domain([0, group.top(1)[0].value]);
 
-    div.each(function() {
+    div.each(function(f,i) {
+      console.log("iterating over all charts, now at i=" + i + ", which has id=" + this.id);
       var div = d3.select(this),
       g = div.select("g");
 
       // Create the skeletal chart.
       if (g.empty()) {
         div.select(".title").append("a")
-        .attr("href", "javascript:reset(" + id + ")")
+        .attr("href", "javascript:evolutionChartReset(" + evolutionChart.id + ")")
         .attr("class", "reset")
         .text("reset")
         .style("display", "none");
@@ -305,14 +307,66 @@ function evolutionChart() {
         .attr("width", width)
         .attr("height", height);
 
-        g.selectAll(".bar")
-        .data(["background", "foreground"])
-        .enter().append("path")
-        .attr("class", function(d) { return d + " bar"; })
-        .datum(group.all());
 
-        g.selectAll(".foreground.bar")
-        .attr("clip-path", "url(#clip-" + id + ")");
+        // Creating a path function that will load in years as the x values and rsvps as y values. 
+        // This will allows the tool to know where to connect the lines
+        // The interpolate function allows for curved lines
+        
+        var theotherLine = d3.svg.line()
+            .x(function (d, i) {
+              console.log("this is theLine, creating x for i=" + i + ", d=" + d);
+                return x(d.year);
+            })
+            .y(function (d) {
+                return y(d.sum);
+            })
+            .interpolate("basis"); 
+        
+        function theLine(groups) {
+          console.log("constructing theLine for groups=");
+          console.dir(groups);
+          var path = [],
+          i = -1,
+          n = groups.length,
+          d;
+          while (++i < n) {
+            d = groups[i];
+            console.log("now working on " + d.key + " / " + d.value);
+            path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
+          }
+          return path.join("");
+        }
+
+        // Creating the graph
+        // Creating a colouring function
+        // This function allows us to create random colours for each different group ID
+        g.append("g")
+          .attr('class', 'lines')
+          .datum(group.all());
+          
+        g.selectAll(".lines")
+          .append("path")
+            .attr('class', "line")
+            .attr('stroke', 'blue')
+            .attr('stroke-width', 2)
+            .attr('opacity', 0.35)
+            .attr('fill', 'none')
+            .attr("d", theLine)
+            .on('mouseover', function(d){
+                d3.select(this)
+                .style('stroke-width', '6px')
+                .attr('opacity', 1)
+                .moveToFront();
+            })
+            .on('mouseout', function(d){
+                d3.select(this)
+                .style('stroke-width', '2px')
+                .attr('opacity', 0.35)
+                .transition()
+                .duration(750);
+            });
+        
+
 
         g.append("g")
         .attr("class", "axis")
