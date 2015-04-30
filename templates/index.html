@@ -103,7 +103,7 @@
     width: 420px;
   }
 
-  #date-chart {
+  #date-created-chart {
     width: 920px;
   }
 
@@ -175,8 +175,10 @@
       <div id="evolution-chart" class="chart">
         <div class="title">Number of people who rsvped for events in this time bin</div>
       </div>
-      <div id="date-chart" class="chart">
-        <div class="title">Date group was created</div>
+      <div id="date-created-chart" class="chart">
+        <strong>Date group was created</strong>
+        <span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
 
     </div>
@@ -204,10 +206,14 @@
 
     <div id="panel3">
       <div id="no-members-chart" class="chart">
-        <div class="title">Number of Attendees</div>
+        <strong># Attendees</strong>
+        <span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:noMembersChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
       <div id="no-events-chart" class="chart">
-        <div class="title">Number of Events</div>
+        <strong># Events</strong>
+        <span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:noEventsChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
     </div> 
     <div id="panel1">
@@ -256,146 +262,141 @@
 </div>
 {% endblock %}
 {% block javascript %}
-<script src="{{ url_for('static', filename='viz.js') }}"></script>
 <script>
   var groups, groups_by_month, groups_by_year, meetup_group, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
    
-  function viz( classname ) {
-    console.log("viz() has been called");
-    var formatNumber, formatChange, formatCreated, formatTime;
+  var noMembersChart    = dc.barChart('#no-members-chart');
+  var noEventsChart     = dc.barChart('#no-events-chart');
+  var dateCreatedChart  = dc.barChart('#date-created-chart');
+  var evolutionChart    = dc.compositeChart('#evolution-chart');
 
-    function viz_handle_csv(error, g, gm, gy) {
-      console.log("got me some csv");
-      groups = g;
-      groups_by_month = gm; // gm.slice(0,100);
-      groups_by_year =  gy; // gy.slice(0,100);
+  function handle_csv(error, g, gm, gy) {
+    console.log("got me some data");
+    groups = g;
+    groups_by_month = gm; // gm.slice(0,100);
+    groups_by_year =  gy; // gy.slice(0,100);
 
-      // Various formatters.
-      formatNumber = d3.format(",d");
-      formatChange = d3.format("+,d");
-      formatCreated = d3.time.format("%Y-%m-%d %H:%M:%S");
-      formatDate = d3.time.format("%Y-%m-%d");
-      formatMonth = d3.time.format("%Y, %b");
-      formatYearMonth = d3.time.format("rsvps-month-%Y-%m");
-      formatYear = d3.time.format("rsvps-year-%Y");
-      formatTime = d3.time.format("%I:%M %p");
+    // Various formatters.
+    formatInt = d3.format("f");
+    formatNumber = d3.format(",d");
+    formatChange = d3.format("+,d");
+    formatCreated = d3.time.format("%Y-%m-%d %H:%M:%S");
+    formatDate = d3.time.format("%Y-%m-%d");
+    formatMonth = d3.time.format("%Y, %b");
+    formatYearMonth = d3.time.format("%Y-%m");
+    formatYear = d3.time.format("%Y");
+    formatTime = d3.time.format("%I:%M %p");
 
-      // A nest operator, for grouping the group list.
-      nestByDate  = d3.nest().key(function(d) { return d3.time.month( d.date ); });
+    // A nest operator, for grouping the group list.
+    nestByDate  = d3.nest().key(function(d) { return d3.time.month( d.date ); });
 
-      // A little coercion, since the CSV is untyped.
-      groups_by_year.forEach(function(d, i) {
-        d.index = i;
-        d.time_bin = formatCreated.parse( d.time_bin );
-      });
-      groups_by_month.forEach(function(d, i) {
-        d.index = i;
-        d.time_bin = formatCreated.parse( d.time_bin );
-      });
-      groups.forEach(function(d, i) {
-        d.index = i;
-        d.date = formatCreated.parse( d.created );
-        d.first_event_time = formatCreated.parse( d.first_event_time );
-        d.last_event_time = formatCreated.parse( d.last_event_time );
-        d.id_gropu = +d.id_group;
-        d.no_members = +d.no_members;
-        d.number_of_events = +d.number_of_events;
-        d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
-        d.max_yes_at_one_event = +d.max_yes_at_one_event;
-        d.rating = parseFloat(d.rating);
-        if (d.rating == 0.0) d.rating = null;
-      });
-      console.log("done treating csv");
+    // A little coercion, since the CSV is untyped.
+    groups_by_year.forEach(function(d, i) {
+      d.index = i;
+      d.time_bin = formatCreated.parse( d.time_bin );
+    });
+    groups_by_month.forEach(function(d, i) {
+      d.index = i;
+      d.time_bin = formatCreated.parse( d.time_bin );
+    });
+    groups.forEach(function(d, i) {
+      d.index = i;
+      d.date = formatCreated.parse( d.created );
+      d.first_event_time = formatCreated.parse( d.first_event_time );
+      d.last_event_time = formatCreated.parse( d.last_event_time );
+      d.id_gropu = +d.id_group;
+      d.no_members = +d.no_members;
+      d.number_of_events = +d.number_of_events;
+      d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
+      d.max_yes_at_one_event = +d.max_yes_at_one_event;
+      d.rating = parseFloat(d.rating);
+      if (d.rating == 0.0) d.rating = null;
+    });
+    console.log("done treating csv");
 
-      // Create the crossfilter for the relevant dimensions and groups.
-      // var 
-      meetup_group = crossfilter(groups);
-      all = meetup_group.groupAll();
-      id_group = meetup_group.dimension(function(d) { return d.id_group; });
-      id_groups = id_group.group();
-      date = meetup_group.dimension(function(d) { return d.date; });
-      dates = date.group(d3.time.day);
-      hour = meetup_group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
-      hours = hour.group(Math.floor);
-      rating = meetup_group.dimension(function(d) { return d.rating })
-      ratings = rating.group(function(d) { return Math.floor(d * 4) / 4; });
-      no_member = meetup_group.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
-      no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; });
-      no_event   = meetup_group.dimension(function(d) { return d.number_of_events });
-      no_events  = no_event.group(function(d) { return Math.floor(d / 10) * 10; });
+    // Create the crossfilter for the relevant dimensions and groups.
+    // var 
+    meetup_group = crossfilter(groups);
+    all = meetup_group.groupAll();
+    id_group = meetup_group.dimension(function(d) { return d.id_group; });
+    yearColumns = ["rsvps-year-2003","rsvps-year-2004","rsvps-year-2005","rsvps-year-2006",
+      "rsvps-year-2007","rsvps-year-2008","rsvps-year-2009","rsvps-year-2010",
+      "rsvps-year-2011","rsvps-year-2012","rsvps-year-2013","rsvps-year-2014"]
+    id_groups        = [];
+    many_line_charts = [];
+    yearColumns.forEach(function(c,i){
+      var g = id_group.group().reduceSum(function (d) { return +d[c]; });
+      id_groups.push( [c, g]);
+      many_line_charts.push( dc.lineChart(evolutionChart).group(g) );
+    });
+    console.log("I have created several groups for several columns");
+    console.dir(id_groups);
+    date = meetup_group.dimension(function(d) { return d.date; });
+    dates = date.group(d3.time.day);
+    hour = meetup_group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
+    hours = hour.group(Math.floor);
+    rating = meetup_group.dimension(function(d) { return d.rating })
+    ratings = rating.group(function(d) { return Math.floor(d * 4) / 4; });
+    no_member = meetup_group.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
+    no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; });
+    no_event   = meetup_group.dimension(function(d) { return d.number_of_events });
+    no_events  = no_event.group(function(d) { return Math.floor(d / 10) * 10; });
 
-      var charts = [
-        evolutionChart()
-        .datum(groups_by_year)
-        .dimension(id_group)
-        .group(id_groups)
-        .filter([0,16829372])
-        .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90])),
+    noMembersChart.width(230)
+      .height(100)
+      .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .dimension(no_member)
+      .group(no_members)
+      .filterPrinter(function (filters) {
+        var filter = filters[0];
+        return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
+      })
+      .x(d3.scale.linear().domain([0, 1500]).rangeRound([0, 10 * 21]));
 
-        barChart()
-        .dimension(date)
-        .group(dates)
-        .round(d3.time.day.round)
-        .x(d3.time.scale()
+    noMembersChart.xAxis().ticks(5);
+    noMembersChart.yAxis().ticks(4);
+
+    noEventsChart.width(230)
+      .height(100)
+      .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .dimension(no_event)
+      .gap(1)
+      .group(no_events)
+      .filterPrinter(function (filters) {
+        var filter = filters[0];
+        return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
+      })
+      .x(d3.scale.linear().domain([1, 200]).rangeRound([0, 10 * 20]));
+    noEventsChart.xAxis().ticks(5);
+    noEventsChart.yAxis().ticks(4);
+
+    dateCreatedChart.width(1000)
+      .dimension(date)
+      .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .height(100)
+      .group(dates)
+      .round(d3.time.day.round)
+      .filterPrinter(function (filters) {
+        var filter = filters[0];
+        return "" + formatDate(filter[0]) + " to " + formatDate(filter[1]);
+      })
+      .x(d3.time.scale()
         .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
-        .rangeRound([0, 10 * 90]))
-        .filter([new Date(2001, 1, 1), new Date(2015, 2, 1)]),
+        .rangeRound([0, 10 * 90]));
 
-        barChart()
-        .dimension(no_member)
-        .group(no_members)
-        .x(d3.scale.linear().domain([0, 1500]).rangeRound([0, 10 * 21])),
+    evolutionChart.width(1000)
+      .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .dimension(id_group)
+      .valueAccessor(function (d) { return d.value; })
+      .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90]))
+      .compose( many_line_charts );
 
-        barChart()
-        .dimension(no_event)
-        .group(no_events)
-        .x(d3.scale.linear().domain([1, 200]).rangeRound([0, 10 * 20]))
-      ];
 
-      // Given our array of charts, which we assume are in the same order as the
-      // .chart elements in the DOM, bind the charts to the DOM and render them.
-      // We also listen to the chart's brush events to update the display.
-      var chart = d3.selectAll(".chart")
-      .data(charts)
-      .each(function(chart) { 
-        chart.on("brush", renderAll).on("brushend", renderAll); 
-      });
 
-      // Render the initial lists.
-      var list = d3.selectAll("#groups-list").data([groupList]);
+    dc.renderAll();
 
-      // Render the total.
-      d3.selectAll("#total").text(formatNumber(meetup_group.size()));
-
-      renderAll();
-
-      // Renders the specified chart or list.
-      function render(method) {
-        d3.select(this).call(method);
-      }
-
-      // Whenever the brush moves, re-rendering everything.
-      function renderAll() {
-        chart.each(render);
-        list.each(render);
-        d3.select("#active").text(formatNumber(all.value()));
-      }
-
-      window.filter = function(filters) {
-        filters.forEach(function(d, i) { charts[i].filter(d); });
-        renderAll();
-        };
-
-      window.reset = function(i) {
-        charts[i].filter(null);
-        renderAll();
-      };
-
-    }
-    console.log("done preparing viz");
-    return viz_handle_csv;
   }
-  handle_csv = viz('.chart');
+  console.log("start loading data");
   queue()
   .defer(d3.csv, "/static/groups.csv")
   .defer(d3.csv, "/static/group-evolution-by-month.csv")
