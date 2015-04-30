@@ -1,12 +1,9 @@
 var nestByDate, formatMonth, formatDate;
 
 function groupList(div) {
-  console.log("groupList(div) got called");
   var groupsByDate = nestByDate.entries(date.top(40));
 
   div.each(function() {
-    console.log("will display list of groups in");
-    console.log(this);
     var date = d3.select(this).selectAll(".date")
     .data(groupsByDate, function(d) { return d.key; });
 
@@ -59,7 +56,7 @@ function groupList(div) {
     
     groupEnter.append("div")
     .attr("class", "last_event_time")
-    .text(function(d) { return formatDate(d.last_event_time) ; });
+    .text(function(d) { return formatDate(d.last_event_time); });
 
     group.exit().remove();
 
@@ -168,10 +165,10 @@ function barChart() {
       var e = +(d == "e"),
       x = e ? 1 : -1,
       y = height / 3;
-      return "M" + (.5 * x) + "," + y
+      return "M" + (0.5 * x) + "," + y
       + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
       + "V" + (2 * y - 6)
-      + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
+      + "A6,6 0 0 " + e + " " + (0.5 * x) + "," + (2 * y)
       + "Z"
       + "M" + (2.5 * x) + "," + (y + 8)
       + "V" + (2 * y - 8)
@@ -266,23 +263,24 @@ function evolutionChart() {
 
   var margin = {top: 10, right: 10, bottom: 20, left: 10},
   x,
-  y = d3.scale.linear().range([75, 0]),
+  y,
   id = evolutionChart.id++,
-  axis = d3.svg.axis().orient("bottom"),
   brush = d3.svg.brush(),
-  brushDirty,
+  axis = d3.svg.axis().orient("bottom"),
   round;
 
-  console.log("evolutionChart() got called, id=" + evolutionChart.id);
   function chart(div) {
-    console.log("evolutionChart() is now charted on " + div);
-    var width = x.range()[1],
-    height = 400; //  y.range()[0];
+    console.log("drawing evolutionChart() " + evolutionChart.id + " on div(s) " + div);
+    var width = x.range()[1]
+      , height = 400 //  y.range()[0];
+      , y = d3.scale.linear().range([height, 0])
+      , max_y; //  = d3.max( datum, function(d,i){ return d.sum });
 
-    y.domain([0, 200]); //  group.top(1)[0].value]);
+    max_y = 8000;
+    console.log("max y=" + max_y);
+    y.domain([0, max_y]); //  group.top(1)[0].value]);
 
     div.each(function(f,i) {
-      console.log("iterating over all charts, now at i=" + i + ", which has id=" + this.id);
       var div = d3.select(this),
       g = div.select("g");
 
@@ -310,7 +308,8 @@ function evolutionChart() {
         .attr("class", "lines");
 
 
-        // Creating a function that will nest our ID groups into; so our json file is clustered by group instead
+        // Creating a function that will nest our ID groups into; 
+        // so our data is clustered by group instead
         // of having just a list of all the information.
         var dataGroup = d3.nest()
             .key(function(d) {
@@ -321,7 +320,8 @@ function evolutionChart() {
 //                var color = function(d, j) {
 //                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
 //                        }
-        // Creating a path function that will load in years as the x values and rsvps as y values. 
+        // Creating a path function that will load in years/months/time_bins 
+        // as the x values and sum of rsvps as y values. 
         // This will allows the tool to know where to connect the lines
         // The interpolate function allows for curved lines
         var theLine = d3.svg.line()
@@ -330,7 +330,7 @@ function evolutionChart() {
             })
             .y(function (d) {
                 return y(d.sum);
-            })
+            });
 //                    .interpolate("basis"); 
         
         // Creating a function that moves the selected line to the front
@@ -349,7 +349,7 @@ function evolutionChart() {
 //                        .attr('stroke', function(d, j) {
 //                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
 //                        })
-                .attr ('stroke', '#0000FF')
+                .attr('stroke',"steelblue")
                 .attr('stroke-width', 2)
                 .attr('opacity', 0.35)
                 .attr('fill', 'none')
@@ -373,89 +373,10 @@ function evolutionChart() {
         .attr("transform", "translate(0," + height + ")")
         .call(axis);
 
-        // Initialize the brush component with pretty resize handles.
-        var gBrush = g.append("g").attr("class", "brush").call(brush);
-        gBrush.selectAll("rect").attr("height", height);
-        gBrush.selectAll(".resize").append("path").attr("d", resizePath);
       }
 
-      // Only redraw the brush if set externally.
-      /*
-      if (brushDirty) {
-        brushDirty = false;
-        g.selectAll(".brush").call(brush);
-        div.select(".title a").style("display", brush.empty() ? "none" : null);
-        if (brush.empty()) {
-          g.selectAll("#clip-" + id + " rect")
-          .attr("x", 0)
-          .attr("width", width);
-          } else {
-          var extent = brush.extent();
-          g.selectAll("#clip-" + id + " rect")
-          .attr("x", x(extent[0]))
-          .attr("width", x(extent[1]) - x(extent[0]));
-        }
-      }
-      */
-
-      // g.selectAll(".bar").attr("d", barPath);
     });
-/*
-    function barPath(groups) {
-      var path = [],
-      i = -1,
-      n = groups.length,
-      d;
-      while (++i < n) {
-        d = groups[i];
-        path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
-      }
-      return path.join("");
-    }
-*/
-    function resizePath(d) {
-      var e = +(d == "e"),
-      x = e ? 1 : -1,
-      y = height / 3;
-      return "M" + (.5 * x) + "," + y
-      + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
-      + "V" + (2 * y - 6)
-      + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
-      + "Z"
-      + "M" + (2.5 * x) + "," + (y + 8)
-      + "V" + (2 * y - 8)
-      + "M" + (4.5 * x) + "," + (y + 8)
-      + "V" + (2 * y - 8);
-    }
   }
-/*
-  brush.on("brushstart.chart", function() {
-    var div = d3.select(this.parentNode.parentNode.parentNode);
-    div.select(".title a").style("display", null);
-  });
-
-  brush.on("brush.chart", function() {
-    var g = d3.select(this.parentNode),
-    extent = brush.extent();
-    if (round) g.select(".brush")
-    .call(brush.extent(extent = extent.map(round)))
-    .selectAll(".resize")
-    .style("display", null);
-    g.select("#clip-" + id + " rect")
-    .attr("x", x(extent[0]))
-    .attr("width", x(extent[1]) - x(extent[0]));
-    dimension.filterRange(extent);
-  });
-
-  brush.on("brushend.chart", function() {
-    if (brush.empty()) {
-      var div = d3.select(this.parentNode.parentNode.parentNode);
-      div.select(".title a").style("display", "none");
-      div.select("#clip-" + id + " rect").attr("x", null).attr("width", "100%");
-      dimension.filterAll();
-    }
-  });
-*/
   chart.margin = function(_) {
     if (!arguments.length) return margin;
     margin = _;
@@ -466,7 +387,6 @@ function evolutionChart() {
     if (!arguments.length) return x;
     x = _;
     axis.scale(x);
-    brush.x(x);
     return chart;
   };
 
@@ -478,26 +398,7 @@ function evolutionChart() {
 
   chart.datum = function(_) {
     if (!arguments.length) return datum;
-    console.log("setting datum to " + _);
     datum = _;
-    return chart;
-  };
-
-  chart.filter = function(_) {
-    if (_) {
-      brush.extent(_);
-      dimension.filterRange(_);
-      } else {
-      brush.clear();
-      dimension.filterAll();
-    }
-    brushDirty = true;
-    return chart;
-  };
-
-  chart.group = function(_) {
-    if (!arguments.length) return group;
-    group = _;
     return chart;
   };
 
