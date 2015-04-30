@@ -1,5 +1,12 @@
 var nestByDate, formatMonth, formatDate;
 
+// Creating a function that moves the selected line to the front
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function() {
+    this.parentNode.appendChild(this);
+  });
+};
+
 function groupList(div) {
   var groupsByDate = nestByDate.entries(date.top(40));
 
@@ -192,6 +199,7 @@ function barChart() {
     g.select("#clip-" + id + " rect")
     .attr("x", x(extent[0]))
     .attr("width", x(extent[1]) - x(extent[0]));
+    console.log("in barChart no " + id + ": filterRange(" + extent + ")");
     dimension.filterRange(extent);
   });
 
@@ -304,22 +312,28 @@ function evolutionChart() {
         .attr("width", width)
         .attr("height", height);
 
+        g.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(axis);
+
         lines = g.append("g")
         .attr("class", "lines");
-
 
         // Creating a function that will nest our ID groups into; 
         // so our data is clustered by group instead
         // of having just a list of all the information.
+        console.log("there are currently " + groups.length + " selected");
+        console.dir(groups);
         var dataGroup = d3.nest()
             .key(function(d) {
                 return d.id_group;
             })
             .entries(datum);
 
-//                var color = function(d, j) {
-//                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
-//                        }
+  //                var color = function(d, j) {
+  //                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
+  //                        }
         // Creating a path function that will load in years/months/time_bins 
         // as the x values and sum of rsvps as y values. 
         // This will allows the tool to know where to connect the lines
@@ -331,24 +345,17 @@ function evolutionChart() {
             .y(function (d) {
                 return y(d.sum);
             });
-//                    .interpolate("basis"); 
+  //                    .interpolate("basis"); 
         
-        // Creating a function that moves the selected line to the front
-        d3.selection.prototype.moveToFront = function() { 
-            return this.each(function() { 
-                this.parentNode.appendChild(this); 
-                }); 
-            };
-
         // Creating the graph
         // Creating a colouring function
         // This function allows us to create random colours for each different group ID
         dataGroup.forEach(function(d, i) {
             lines.append('svg:path')
                 .attr('d', theLine(d.values))
-//                        .attr('stroke', function(d, j) {
-//                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
-//                        })
+  //                        .attr('stroke', function(d, j) {
+  //                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
+  //                        })
                 .attr('stroke',"steelblue")
                 .attr('stroke-width', 2)
                 .attr('opacity', 0.35)
@@ -358,7 +365,7 @@ function evolutionChart() {
                     .style('stroke-width', '6px')
                     .attr('opacity', 1)
                     .moveToFront();
-            })
+                })
                 .on('mouseout', function(d){
                     d3.select(this)
                     .style('stroke-width', '2px')
@@ -367,13 +374,11 @@ function evolutionChart() {
                     .duration(750);
             });
         });
-
-        g.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(axis);
-
       }
+      // fill the skeletal chart.
+      console.log("evolutionChart updated: there are currently " + groups.length + " selected");
+      console.dir(groups);
+
 
     });
   }
@@ -402,6 +407,26 @@ function evolutionChart() {
     return chart;
   };
 
+  chart.group = function(_) {
+    if (!arguments.length) return group;
+    group = _;
+    return chart;
+  };
+
+  chart.dimension = function(_) {
+    if (!arguments.length) return dimension;
+    dimension = _;
+    return chart;
+  };
+
+  chart.filter = function(_) {
+    if (_) {
+      dimension.filterRange(_);
+    } else {
+      dimension.filterAll();
+    }
+    return chart;
+  };
   chart.round = function(_) {
     if (!arguments.length) return round;
     round = _;

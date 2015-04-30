@@ -258,7 +258,7 @@
 {% block javascript %}
 <script src="{{ url_for('static', filename='viz.js') }}"></script>
 <script>
-  var groups, groups_by_month, groups_by_year, group, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
+  var groups, groups_by_month, groups_by_year, meetup_group, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
    
   function viz( classname ) {
     console.log("viz() has been called");
@@ -297,6 +297,7 @@
         d.date = formatCreated.parse( d.created );
         d.first_event_time = formatCreated.parse( d.first_event_time );
         d.last_event_time = formatCreated.parse( d.last_event_time );
+        d.id_gropu = +d.id_group;
         d.no_members = +d.no_members;
         d.number_of_events = +d.number_of_events;
         d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
@@ -308,23 +309,27 @@
 
       // Create the crossfilter for the relevant dimensions and groups.
       // var 
-      group = crossfilter(groups);
-      all = group.groupAll();
-      id_group = group.dimension(function(d) { return d.id_group; });
-      date = group.dimension(function(d) { return d.date; });
+      meetup_group = crossfilter(groups);
+      all = meetup_group.groupAll();
+      id_group = meetup_group.dimension(function(d) { return d.id_group; });
+      id_groups = id_group.group();
+      date = meetup_group.dimension(function(d) { return d.date; });
       dates = date.group(d3.time.day);
-      hour = group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
+      hour = meetup_group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
       hours = hour.group(Math.floor);
-      rating = group.dimension(function(d) { return d.rating })
+      rating = meetup_group.dimension(function(d) { return d.rating })
       ratings = rating.group(function(d) { return Math.floor(d * 4) / 4; });
-      no_member = group.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
+      no_member = meetup_group.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
       no_members = no_member.group(function(d) { return Math.floor(d / 10) * 10; });
-      no_event   = group.dimension(function(d) { return d.number_of_events });
+      no_event   = meetup_group.dimension(function(d) { return d.number_of_events });
       no_events  = no_event.group(function(d) { return Math.floor(d / 10) * 10; });
 
       var charts = [
         evolutionChart()
         .datum(groups_by_year)
+        .dimension(id_group)
+        .group(id_groups)
+        .filter([0,16829372])
         .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90])),
 
         barChart()
@@ -353,37 +358,37 @@
       var chart = d3.selectAll(".chart")
       .data(charts)
       .each(function(chart) { 
-      chart.on("brush", renderAll).on("brushend", renderAll); 
+        chart.on("brush", renderAll).on("brushend", renderAll); 
       });
 
       // Render the initial lists.
       var list = d3.selectAll("#groups-list").data([groupList]);
 
       // Render the total.
-      d3.selectAll("#total").text(formatNumber(group.size()));
+      d3.selectAll("#total").text(formatNumber(meetup_group.size()));
 
       renderAll();
 
       // Renders the specified chart or list.
       function render(method) {
-      d3.select(this).call(method);
+        d3.select(this).call(method);
       }
 
       // Whenever the brush moves, re-rendering everything.
       function renderAll() {
-      chart.each(render);
-      list.each(render);
-      d3.select("#active").text(formatNumber(all.value()));
+        chart.each(render);
+        list.each(render);
+        d3.select("#active").text(formatNumber(all.value()));
       }
 
       window.filter = function(filters) {
-      filters.forEach(function(d, i) { charts[i].filter(d); });
-      renderAll();
-      };
+        filters.forEach(function(d, i) { charts[i].filter(d); });
+        renderAll();
+        };
 
       window.reset = function(i) {
-      charts[i].filter(null);
-      renderAll();
+        charts[i].filter(null);
+        renderAll();
       };
 
     }
