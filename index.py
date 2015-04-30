@@ -25,7 +25,7 @@ def before_request():
   except Exception as inst:
     app.logger.error('Error connecting to %s' % os.environ['DATABASE_URL'])
     g.error_message = "Could not connect to database."
-    abort(500)
+    # abort(500)
 
 # ====================================================================================
 @app.route('/about.html')
@@ -185,11 +185,26 @@ def build_csv():
   ]
   group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups where created is not null", db, index_col='id_group')
 
-  rsvp_by_year = pd.read_sql("SELECT * from event_rsvps_by_year", db).pivot(index='id_group', columns='time_bin', values='sum')
+  df = pd.read_sql("SELECT * from event_rsvps_by_year", db)
+  df.to_csv(open("static/group-evolution-by-year.csv","w"), index=False)
+  
+  rsvp_by_year = df.pivot(index='id_group', columns='time_bin', values='sum')
   rsvp_by_year.rename(columns=lambda x: "rsvps-year-%04d" % x.year, inplace=True)
+  rsvp_by_year.fillna(0, inplace=True)
+  for c in rsvp_by_year.columns.values:
+    if "rsvps-" in c:
+      rsvp_by_year[c] =  rsvp_by_year[c].astype('int')
 
+  df = pd.read_sql("SELECT * from event_rsvps_by_month", db)
+  df.to_csv(open("static/group-evolution-by-month.csv","w"), index=False)
+
+  rsvp_by_month = df.pivot(index='id_group', columns='time_bin', values='sum')
   rsvp_by_month = pd.read_sql("SELECT * from event_rsvps_by_month", db).pivot(index='id_group', columns='time_bin', values='sum')
   rsvp_by_month.rename(columns=lambda x: "rsvps-month-%04d-%02d" % (x.year, x.month), inplace=True)
+  rsvp_by_month.fillna(0, inplace=True)
+  for c in rsvp_by_month.columns.values:
+    if "rsvps-" in c:
+      rsvp_by_month[c] =  rsvp_by_month[c].astype('int')
 
   data = group_df.merge(rsvp_by_year, left_index=True, right_index=True)
   data = data.merge(rsvp_by_month, left_index=True, right_index=True)

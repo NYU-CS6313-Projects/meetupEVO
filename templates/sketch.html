@@ -1,0 +1,310 @@
+{% extends "flex_layout.html" %}
+{% block body %}
+<style>
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Ubuntu';
+  }
+  p, div {
+    font-family: 'Open Sans';
+  }
+  * {
+    box-sizing: border-box;
+    }
+    body.flexbox {
+      display: flex;
+      height: 90vh;
+      flex-direction: column;
+    }
+    #flex_row {
+      display: flex;
+      flex-direction: row;
+    }
+    #left_col { 
+      flex: 1;
+    }
+    #right_col { 
+      flex: 0 0 250px;
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
+    }
+    #panel3 { 
+      flex: 0 0 300px;
+    }
+    #panel1 { 
+      flex: 1;
+    }
+    #panel5 {
+      flex: 0 0 300px;
+    }
+    #panel2 {
+      flex: 1;
+    }
+
+    #panel5 h1, #panel3 h1 { margin-top: 0px; line-height: 90%;}
+
+    #panel1 li { font-size: smaller; }
+  #charts {
+    padding: 10px 0;
+  }
+
+  .chart {
+    display: inline-block;
+    height: 131px;
+    margin-bottom: 20px;
+  }
+  .chart#evolution-chart {
+    height: 431px;
+  }
+
+  .reset {
+    padding-left: 1em;
+    font-size: smaller;
+    color: #ccc;
+  }
+
+  .background.bar {
+    fill: #ccc;
+  }
+
+  .foreground.bar {
+    fill: steelblue;
+  }
+
+  .axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    font: 10px sans-serif;
+  }
+
+  .brush rect.extent {
+    fill: steelblue;
+    fill-opacity: .125;
+  }
+
+  .brush .resize path {
+    fill: #eee;
+    stroke: #666;
+  }
+
+  #hour-chart {
+    width: 260px;
+  }
+
+  #no-members-chart {
+    width: 230px;
+  }
+
+  #distance-chart {
+    width: 420px;
+  }
+
+  #date-chart {
+    width: 920px;
+  }
+
+
+  .list {
+    line-height: 1.5em;
+  }
+
+  #groups-list div {
+  }
+
+  #groups-headers {
+    font-weight: bold;
+  }
+  #groups-list a { text-decoration: none; }
+  #groups-list a:hover { text-decoration: underline; }
+
+  .list .date,
+  .list .day {
+    margin-bottom: .4em;
+  }
+
+  .list .group {
+    margin-bottom: 1px;
+  }
+
+  .list .name {
+    color: #000;
+  }
+  #groups-list  {
+    color: #999;
+  }
+
+  .list .group div {
+    display: inline-block;
+    height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+  }
+  .list .group div.name {
+    width: 300px;
+  }
+
+  .list div.distance,
+  .list div.no-member {
+    width: 160px;
+    padding-right: 10px;
+    text-align: right;
+  }
+
+  .list .early {
+    color: green;
+  }
+
+  aside {
+    margin: 30px;
+  }
+
+</style>
+<div id="flex_row">
+  <div id="left_col">
+    <div id="panel5">
+    </div>
+    <div id="panel2">
+      <div id="evolution-chart" class="chart">
+        <div class="title">Number of people who rsvped for events in this time bin</div>
+      </div>
+      <div id="date-chart" class="chart">
+      </div>
+
+    </div>
+      <div id="lists">
+        <div id="groups-list" class="list"></div>
+      </div>
+  </div>
+  <div id="right_col">
+
+    <div id="panel3">
+      <div id="no-members-chart" class="chart">
+      </div>
+      <div id="no-events-chart" class="chart">
+      </div>
+    </div> 
+    <div id="panel1">
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+{% block javascript %}
+<script src="{{ url_for('static', filename='viz.js') }}"></script>
+<script>
+  var groups, groups_by_month, groups_by_year, group, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
+  function viz( classname ) {
+    console.log("viz() has been called");
+    var formatNumber, formatChange, formatCreated, formatTime;
+
+    function viz_handle_csv(error, g, gm, gy) {
+      console.log("got me some csv");
+      groups = g;
+      groups_by_month = gm.slice(0,100);
+      groups_by_year = gy.slice(0,100);
+
+      // Various formatters.
+      formatNumber = d3.format(",d");
+      formatChange = d3.format("+,d");
+      formatCreated = d3.time.format("%Y-%m-%d %H:%M:%S");
+      formatDate = d3.time.format("%Y-%m-%d");
+      formatMonth = d3.time.format("%Y, %b");
+      formatYearMonth = d3.time.format("rsvps-month-%Y-%m");
+      formatYear = d3.time.format("rsvps-year-%Y");
+      formatTime = d3.time.format("%I:%M %p");
+
+      // A nest operator, for grouping the group list.
+      nestByDate = d3.nest().key(function(d) { return d3.time.month( d.date ); });
+
+      // A little coercion, since the CSV is untyped.
+      groups_by_year.forEach(function(d, i) {
+        d.index = i;
+        d.time_bin = formatCreated.parse( d.time_bin );
+      });
+      groups_by_month.forEach(function(d, i) {
+        d.index = i;
+        d.time_bin = formatCreated.parse( d.time_bin );
+      });
+      groups.forEach(function(d, i) {
+        d.index = i;
+        d.date = formatCreated.parse( d.created );
+        d.first_event_time = formatCreated.parse( d.first_event_time );
+        d.last_event_time = formatCreated.parse( d.last_event_time );
+        d.no_members = +d.no_members;
+        d.number_of_events = +d.number_of_events;
+        d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
+        d.max_yes_at_one_event = +d.max_yes_at_one_event;
+        d.rating = parseFloat(d.rating);
+        if (d.rating == 0.0) d.rating = null;
+      });
+      console.log("done treating csv");
+
+      // Create the crossfilter for the relevant dimensions and groups.
+      // var 
+      group = crossfilter(groups);
+      all = group.groupAll();
+      date = group.dimension(function(d) { return d.date; });
+      dates = date.group(d3.time.day);
+      id_group = group.dimension(function(d) { return d.id_group; });
+      /*
+      by_year = group.dimension(function(d) { return d.by_year; });
+      by_years = by_year.group( function(d) { if (d.by_year) { return d.by_year[10] } else { return 0 } });
+      */
+      var charts = [
+        evolutionChart()
+        .datum(groups_by_year)
+        .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90])),
+      ];
+
+      // Given our array of charts, which we assume are in the same order as the
+      // .chart elements in the DOM, bind the charts to the DOM and render them.
+      // We also listen to the chart's brush events to update the display.
+      
+      var chart = d3.selectAll("#evolution-chart")
+      .data(charts)
+      .each(function(chart) { 
+      chart.on("brush", renderAll).on("brushend", renderAll); 
+      });
+
+      renderAll();
+
+      // Renders the specified chart or list.
+      function render(method) {
+        d3.select(this).call(method);
+      }
+
+      // Whenever the brush moves, re-rendering everything.
+      function renderAll() {
+      chart.each(render);
+      // list.each(render);
+      // d3.select("#active").text(formatNumber(all.value()));
+      }
+
+      window.filter = function(filters) {
+      filters.forEach(function(d, i) { charts[i].filter(d); });
+      renderAll();
+      };
+
+      window.reset = function(i) {
+      charts[i].filter(null);
+      renderAll();
+      };
+
+    }
+    console.log("done preparing viz");
+    return viz_handle_csv;
+  }
+  handle_csv = viz('.chart');
+  queue()
+    .defer(d3.csv, "/static/groups.csv")
+    .defer(d3.csv, "/static/group-evolution-by-month.csv")
+    .defer(d3.csv, "/static/group-evolution-by-year.csv")
+    .await(handle_csv);
+</script>
+
+{% endblock %}

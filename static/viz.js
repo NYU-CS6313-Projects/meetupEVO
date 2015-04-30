@@ -263,6 +263,7 @@ function barChart() {
 function evolutionChart() {
   if (!evolutionChart.id) evolutionChart.id = 0;
 
+
   var margin = {top: 10, right: 10, bottom: 20, left: 10},
   x,
   y = d3.scale.linear().range([75, 0]),
@@ -270,8 +271,6 @@ function evolutionChart() {
   axis = d3.svg.axis().orient("bottom"),
   brush = d3.svg.brush(),
   brushDirty,
-  dimension,
-  group,
   round;
 
   console.log("evolutionChart() got called, id=" + evolutionChart.id);
@@ -307,65 +306,67 @@ function evolutionChart() {
         .attr("width", width)
         .attr("height", height);
 
+        lines = g.append("g")
+        .attr("class", "lines");
 
+
+        // Creating a function that will nest our ID groups into; so our json file is clustered by group instead
+        // of having just a list of all the information.
+        var dataGroup = d3.nest()
+            .key(function(d) {
+                return d.id_group;
+            })
+            .entries(datum);
+
+//                var color = function(d, j) {
+//                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
+//                        }
         // Creating a path function that will load in years as the x values and rsvps as y values. 
         // This will allows the tool to know where to connect the lines
         // The interpolate function allows for curved lines
-        
-        var theotherLine = d3.svg.line()
+        var theLine = d3.svg.line()
             .x(function (d, i) {
-              console.log("this is theLine, creating x for i=" + i + ", d=" + d);
-                return x(d.year);
+                return x(d.time_bin);
             })
             .y(function (d) {
                 return y(d.sum);
             })
-            .interpolate("basis"); 
+//                    .interpolate("basis"); 
         
-        function theLine(groups) {
-          console.log("constructing theLine for groups=");
-          console.dir(groups);
-          var path = [],
-          i = -1,
-          n = groups.length,
-          d;
-          while (++i < n) {
-            d = groups[i];
-            path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
-          }
-          return path.join("");
-        }
+        // Creating a function that moves the selected line to the front
+        d3.selection.prototype.moveToFront = function() { 
+            return this.each(function() { 
+                this.parentNode.appendChild(this); 
+                }); 
+            };
 
         // Creating the graph
         // Creating a colouring function
         // This function allows us to create random colours for each different group ID
-        g.append("g")
-          .attr('class', 'lines')
-          .datum(group.all());
-          
-        g.selectAll(".lines")
-          .append("path")
-            .attr('class', "line")
-            .attr('stroke', 'blue')
-            .attr('stroke-width', 2)
-            .attr('opacity', 0.35)
-            .attr('fill', 'none')
-            .attr("d", theLine)
-            .on('mouseover', function(d){
-                d3.select(this)
-                .style('stroke-width', '6px')
-                .attr('opacity', 1)
-                .moveToFront();
-            })
-            .on('mouseout', function(d){
-                d3.select(this)
-                .style('stroke-width', '2px')
+        dataGroup.forEach(function(d, i) {
+            lines.append('svg:path')
+                .attr('d', theLine(d.values))
+//                        .attr('stroke', function(d, j) {
+//                            return "hsl(" + Math.random() * 360 + ",70%,50%)";
+//                        })
+                .attr ('stroke', '#0000FF')
+                .attr('stroke-width', 2)
                 .attr('opacity', 0.35)
-                .transition()
-                .duration(750);
+                .attr('fill', 'none')
+                .on('mouseover', function(d){
+                    d3.select(this)
+                    .style('stroke-width', '6px')
+                    .attr('opacity', 1)
+                    .moveToFront();
+            })
+                .on('mouseout', function(d){
+                    d3.select(this)
+                    .style('stroke-width', '2px')
+                    .attr('opacity', 0.35)
+                    .transition()
+                    .duration(750);
             });
-        
-
+        });
 
         g.append("g")
         .attr("class", "axis")
@@ -412,7 +413,6 @@ function evolutionChart() {
       return path.join("");
     }
 */
-/*
     function resizePath(d) {
       var e = +(d == "e"),
       x = e ? 1 : -1,
@@ -427,7 +427,6 @@ function evolutionChart() {
       + "M" + (4.5 * x) + "," + (y + 8)
       + "V" + (2 * y - 8);
     }
-*/
   }
 /*
   brush.on("brushstart.chart", function() {
@@ -477,10 +476,10 @@ function evolutionChart() {
     return chart;
   };
 
-  chart.dimension = function(_) {
-    if (!arguments.length) return dimension;
-    console.log("setting dimension to " + _);
-    dimension = _;
+  chart.datum = function(_) {
+    if (!arguments.length) return datum;
+    console.log("setting datum to " + _);
+    datum = _;
     return chart;
   };
 

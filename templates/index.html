@@ -172,7 +172,7 @@
 
     </div>
     <div id="panel2">
-      <div id="evolution-chart" class="chart">
+      <div id="evolution-chart" class="disabled-chart">
         <div class="title">Number of people who rsvped for events in this time bin</div>
       </div>
       <div id="date-chart" class="chart">
@@ -278,9 +278,8 @@
   formatTime = d3.time.format("%I:%M %p");
 
   // A nest operator, for grouping the group list.
-  nestByDate = d3.nest().key(function(d) { return d3.time.month( d.date ); });
-
-  dataByGroup = d3.nest().key(function(d){ return d.id_group }).entries( groups );
+  nestByDate  = d3.nest().key(function(d) { return d3.time.month( d.date ); });
+  nestByGroup = d3.nest().key(function(d){ return d.id_group });
 
   function extract_years( d ) {
     var o = _.pick(d, function(value, key) { return key.indexOf("rsvps-year") > -1 });
@@ -305,8 +304,10 @@
     d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
     d.max_yes_at_one_event = +d.max_yes_at_one_event;
     d.rating = parseFloat(d.rating);
+    /*
     d.by_year  = extract_years(d);
     d.by_month = extract_months(d);
+    */
     if (d.rating == 0.0) d.rating = null;
   });
   console.log("done treating csv");
@@ -315,10 +316,13 @@
   // var 
   group = crossfilter(groups);
   all = group.groupAll();
+  id_group = group.dimension(function(d) { return d.id_group; });
   date = group.dimension(function(d) { return d.date; });
   dates = date.group(d3.time.day);
+  /*
   by_year = group.dimension(function(d) { return d.by_year; });
   by_years = by_year.group( function(d) { if (d.by_year) { return d.by_year[10] } else { return 0 } });
+  */
   hour = group.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
   hours = hour.group(Math.floor);
   rating = group.dimension(function(d) { return d.rating })
@@ -329,11 +333,12 @@
   no_events  = no_event.group(function(d) { return Math.floor(d / 10) * 10; });
 
   var charts = [
+  /*
     evolutionChart()
     .dimension(by_year)
     .group(by_years)
     .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90])),
-
+  */
     barChart()
     .dimension(date)
     .group(dates)
