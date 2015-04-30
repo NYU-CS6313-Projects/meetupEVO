@@ -166,13 +166,14 @@
   aside {
     margin: 30px;
   }
-
+  h1 { width: 80% }
+  #totals { color: #ddd; font-size: 14px; font-weight: normal; }
 </style>
 <div id="flex_row">
   <div id="left_col">
     <div id="panel5">
-      <h1>Evolution <small id="totals">of Meetup Groups - 
-      <span id="active">-</span> of <span id="total">-</span> groups selected.</small></h1>
+      <h1>Evolution <small>of Meetup Groups </small><span id="totals">data loading</span></h1> 
+      
 
     </div>
     <div id="panel2">
@@ -275,6 +276,8 @@
   var noEventsChart     = dc.barChart('#no-events-chart');
   var dateCreatedChart  = dc.barChart('#date-created-chart');
   var evolutionChart    = dc.seriesChart('#evolution-chart');
+  var countWidget       = dc.dataCount('#totals');
+
 
   function handle_csv(error, g, gm, gy) {
     console.log("got me some data");
@@ -344,6 +347,12 @@
     meetup.groups.no_event_groups = meetup.groups.no_event_dim.group(function(d) { return Math.floor(d / 10) * 10; });
 
     console.log("creating charts for groups:");
+
+    countWidget.dimension(meetup.groups.cf).group(meetup.groups.all).html({
+          some: '%filter-count of %total-count meetup groups selected',
+          all: 'All meetup groups selected. Click on charts to apply filters'
+    });
+
     noMembersChart.width(230)
       .height(100)
       .margins({top: 10, right: 10, bottom: 30, left: 40})
@@ -398,6 +407,7 @@
     evolutionChart.width(1000)
       .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
       .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .brushOn(0)
       .dimension(meetup.evolution.group_and_date_dim)
       .group(meetup.evolution.group_and_date_group)
       .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90]))
