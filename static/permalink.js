@@ -16,7 +16,7 @@ function status_to_url() {
 
 function url_to_status() {
   // Get hash values
-  var parseHash = /^#no-members=([A-Za-z0-9,_\-\/\s]*)&no-events=([A-Za-z0-9,_\-\/\s]*)&date-created=([A-Za-z0-9,_\-\/\s]*)&categories=([A-Za-z0-9,_\-\/\s]*)$/;
+  var parseHash = /^#no-members=([A-Za-z0-9,_\.\-\/\s]*)&no-events=([A-Za-z0-9,_\.\-\/\s]*)&date-created=([A-Za-z0-9,_\.\-\/\s]*)&categories=([A-Za-z0-9,_\-\/\s]*)$/;
   var parsed = parseHash.exec(decodeURIComponent(location.hash));
   function filter(chart, rank) {  // for instance chart = sector_chart and rank in URL hash = 1
     // sector chart
@@ -25,9 +25,15 @@ function url_to_status() {
     }
     else {
       var filterValues = parsed[rank].split(",");
-      for (var i = 0; i < filterValues.length; i++ ) {
-        chart.filter(filterValues[i]);
+      console.log("filtering chart for ");
+      console.dir(filterValues);
+      if (rank < 4) {
+        for (var i = 0; i < filterValues.length; i++ ) {
+          filterValues[i] = parseFloat( filterValues[i] );
+        }
       }
+      console.dir(filterValues);
+      chart.filter(filterValues);
     }
   }
   if (parsed) {
@@ -35,5 +41,8 @@ function url_to_status() {
     filter(noEventsChart, 2);
     filter(dateCreatedChart, 3);
     filter(categoriesChart, 4);
+  } else {
+    console.log("could not parse " + decodeURIComponent(location.hash));
   }
+  console.log(".");
 }

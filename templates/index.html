@@ -273,6 +273,9 @@
 
     console.log("rendering all");
     dc.renderAll();
+    console.log("filtering from url");
+    url_to_status();
+    console.log("done.");
 
   }
   console.log("start loading data");
@@ -281,7 +284,6 @@
   .defer(d3.csv,   "/static/group-evolution-by-month.csv")
   .defer(d3.csv,   "/static/group-evolution-by-year.csv")
   .await(handle_csv);
-  url_to_status();
 </script>
 
 {% endblock %}
