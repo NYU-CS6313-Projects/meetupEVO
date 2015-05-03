@@ -107,7 +107,7 @@
     groups.forEach(function(d, i) {
       d.index                = i;
       d.rating               = parseFloat(d.rating);
-      d.date                 = formatDate.parse( d.created.substr(0,10) );
+      d.created              = formatCreated.parse( d.created );
       d.first_event_time     = formatCreated.parse( d.first_event_time );
       d.last_event_time      = formatCreated.parse( d.last_event_time );
       d.no_members           = +d.no_members;
@@ -174,11 +174,8 @@
     meetup.groups.all               = meetup.groups.cf.groupAll();
     meetup.groups.id_dim            = meetup.groups.cf.dimension(function(d) { return d.id_group; });
 
-    meetup.groups.date_dim          = meetup.groups.cf.dimension(function(d) { return d.date; });
-    meetup.groups.date_groups       = meetup.groups.date_dim.group(d3.time.day);
-
-    meetup.groups.hour_dim          = meetup.groups.cf.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; });
-    meetup.groups.hour_groups       = meetup.groups.hour_dim.group(Math.floor);
+    meetup.groups.created_dim       = meetup.groups.cf.dimension(function(d) { return d.created; });
+    meetup.groups.created_groups    = meetup.groups.created_dim.group(d3.time.day);
 
     meetup.groups.no_member_dim     = meetup.groups.cf.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
     meetup.groups.no_member_groups  = meetup.groups.no_member_dim.group(function(d) { return Math.floor(d / 10) * 10; });
@@ -245,8 +242,8 @@
     .xAxis().ticks(4);
 
     dateCreatedChart
-    .dimension(meetup.groups.date_dim)
-    .group(meetup.groups.date_groups)
+    .dimension(meetup.groups.created_dim)
+    .group(meetup.groups.created_groups)
     .width(1000).height(100).margins({top: 10, right: 10, bottom: 30, left: 40})
     .round(d3.time.day.round)
     .filterPrinter(function (filters) {
@@ -258,8 +255,8 @@
     .domain([timeline_start, timeline_end])
     .rangeRound([0, 10 * 90]));
 
-    listOfGroups.dimension(meetup.groups.date_dim)
-    .group(function (d) { return d.date.getFullYear(); })
+    listOfGroups.dimension(meetup.groups.id_dim)
+    .group(function (d) { return "Selected Groups"; })
     .columns([
           'name',    
           'created',    

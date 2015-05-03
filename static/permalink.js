@@ -15,6 +15,7 @@ function status_to_url() {
 }
 
 function url_to_status() {
+  console.log("#");
   // Get hash values
   var parseHash = /^#no-members=([A-Za-z0-9,_\.\-\/\s]*)&no-events=([A-Za-z0-9,_\.\-\/\s]*)&date-created=([A-Za-z0-9,_\.\-\/\s]*)&categories=([A-Za-z0-9,_\-\/\s]*)$/;
   var parsed = parseHash.exec(decodeURIComponent(location.hash));
@@ -34,12 +35,13 @@ function url_to_status() {
     }
   }
   if (parsed) {
+    console.log("setting new filters");
     filter(noMembersChart, 1);
     filter(noEventsChart, 2);
     filter(dateCreatedChart, 3);
     filter(categoriesChart, 4);
+    dc.redrawAll();
   } else {
     console.log("could not parse " + decodeURIComponent(location.hash));
   }
-  console.log(".");
 }
