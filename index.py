@@ -174,7 +174,6 @@ def sketch():
 
 @app.route('/build-csv')
 def build_csv():
-  db = g.db
   columns = [
       "id_group", "id_category", "name_category", "shortname_category",
       "name", "link", "join_mode", "created", 
@@ -183,7 +182,9 @@ def build_csv():
       "number_of_events", "first_event_time", "last_event_time",
       "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
   ]
+  db = g.db
   group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups where created is not null", db, index_col='id_group')
+  group_df.to_csv(open("static/groups.csv", "w"))
 
   df = pd.read_sql("SELECT * from event_rsvps_by_year", db)
   df.to_csv(open("static/group-evolution-by-year.csv","w"), index=False)
@@ -206,10 +207,9 @@ def build_csv():
     if "rsvps-" in c:
       rsvp_by_month[c] =  rsvp_by_month[c].astype('int')
 
-  data = group_df.merge(rsvp_by_year, left_index=True, right_index=True)
-  data = data.merge(rsvp_by_month, left_index=True, right_index=True)
+  #data = group_df.merge(rsvp_by_year, left_index=True, right_index=True)
+  #data = data.merge(rsvp_by_month, left_index=True, right_index=True)
 
-  data.to_csv(open("static/groups.csv", "w"))
 
   return "<h1>Created</h1><a href='static/groups.csv'>group.csv</a>"
 

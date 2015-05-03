@@ -1,176 +1,5 @@
 {% extends "flex_layout.html" %}
 {% block body %}
-<style>
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Ubuntu';
-  }
-  p, div {
-    font-family: 'Open Sans';
-  }
-
-  path {
-    fill-opacity: 0;
-  }
-  * {
-    box-sizing: border-box;
-    }
-    body.flexbox {
-      display: flex;
-      height: 90vh;
-      flex-direction: column;
-    }
-    #flex_row {
-      display: flex;
-      flex-direction: row;
-    }
-    #left_col { 
-      flex: 1;
-    }
-    #right_col { 
-      flex: 0 0 250px;
-      display: flex;
-      flex-direction: column;
-      min-height: 600px;
-    }
-    #panel3 { 
-      flex: 0 0 300px;
-    }
-    #panel1 { 
-      flex: 1;
-    }
-    #panel5 {
-      flex: 0 0 300px;
-    }
-    #panel2 {
-      flex: 1;
-    }
-
-    #panel5 h1, #panel3 h1 { margin-top: 0px; line-height: 90%;}
-
-    #panel1 li { font-size: smaller; }
-  #charts {
-    padding: 10px 0;
-  }
-
-  .chart {
-    display: inline-block;
-    height: 131px;
-    margin-bottom: 20px;
-  }
-  .chart#evolution-chart {
-    height: 431px;
-  }
-
-  .reset {
-    padding-left: 1em;
-    font-size: smaller;
-    color: #ccc;
-  }
-
-  .background.bar {
-    fill: #ccc;
-  }
-
-  .foreground.bar {
-    fill: steelblue;
-  }
-
-  .axis path, .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-  }
-
-  .axis text {
-    font: 10px sans-serif;
-  }
-
-  .brush rect.extent {
-    fill: steelblue;
-    fill-opacity: .125;
-  }
-
-  .brush .resize path {
-    fill: #eee;
-    stroke: #666;
-  }
-
-  #hour-chart {
-    width: 260px;
-  }
-
-  #no-members-chart {
-    width: 230px;
-  }
-
-  #distance-chart {
-    width: 420px;
-  }
-
-  #date-created-chart {
-    width: 920px;
-  }
-
-
-  .list {
-    line-height: 1.5em;
-  }
-
-  #groups-list div {
-  }
-
-  #groups-headers {
-    font-weight: bold;
-  }
-  #groups-list a { text-decoration: none; }
-  #groups-list a:hover { text-decoration: underline; }
-
-  .list .date,
-  .list .day {
-    margin-bottom: .4em;
-  }
-
-  .list .group {
-    margin-bottom: 1px;
-  }
-
-  .list .name {
-    color: #000;
-  }
-  #groups-list  {
-    color: #999;
-  }
-
-  .list .group div {
-    display: inline-block;
-    height: 22px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100px;
-  }
-  .list .group div.name {
-    width: 300px;
-  }
-
-  .list div.distance,
-  .list div.no-member {
-    width: 160px;
-    padding-right: 10px;
-    text-align: right;
-  }
-
-  .list .early {
-    color: green;
-  }
-
-  aside {
-    margin: 30px;
-  }
-  h1 { width: 80% }
-  #totals { color: #ddd; font-size: 14px; font-weight: normal; }
-
-  .dc-data-table { width: 1000px; color: #ddd; font-size: 14px; text-align:left;  }
-</style>
 <div id="flex_row">
   <div id="left_col">
     <div id="panel5">
@@ -209,45 +38,11 @@
       </div>
     </div> 
     <div id="panel1">
-      <p>Categories</p>
-      <!--Adding all categories for selection-->
-      <ul>
-        <li><input type="checkbox" value="Tech" class="category_button"  id="tech" name="#a6cee3"> Tech</li>
-        <li><input type="checkbox" value="Women" class="category_button" id="women" name = "#1f78b4"> Women</li>
-        <li><input type="checkbox" value="Alternative lifesyle" class="category_button" id="alternative lifestyle" name = "#b2df8a"> Alternative lifesyle</li>
-        <li><input type="checkbox" value="Career/Business" class="category_button" id="career/business" name = "#33a02c"> Career/Business</li>
-        <li><input type="checkbox" value="Cars/Motorcycles" class="category_button" id="cars/motorcycles" name = "#fb9a99"> Cars/Motorcycles</li>
-        <li><input type="checkbox" value="Community/Environment" class="category_button" id="community/environment" name = "#e31a1c"> Community/Environment </li>
-        <li><input type="checkbox" value="dancing" class="category_button" id="dancing" name = "#fdbf6f"> Dancing </li>
-        <li><input type="checkbox" value="Education/Learning" class="category_button" id="education/learning" name = "#ff7f00"> Education/Learning </li>
-        <li><input type="checkbox" value="Fashion/Beauty" class="category_button" id="fashion/beauty" name = "#cab2d6"> Fashion/Beauty </li>
-        <li><input type="checkbox" value="Fine Arts/Culture" class="category_button" id="fine arts/culture" name = "#6a3d9a"> Fine Arts/Culture</li>
-        <li><input type="checkbox" value="Fitness" class="category_button" id="fitness" name = "#ffff99"> Fitness </li>
-        <li><input type="checkbox" value="Food/Drink" class="category_button" id="food/drink" name = "#b15928"> Food/Drink </li>
-        <li><input type="checkbox" value="Games" class="category_button" id="games" name = "#8dd3c7"> Games </li>
-        <li><input type="checkbox" value="Health/Wellbeing" class="category_button" id="health/wellbeing" name = "#ffffb3"> Health/Wellbeing </li>
-        <li><input type="checkbox" value="Hobbies/Crafts" class="category_button" id="hobbies/crafts" name = "#bebada"> Hobbies/Crafts </li>
-        <li><input type="checkbox" value="Language/Ethnic Identity" class="category_button" id="language/Ethnic identity" name = "#cab2d6"> Language/Ethnic Identity </li>
-        <li><input type="checkbox" value="LGBT" class="category_button" id="LGBT" name = "#fb8072"> LGBT </li>
-        <li><input type="checkbox" value="Literature/Writing" class="category_button" id="literature/writing" name = "#80b1d3"> Literature/Writing </li>
-        <li><input type="checkbox" value="Movements/Politics" class="category_button" id="movements/politics" name = "#fdb462"> Movements/Politics </li>
-        <li><input type="checkbox" value="Movies/Film" class="category_button" id="movies/film" name = "#b3de69 "> Movies/Film </li>
-        <li><input type="checkbox" value="Music" class="category_button" id="music" name = "#fccde5"> Music </li>
-        <li><input type="checkbox" value="New Age/Spirituality" class="category_button" id="new age/spirituality" name = "#d9d9d9 "> New Age/Spirituality </li>
-        <li><input type="checkbox" value="Outdoors/Adventure" class="category_button" id="outdoors/adventure" name = "#bc80bd"> Outdoors/Adventure </li>
-        <li><input type="checkbox" value="Paranormal" class="category_button" id="paranormal" name = "#ccebc5"> Paranormal </li>
-        <li><input type="checkbox" value="Parents/Family" class="category_button" id="parents/family" name = "#ffed6fs"> Parents/Family </li>
-        <li><input type="checkbox" value="Pets/Animals" class="category_button" id="pets/animals" name = "#bf812d"> Pets/Animals </li>
-        <li><input type="checkbox" value="Photography" class="category_button" id="photography" name = "#f6e8c3"> Photography </li>
-        <li><input type="checkbox" value="Religion/Beliefs" class="category_button" id="religion/beliefs" name = "#c51b7d"> Religion/Beliefs </li>
-        <li><input type="checkbox" value="Sci-Fi/Fantasy" class="category_button" id="sci-fi/fantasy" name = "#f1b6da"> Sci-Fi/Fantasy </li>
-        <li><input type="checkbox" value="Singles" class="category_button" id="singles" name = "#e6f598"> Singles </li>
-        <li><input type="checkbox" value="Socializing" class="category_button" id="socializing" name = "#01665e"> Socializing </li>
-        <li><input type="checkbox" value="Sports/Recreation" class="category_button" id="sports/recreation" name = "#80cdc1"> Sports/Recreation </li>
-        <li><input type="checkbox" value="Support" class="category_button" id="support" name = "#3288bd"> Support </li>
-        <li><input type="checkbox" value="All" class="category_button" id="*" name = 'steelblue'> All </li>
-        <li><input type="checkbox" value="None" class="category_button" id="" name = 'white'> None </li>
-      </ul>
+      <div id="categories-chart" class="chart">
+        <strong>Categories</strong>
+        <span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:categoriesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+      </div>
     </div>
 
   </div>
@@ -255,13 +50,12 @@
   {% endblock %}
   {% block javascript %}
   <script>
-    var groups, groups_by_month, groups_by_year, meetup, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
+    var groups, categories, groups_by_month, groups_by_year, meetup, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
 
-
-
-    function handle_csv(error, g, gm, gy) {
+    function handle_csv(error, g, cat, gm, gy) {
       console.log("got me some data");
       groups = g;
+      colors_for_categories = cat;
       groups_by_month = gm; // gm.slice(0,100);
       groups_by_year =  gy; // gy.slice(0,100);
 
@@ -291,12 +85,14 @@
         d.time_bin = formatCreated.parse( d.time_bin );
       });
       */
+      colors_for_groups = {};
       groups.forEach(function(d, i) {
         d.index = i;
         d.date = formatDate.parse( d.created.substr(0,10) );
         d.first_event_time = formatCreated.parse( d.first_event_time );
         d.last_event_time = formatCreated.parse( d.last_event_time );
-        d.id_gropu = +d.id_group;
+        // d.id_gropu = +d.id_group;
+        colors_for_groups[ d.id_group ] = colors_for_categories[ d.name_category ];
         d.no_members = +d.no_members;
         d.number_of_events = +d.number_of_events;
         d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
@@ -322,7 +118,27 @@
       .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90]))
       .seriesAccessor(function(d) {return +d.key[0];})
       .keyAccessor(function(d) {return +d.key[1];})
-      .valueAccessor(function(d) {return +d.value;});
+      .valueAccessor(function(d) {return +d.value;})
+      .on('postRender', function(chart){
+        chart.selectAll("g.stack path").attr("stroke", function(d){
+          var k = d.name;
+          if( k in colors_for_groups ) {
+            return colors_for_groups[k];
+          } 
+          else {
+            return "#dddddd";
+          }
+        });
+        chart.selectAll("g.stack circle").attr("fill", function(d){
+          var k = d.name;
+          if( k in colors_for_groups ) {
+            return colors_for_groups[k];
+          } 
+          else {
+            return "#dddddd";
+          }
+        })
+      })
 
       console.log("rendering first thing");
       dc.renderAll();
@@ -347,10 +163,14 @@
       meetup.groups.no_event_dim    = meetup.groups.cf.dimension(function(d) { return d.number_of_events });
       meetup.groups.no_event_groups = meetup.groups.no_event_dim.group(function(d) { return Math.floor(d / 10) * 10; });
 
+      meetup.groups.categories_dim    = meetup.groups.cf.dimension(function(d) { return d.name_category; });
+      meetup.groups.categories_groups = meetup.groups.categories_dim.group();
+
       console.log("creating charts for groups:");
       var noMembersChart    = dc.barChart('#no-members-chart');
       var noEventsChart     = dc.barChart('#no-events-chart');
       var dateCreatedChart  = dc.barChart('#date-created-chart');
+      var categoriesChart   = dc.rowChart('#categories-chart');
       var countWidget       = dc.dataCount('#totals');
       var listOfGroups      = dc.dataTable('.dc-data-table');
 
@@ -389,6 +209,34 @@
       noEventsChart.xAxis().ticks(5);
       noEventsChart.yAxis().ticks(4);
 
+      categoriesChart
+      .dimension(meetup.groups.categories_dim)
+      .group(meetup.groups.categories_groups)
+      .ordering(function(d){ return -d.value })
+      .width(230)
+      .height(1000)
+      .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .height(1000)
+      .label(function (d) {
+        return d.key + " (" + d.value + ")";
+      })
+      .title(function (d) {
+        return d.value;
+      })
+      .on('postRender', function(chart){
+        chart.selectAll("g.row rect").attr("fill", function(d){
+          var k = d.key;
+          if( k in colors_for_categories ) {
+            return colors_for_categories[k];
+          } 
+          else {
+            return "#dddddd";
+          }
+        })
+      })
+      .elasticX(true)
+      .xAxis().ticks(4);
+
       dateCreatedChart.width(1000)
       .dimension(meetup.groups.date_dim)
       .margins({top: 10, right: 10, bottom: 30, left: 40})
@@ -424,9 +272,10 @@
     }
     console.log("start loading data");
     queue()
-    .defer(d3.csv, "/static/groups.csv")
-    .defer(d3.csv, "/static/group-evolution-by-month.csv")
-    .defer(d3.csv, "/static/group-evolution-by-year.csv")
+    .defer(d3.csv,   "/static/groups.csv")
+    .defer(d3.json,  "/static/categories-colors.json")
+    .defer(d3.csv,   "/static/group-evolution-by-month.csv")
+    .defer(d3.csv,   "/static/group-evolution-by-year.csv")
     .await(handle_csv);
   </script>
 

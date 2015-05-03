@@ -1,0 +1,171 @@
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Ubuntu';
+  }
+  p, div {
+    font-family: 'Open Sans';
+  }
+
+  path {
+    fill-opacity: 0;
+  }
+  * {
+    box-sizing: border-box;
+    }
+    body.flexbox {
+      display: flex;
+      height: 90vh;
+      flex-direction: column;
+    }
+    #flex_row {
+      display: flex;
+      flex-direction: row;
+    }
+    #left_col { 
+      flex: 1;
+    }
+    #right_col { 
+      flex: 0 0 250px;
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
+    }
+    #panel3 { 
+      flex: 0 0 300px;
+    }
+    #panel1 { 
+      flex: 1;
+    }
+    #panel5 {
+      flex: 0 0 300px;
+    }
+    #panel2 {
+      flex: 1;
+    }
+
+    #panel5 h1, #panel3 h1 { margin-top: 0px; line-height: 90%;}
+
+    #panel1 li { font-size: smaller; }
+  #charts {
+    padding: 10px 0;
+  }
+
+  .chart {
+    display: inline-block;
+    height: 131px;
+    margin-bottom: 20px;
+  }
+
+  .chart .grid-line { opacity: 0.2; }
+  .chart#evolution-chart {
+    height: 431px;
+  }
+
+  .reset {
+    padding-left: 1em;
+    font-size: smaller;
+    color: #ccc;
+  }
+
+  .background.bar {
+    fill: #ccc;
+  }
+
+  .foreground.bar {
+    fill: steelblue;
+  }
+
+  .axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    font: 10px sans-serif;
+  }
+
+  .brush rect.extent {
+    fill: steelblue;
+    fill-opacity: .125;
+  }
+
+  .brush .resize path {
+    fill: #eee;
+    stroke: #666;
+  }
+
+  #hour-chart {
+    width: 260px;
+  }
+
+  #no-members-chart {
+    width: 230px;
+  }
+
+  #categories-chart text {
+    font-size: 12px;
+  }
+
+  #date-created-chart {
+    width: 920px;
+  }
+
+
+  .list {
+    line-height: 1.5em;
+  }
+
+  #groups-list div {
+  }
+
+  #groups-headers {
+    font-weight: bold;
+  }
+  #groups-list a { text-decoration: none; }
+  #groups-list a:hover { text-decoration: underline; }
+
+  .list .date,
+  .list .day {
+    margin-bottom: .4em;
+  }
+
+  .list .group {
+    margin-bottom: 1px;
+  }
+
+  .list .name {
+    color: #000;
+  }
+  #groups-list  {
+    color: #999;
+  }
+
+  .list .group div {
+    display: inline-block;
+    height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+  }
+  .list .group div.name {
+    width: 300px;
+  }
+
+  .list div.distance,
+  .list div.no-member {
+    width: 160px;
+    padding-right: 10px;
+    text-align: right;
+  }
+
+  .list .early {
+    color: green;
+  }
+
+  aside {
+    margin: 30px;
+  }
+  h1 { width: 80% }
+  #totals { color: #ddd; font-size: 14px; font-weight: normal; }
+
+  .dc-data-table { width: 1000px; color: #ddd; font-size: 14px; text-align:left;  }
