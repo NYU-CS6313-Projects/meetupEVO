@@ -489,7 +489,7 @@ aside {
   margin: 30px;
 }
 h1 { width: 80% }
-#totals { 
+#totals, #selected { 
   color: #ddd; 
   font-size: 14px; 
   font-weight: normal; 
@@ -497,7 +497,7 @@ h1 { width: 80% }
 
 .dc-data-table { 
   width: 1000px; 
-  color: #ddd; 
   font-size: 14px; 
   text-align:left;  
+  margin-bottom: 300px;
 }

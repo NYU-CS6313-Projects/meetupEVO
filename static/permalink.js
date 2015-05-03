@@ -25,14 +25,11 @@ function url_to_status() {
     }
     else {
       var filterValues = parsed[rank].split(",");
-      console.log("filtering chart for ");
-      console.dir(filterValues);
       if (rank < 4) {
         for (var i = 0; i < filterValues.length; i++ ) {
           filterValues[i] = parseFloat( filterValues[i] );
         }
       }
-      console.dir(filterValues);
       chart.filter(filterValues);
     }
   }

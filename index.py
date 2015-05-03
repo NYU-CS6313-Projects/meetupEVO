@@ -176,13 +176,17 @@ def sketch():
 def build_csv():
   columns = [
       "id_group", "id_category", "name_category", "shortname_category",
-      "name", "link", "join_mode", "created", 
+      "name", "link", "join_mode", 
       "no_members", "rating",
       "city", "lat", "lon", "state", "country", 
       "number_of_events", "first_event_time", "last_event_time",
       "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
   ]
   db = g.db
+  sql = "SELECT " + (",".join(columns)) + ", date_trunc('month', created) as created, time_bin, date_trunc('year', time_bin) as time_bin_year, sum as sum_rsvp_yes_in_time_bin from groups LEFT JOIN event_rsvps_by_month USING(id_group) where (created is not null) and (created < '2014-01-01') and (no_member_who_ever_rsvpd_yes > 0) and (number_of_events > 0)"
+  flat_df = pd.read_sql(sql, db)
+  flat_df.to_csv(open("static/groups-and-evolution.csv", "w"), index=False)
+
   sql = "SELECT " + (",".join(columns)) + " from groups where (created is not null) and (created < '2014-01-01') and (no_member_who_ever_rsvpd_yes > 0) and (number_of_events > 0)"
   group_df = pd.read_sql(sql, db, index_col='id_group')
   group_df.to_csv(open("static/groups.csv", "w"))
