@@ -489,7 +489,7 @@ aside {
   margin: 30px;
 }
 h1 { width: 80% }
-#totals { 
+#status { 
   color: #ddd; 
   font-size: 14px; 
   font-weight: normal; 
@@ -500,3 +500,5 @@ h1 { width: 80% }
   font-size: 14px; 
   text-align:left;  
 }
+td._6, td._8 {  white-space: nowrap; }
+td._4, td._5, td._7 {  text-align: right; }
