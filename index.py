@@ -183,7 +183,8 @@ def build_csv():
       "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
   ]
   db = g.db
-  group_df = pd.read_sql("SELECT " + ",".join(columns) + " from groups where created is not null", db, index_col='id_group')
+  sql = "SELECT " + (",".join(columns)) + " from groups where (created is not null) and (created < '2014-01-01') and (no_member_who_ever_rsvpd_yes > 0) and (number_of_events > 0)"
+  group_df = pd.read_sql(sql, db, index_col='id_group')
   group_df.to_csv(open("static/groups.csv", "w"))
 
   df = pd.read_sql("SELECT * from event_rsvps_by_year", db)

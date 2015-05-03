@@ -50,12 +50,26 @@
   {% endblock %}
   {% block javascript %}
   <script>
-    var groups, categories, groups_by_month, groups_by_year, meetup, dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
+    /* Configuration for Charts */
+    var timeline_start = new Date(2002, 0, 1);
+    var timeline_end   = new Date(2014, 0, 1);
 
-    function handle_csv(error, g, cat, gm, gy) {
+    /* Global for reset-buttons */
+    var evolutionChart    = dc.seriesChart('#evolution-chart');
+    var noMembersChart    = dc.barChart('#no-members-chart');
+    var noEventsChart     = dc.barChart('#no-events-chart');
+    var dateCreatedChart  = dc.barChart('#date-created-chart');
+    var categoriesChart   = dc.rowChart('#categories-chart');
+    var countWidget       = dc.dataCount('#totals');
+    var listOfGroups      = dc.dataTable('.dc-data-table');
+
+  /* Global for Debugging */
+    var groups, groups_by_month, groups_by_year, meetup; 
+
+    function handle_csv(error, g, gm, gy) {
+      var dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
       console.log("got me some data");
       groups = g;
-      colors_for_categories = cat;
       groups_by_month = gm; // gm.slice(0,100);
       groups_by_year =  gy; // gy.slice(0,100);
 
@@ -85,14 +99,14 @@
         d.time_bin = formatCreated.parse( d.time_bin );
       });
       */
-      colors_for_groups = {};
+      category_for_group = {};
       groups.forEach(function(d, i) {
         d.index = i;
         d.date = formatDate.parse( d.created.substr(0,10) );
         d.first_event_time = formatCreated.parse( d.first_event_time );
         d.last_event_time = formatCreated.parse( d.last_event_time );
         // d.id_gropu = +d.id_group;
-        colors_for_groups[ d.id_group ] = colors_for_categories[ d.name_category ];
+        category_for_group[ d.id_group ] = d.shortname_category;
         d.no_members = +d.no_members;
         d.number_of_events = +d.number_of_events;
         d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
@@ -108,40 +122,21 @@
       meetup.evolution.group_and_date_group = meetup.evolution.group_and_date_dim.group().reduceSum(function(d) { return d.sum; })
 
       console.log("creating chart for evolution:");
-      var evolutionChart    = dc.seriesChart('#evolution-chart');
       evolutionChart.width(1000)
       .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
       .margins({top: 10, right: 10, bottom: 30, left: 40})
       .brushOn(0)
       .dimension(meetup.evolution.group_and_date_dim)
       .group(meetup.evolution.group_and_date_group)
-      .x(d3.time.scale().domain([new Date(2001, 0, 1), new Date(2015, 3, 1)]).rangeRound([0, 10 * 90]))
+      .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
       .seriesAccessor(function(d) {return +d.key[0];})
       .keyAccessor(function(d) {return +d.key[1];})
       .valueAccessor(function(d) {return +d.value;})
       .on('postRender', function(chart){
-        chart.selectAll("g.stack path").attr("stroke", function(d){
-          var k = d.name;
-          if( k in colors_for_groups ) {
-            return colors_for_groups[k];
-          } 
-          else {
-            return "#dddddd";
-          }
-        });
-        chart.selectAll("g.stack circle").attr("fill", function(d){
-          var k = d.name;
-          if( k in colors_for_groups ) {
-            return colors_for_groups[k];
-          } 
-          else {
-            return "#dddddd";
-          }
-        })
+        chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; })
+        chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
       })
 
-      console.log("rendering first thing");
-      dc.renderAll();
       console.log("creating crossfilter for groups:");
 
       // Create the crossfilter for the relevant dimensions and groups.
@@ -163,16 +158,10 @@
       meetup.groups.no_event_dim    = meetup.groups.cf.dimension(function(d) { return d.number_of_events });
       meetup.groups.no_event_groups = meetup.groups.no_event_dim.group(function(d) { return Math.floor(d / 10) * 10; });
 
-      meetup.groups.categories_dim    = meetup.groups.cf.dimension(function(d) { return d.name_category; });
+      meetup.groups.categories_dim    = meetup.groups.cf.dimension(function(d) { return d.shortname_category; });
       meetup.groups.categories_groups = meetup.groups.categories_dim.group();
 
       console.log("creating charts for groups:");
-      var noMembersChart    = dc.barChart('#no-members-chart');
-      var noEventsChart     = dc.barChart('#no-events-chart');
-      var dateCreatedChart  = dc.barChart('#date-created-chart');
-      var categoriesChart   = dc.rowChart('#categories-chart');
-      var countWidget       = dc.dataCount('#totals');
-      var listOfGroups      = dc.dataTable('.dc-data-table');
 
       countWidget.dimension(meetup.groups.cf).group(meetup.groups.all).html({
         some: '%filter-count of %total-count meetup groups selected',
@@ -224,15 +213,7 @@
         return d.value;
       })
       .on('postRender', function(chart){
-        chart.selectAll("g.row rect").attr("fill", function(d){
-          var k = d.key;
-          if( k in colors_for_categories ) {
-            return colors_for_categories[k];
-          } 
-          else {
-            return "#dddddd";
-          }
-        })
+        chart.selectAll("g.row rect").attr("class", function(d){ return "deselected category " + d.key; })
       })
       .elasticX(true)
       .xAxis().ticks(4);
@@ -248,7 +229,7 @@
         return "" + formatDate(filter[0]) + " to " + formatDate(filter[1]);
       })
       .x(d3.time.scale()
-      .domain([new Date(2001, 0, 1), new Date(2015, 3, 1)])
+      .domain([timeline_start, timeline_end])
       .rangeRound([0, 10 * 90]));
 
       listOfGroups.dimension(meetup.groups.date_dim)
@@ -273,7 +254,6 @@
     console.log("start loading data");
     queue()
     .defer(d3.csv,   "/static/groups.csv")
-    .defer(d3.json,  "/static/categories-colors.json")
     .defer(d3.csv,   "/static/group-evolution-by-month.csv")
     .defer(d3.csv,   "/static/group-evolution-by-year.csv")
     .await(handle_csv);
