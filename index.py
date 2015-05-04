@@ -178,7 +178,7 @@ def event_time():
   if len(request.args.getlist('id_group[]')) == 0:
     sql = g.db_cursor.mogrify("""
       SELECT * FROM event_rsvps_by_month WHERE id_group IN (
-        SELECT id_group FROM groups WHERE number_of_events>0 AND random() < 0.01 LIMIT %s
+        SELECT id_group FROM groups WHERE number_of_events>0 LIMIT %s
       )""", (l,))
   else:
     sql = g.db_cursor.mogrify("""

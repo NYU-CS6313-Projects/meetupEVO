@@ -106,6 +106,7 @@
     meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
     evolutionMonthChart.render();
     evolutionYearChart.render();
+    /*
     var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
     var id_group,i=0,found=[];
     while( found.length < limit_timeline_load && i < selected_groups.length ) {
@@ -122,6 +123,7 @@
     queue()
     .defer(d3.csv, url)
     .await(handle_time_csv);
+    */
   }
 
   function handle_csv(error, g, gm) {
@@ -334,7 +336,7 @@
   log("start loading data");
   queue()
   .defer(d3.csv,   "/static/groups.csv")
-  .defer(d3.csv,   "/events/time.csv?")
+  .defer(d3.csv,   "/static/time.csv")
   .await(handle_csv);
 </script>
 
