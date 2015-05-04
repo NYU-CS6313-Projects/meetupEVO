@@ -89,6 +89,10 @@
   function handle_time_csv(error, gm) {
     log("new timeline data has arrived");
     var more_groups_by_month = gm; 
+    var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
+    console.log("loaded timeline data on " + more_groups_by_month.length + " groups");
+    more_groups_by_month = more_groups_by_month.filter(function(d){ return loaded_groups.indexOf( d.id_group ) == -1; });
+    console.log("of these only " + more_groups_by_month.length + " are new, will add them");
     more_groups_by_month.forEach(coerce_groups_by_month);
     meetup.evolution.cf.add(more_groups_by_month);
     var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
