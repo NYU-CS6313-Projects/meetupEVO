@@ -140,6 +140,7 @@
     // A little coercion, since the loaded JSON and CSV is untyped.
     groups_by_month.forEach(coerce_groups_by_month);
     category_for_group = {};
+    meetup.groups.data_by_id_group = {}
     groups.forEach(function(d, i) {
       d.index                = i;
       d.rating               = parseFloat(d.rating);
@@ -150,9 +151,18 @@
       d.number_of_events     = +d.number_of_events;
       d.max_yes_at_one_event = +d.max_yes_at_one_event;
       d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
-      category_for_group[ d.id_group ] = d.shortname_category;
       if (d.rating == 0.0) d.rating = null;
+      category_for_group[ d.id_group ] = d.shortname_category;
+      meetup.groups.data_by_id_group[ d.id_group ] = d;
     });
+    meetup.groups.by_id = function(id_group) {
+      var d = meetup.groups.data_by_id_group[ id_group ];
+      return { get: function(key) {
+        if(d == undefined) return "no such group";
+        if(d[key] == undefined) return "no attribute " + key;
+        return d[key];
+      } }
+    }
 
     // =======  Evolution by Month =================================== 
     log("creating crossfilter for evolution by month");
@@ -173,6 +183,9 @@
     .group(meetup.evolution.group_and_month_group)
     .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
     .y(d3.scale.linear().domain([0, 3000]).range([250,0]))
+    .title(function (d) { 
+      return meetup.groups.by_id( d.key[0] ).get("name") + ": " + d.value + " rsvps this month"; 
+    })
     .seriesAccessor(function(d) {return +d.key[0];})
     .keyAccessor(   function(d) {return +d.key[1];})
     .valueAccessor( function(d) {return +d.value;})
@@ -194,7 +207,10 @@
     .dimension(meetup.evolution.group_and_year_dim)
     .group(meetup.evolution.group_and_year_group)
     .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
-    .y(d3.scale.linear().domain([0, 8500]).range([250,0]))
+    .y(d3.scale.linear().domain([0, 9000]).range([250,0]))
+    .title(function (d) { 
+      return meetup.groups.by_id( d.key[0] ).get("name") + ": " + d.value + " rsvps this year"; 
+    })
     .seriesAccessor(function(d) {return +d.key[0];})
     .keyAccessor(   function(d) {return +d.key[1];})
     .valueAccessor( function(d) {return +d.value;})
@@ -269,9 +285,7 @@
     .label(function (d) {
       return d.key + " (" + d.value + ")";
     })
-    .title(function (d) {
-      return d.value;
-    })
+    .title(function (d) { return d.value; })
     .on('postRender', function(chart){
       chart.selectAll("g.row rect").attr("class", function(d){ return "deselected category " + d.key; })
     })
@@ -316,7 +330,7 @@
   log("start loading data");
   queue()
   .defer(d3.csv,   "/static/groups.csv")
-  .defer(d3.csv,   "/events/time.csv")
+  .defer(d3.csv,   "/events/time.csv?")
   .await(handle_csv);
 </script>
 
