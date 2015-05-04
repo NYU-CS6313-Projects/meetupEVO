@@ -168,21 +168,21 @@ def intro():
 def index():
   return render_template("index.html")
 
-@app.route('/sketch.html')
+@app.route('/v2.html')
 def sketch():
-  return render_template("sketch.html")
+  return render_template("v2.html")
 
 @app.route('/events/time.csv')
 def event_time():
   l = 9000
   if len(request.args.getlist('id_group[]')) == 0:
     sql = g.db_cursor.mogrify("""
-      SELECT * FROM event_rsvps_by_month WHERE id_group IN (
+      SELECT * FROM event_rsvps_by_year WHERE id_group IN (
         SELECT id_group FROM groups WHERE number_of_events>0 LIMIT %s
       )""", (l,))
   else:
     sql = g.db_cursor.mogrify("""
-      SELECT * FROM event_rsvps_by_month WHERE id_group IN (
+      SELECT * FROM event_rsvps_by_year WHERE id_group IN (
         SELECT id_group FROM groups WHERE number_of_events>0 AND id_group IN %s  LIMIT %s
       )""", ( tuple( request.args.getlist('id_group[]') ), l ) )
   app.logger.error('time.csv: %s' % sql)
