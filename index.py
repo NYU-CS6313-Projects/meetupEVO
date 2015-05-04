@@ -172,6 +172,23 @@ def index():
 def sketch():
   return render_template("sketch.html")
 
+@app.route('/events/time.csv')
+def event_time():
+  l = 3
+  if len(request.args.getlist('id_group')) == 0:
+    sql = g.db_cursor.mogrify("""
+      SELECT * FROM event_rsvps_by_month WHERE id_group IN (
+        SELECT id_group FROM groups WHERE number_of_events>0 AND random() < 0.01 LIMIT %s
+      )""", (l,))
+  else:
+    sql = g.db_cursor.mogrify("""
+      SELECT * FROM event_rsvps_by_month WHERE id_group IN (
+        SELECT id_group FROM groups WHERE number_of_events>0 AND id_group IN %s  LIMIT %s
+      )""", ( tuple( request.args.getlist('id_group') ), l ) )
+  app.logger.error('time.csv: %s' % sql)
+  df = pd.read_sql(sql , g.db)
+  return Response(df.to_csv(index=False), mimetype='text/plain')
+
 @app.route('/build-csv')
 def build_csv():
   columns = [
