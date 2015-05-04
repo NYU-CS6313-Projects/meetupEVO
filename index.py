@@ -174,7 +174,7 @@ def sketch():
 
 @app.route('/events/time.csv')
 def event_time():
-  l = 30
+  l = 9000
   if len(request.args.getlist('id_group[]')) == 0:
     sql = g.db_cursor.mogrify("""
       SELECT * FROM event_rsvps_by_month WHERE id_group IN (
