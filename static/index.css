@@ -497,9 +497,15 @@ h1 { width: 80% }
 }
 
 .dc-data-table { 
-  width: 1000px; 
+  width: 100%;
   font-size: 14px; 
   text-align:left;  
 }
-td._6, td._8 {  white-space: nowrap; }
+td._6, td._8, th {  white-space: nowrap; }
+td._1 {  text-align: center; }
 td._4, td._5, td._7 {  text-align: right; }
+td + td, th + th { border-left: 1px #ddd solid; border-width: 1px; }
+th, td { padding-left: 10px; padding-right: 10px; }
+
+tr:hover { background-color: #ddd; }
+tr:hover td { border-color: white;}
