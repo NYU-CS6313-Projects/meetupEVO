@@ -104,7 +104,7 @@
     log("reloading timeline data for groups");
     var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
     meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
-    evolutionMonthChart.render();
+    // evolutionMonthChart.render();
     evolutionYearChart.render();
     /*
     var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
@@ -170,38 +170,41 @@
       } }
     }
 
-    // =======  Evolution by Month =================================== 
     log("creating crossfilter for evolution by month");
     meetup.evolution.cf = crossfilter(groups_by_month);
     
     meetup.evolution.id_dim   = meetup.evolution.cf.dimension(function(d) { return d.id_group });
     meetup.evolution.id_group = meetup.evolution.id_dim.group().reduceCount();
 
-    meetup.evolution.group_and_month_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.month]; });
-    meetup.evolution.group_and_month_group = meetup.evolution.group_and_month_dim.group().reduceSum(function(d) { return d.sum; })
 
-    log("creating chart for evolution by month:");
-    evolutionMonthChart.width(1000).height(300)
-    .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(3); })
-    .margins({top: 10, right: 10, bottom: 30, left: 40})
-    .brushOn(0)
-    .dimension(meetup.evolution.group_and_month_dim)
-    .group(meetup.evolution.group_and_month_group)
-    .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
-    .y(d3.scale.linear().domain([0, 3000]).range([250,0]))
-    .title(function (d) { 
-      return meetup.groups.by_id( d.key[0] ).get("name") + ": " + d.value + " rsvps this month"; 
-    })
-    .seriesAccessor(function(d) {return +d.key[0];})
-    .keyAccessor(   function(d) {return +d.key[1];})
-    .valueAccessor( function(d) {return +d.value;})
-    .on('postRender', function(chart){
-      chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; })
-      chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
-    })
+    // =======  Evolution by Month =================================== 
+    if ( 0 ) {
+      meetup.evolution.group_and_month_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.month]; });
+      meetup.evolution.group_and_month_group = meetup.evolution.group_and_month_dim.group().reduceSum(function(d) { return d.sum; })
+
+      log("creating chart for evolution by month:");
+      evolutionMonthChart.width(1000).height(300)
+      .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(3); })
+      .margins({top: 10, right: 10, bottom: 30, left: 40})
+      .brushOn(0)
+      .dimension(meetup.evolution.group_and_month_dim)
+      .group(meetup.evolution.group_and_month_group)
+      .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
+      .y(d3.scale.linear().domain([0, 3000]).range([250,0]))
+      .title(function (d) { 
+        return meetup.groups.by_id( d.key[0] ).get("name") + ": " + d.value + " rsvps this month"; 
+      })
+      .seriesAccessor(function(d) {return +d.key[0];})
+      .keyAccessor(   function(d) {return +d.key[1];})
+      .valueAccessor( function(d) {return +d.value;})
+      .on('postRender', function(chart){
+        chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; })
+        chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
+      })
+    }
 
     // =======  Evolution  by Year==================================== 
-    
+
     meetup.evolution.group_and_year_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.year]; });
     meetup.evolution.group_and_year_group = meetup.evolution.group_and_year_dim.group().reduceSum(function(d) { return d.sum; })
 
