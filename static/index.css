@@ -369,17 +369,18 @@ body.flexbox {
 
 .chart {
   display: inline-block;
-  height: 131px;
   margin-bottom: 20px;
 }
 
 .chart .grid-line { opacity: 0.2; }
 .chart#evolution-month-chart {
-  height: 231px;
+  width: 1000px;
+  height: 300px;
 }
 
 .chart#evolution-chart {
-  height: 231px;
+  width: 1000px;
+  height: 300px;
 }
 
 .reset {

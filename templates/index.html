@@ -6,10 +6,10 @@
       <h1>Evolution <small>of Meetup Groups </small><span id="status"></span></h1> 
     </div>
     <div id="panel2">
-      <div id="evolution-chart" class="chart">
+      <div id="evolution-year-chart" class="chart">
         <strong>Number of people who rsvped for events in this year</strong>
         <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:evolutionChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
       <div id="evolution-month-chart" class="chart">
         <strong>Number of people who rsvped for events in this month</strong>
@@ -54,8 +54,10 @@
   var timeline_start = new Date(2002, 0, 1);
   var timeline_end   = new Date(2015, 0, 1);
 
+  var limit_timeline_load = 30;
+
   /* Global for reset-buttons */
-  var evolutionChart      = dc.seriesChart('#evolution-chart');
+  var evolutionYearChart  = dc.seriesChart('#evolution-year-chart');
   var evolutionMonthChart = dc.seriesChart('#evolution-month-chart');
   var noMembersChart    = dc.barChart('#no-members-chart');
   var noEventsChart     = dc.barChart('#no-events-chart');
@@ -65,7 +67,7 @@
   var listOfGroups      = dc.dataTable('.dc-data-table');
 
 /* Global for Debugging */
-  var groups, groups_by_month, groups_by_year;   // raw data coming in
+  var groups, groups_by_month;   // raw data coming in
   var meetup = {               // namespace for crossfilter 
     'evolution': {}, 
     'evolution_by_month': {},
@@ -74,17 +76,56 @@
 </script>                                    
 <script src="{{ url_for('static', filename='permalink.js') }}"></script>
 <script>                                    
+  function log(s) {
+    $('#status').text(s);
+    console.log("Status:" + s);
+  }
+  function coerce_groups_by_month(d, i) {
+    d.index    = i;
+    d.sum      = +d.sum;
+    d.month = formatCreated.parse( d.time_bin ); // time is already binned to 1st of the month
+    d.year  = new Date(d.month.getFullYear(), 0, 1);
+  };
+  function handle_time_csv(error, gm) {
+    log("new timeline data has arrived");
+    var more_groups_by_month = gm; 
+    more_groups_by_month.forEach(coerce_groups_by_month);
+    meetup.evolution.cf.add(more_groups_by_month);
+    var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
+    meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
+    evolutionMonthChart.render();
+    evolutionYearChart.render();
+  }
   function reload_timeline(){
-    $('#status').text("reloading timeline data");
+    log("reloading timeline data for groups");
+    var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
+    meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
+    evolutionMonthChart.render();
+    evolutionYearChart.render();
+    var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
+    var id_group,i=0,found=[];
+    while( found.length < limit_timeline_load && i < selected_groups.length ) {
+      id_group = selected_groups[i];
+      if( id_group in loaded_groups ) {
+        i++;
+      } else {
+        found.push( id_group );
+        i++;
+      }
+    }
+    log("Will should load timeline data on " + found.length + " new groups");
+    url = "/events/time.csv?" + $.param({id_group:found});
+    queue()
+    .defer(d3.csv, url)
+    .await(handle_time_csv);
   }
 
-  function handle_csv(error, g, gm, gy) {
+  function handle_csv(error, g, gm) {
     var dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
-    $('#status').text("data loaded");
+    log("data loaded");
     // copy over to global variables
     groups = g;
     groups_by_month = gm; 
-    groups_by_year =  gy;
 
     // Various formatters.
     formatInt       = d3.format("f");  // turn any number into integer by dropping digits after point
@@ -97,16 +138,7 @@
     formatTime      = d3.time.format("%I:%M %p");
 
     // A little coercion, since the loaded JSON and CSV is untyped.
-    groups_by_year.forEach(function(d, i) {
-      d.id_group = +d.id_group;
-      d.sum      = +d.sum;
-      d.time_bin = formatCreated.parse( d.time_bin );  // time is already binned to 1.january of the year
-    });
-    groups_by_month.forEach(function(d, i) {
-      d.index    = i;
-      d.sum      = +d.sum;
-      d.time_bin = formatCreated.parse( d.time_bin ); // time is already binned to 1st of the month
-    });
+    groups_by_month.forEach(coerce_groups_by_month);
     category_for_group = {};
     groups.forEach(function(d, i) {
       d.index                = i;
@@ -122,45 +154,25 @@
       if (d.rating == 0.0) d.rating = null;
     });
 
-    // =======  Evolution  by Year==================================== 
-    
-    $('#status').text("creating crossfilter for evolution by year:");
-    meetup.evolution.cf = crossfilter(groups_by_year.slice(1,1000));
-
-    meetup.evolution.group_and_date_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.time_bin]; });
-    meetup.evolution.group_and_date_group = meetup.evolution.group_and_date_dim.group().reduceSum(function(d) { return d.sum; })
-
-    $('#status').text("creating chart for evolution:");
-    evolutionChart.width(1000)
-    .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
-    .margins({top: 10, right: 10, bottom: 30, left: 40})
-    .brushOn(0)
-    .dimension(meetup.evolution.group_and_date_dim)
-    .group(meetup.evolution.group_and_date_group)
-    .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
-    .seriesAccessor(function(d) {return +d.key[0];})
-    .keyAccessor(   function(d) {return +d.key[1];})
-    .valueAccessor( function(d) {return +d.value;})
-    .on('postRender', function(chart){
-      chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; })
-      chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
-    })
-    
     // =======  Evolution by Month =================================== 
-    $('#status').text("creating crossfilter for evolution by month:");
-    meetup.evolution_by_month.cf = crossfilter(groups_by_month.slice(1,1000));
+    log("creating crossfilter for evolution by month");
+    meetup.evolution.cf = crossfilter(groups_by_month);
+    
+    meetup.evolution.id_dim   = meetup.evolution.cf.dimension(function(d) { return d.id_group });
+    meetup.evolution.id_group = meetup.evolution.id_dim.group().reduceCount();
 
-    meetup.evolution_by_month.group_and_date_dim   = meetup.evolution_by_month.cf.dimension(function(d) { return [d.id_group, d.time_bin]; });
-    meetup.evolution_by_month.group_and_date_group = meetup.evolution_by_month.group_and_date_dim.group().reduceSum(function(d) { return d.sum; })
+    meetup.evolution.group_and_month_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.month]; });
+    meetup.evolution.group_and_month_group = meetup.evolution.group_and_month_dim.group().reduceSum(function(d) { return d.sum; })
 
-    $('#status').text("creating chart for evolution by month:");
-    evolutionMonthChart.width(1000)
+    log("creating chart for evolution by month:");
+    evolutionMonthChart.width(1000).height(300)
     .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(3); })
     .margins({top: 10, right: 10, bottom: 30, left: 40})
     .brushOn(0)
-    .dimension(meetup.evolution_by_month.group_and_date_dim)
-    .group(meetup.evolution_by_month.group_and_date_group)
+    .dimension(meetup.evolution.group_and_month_dim)
+    .group(meetup.evolution.group_and_month_group)
     .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
+    .y(d3.scale.linear().domain([0, 3000]).range([250,0]))
     .seriesAccessor(function(d) {return +d.key[0];})
     .keyAccessor(   function(d) {return +d.key[1];})
     .valueAccessor( function(d) {return +d.value;})
@@ -169,8 +181,30 @@
       chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
     })
 
+    // =======  Evolution  by Year==================================== 
+    
+    meetup.evolution.group_and_year_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.year]; });
+    meetup.evolution.group_and_year_group = meetup.evolution.group_and_year_dim.group().reduceSum(function(d) { return d.sum; })
+
+    log("creating chart for evolution by year");
+    evolutionYearChart.width(1000).height(300)
+    .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
+    .margins({top: 10, right: 10, bottom: 30, left: 40})
+    .brushOn(0)
+    .dimension(meetup.evolution.group_and_year_dim)
+    .group(meetup.evolution.group_and_year_group)
+    .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
+    .y(d3.scale.linear().domain([0, 8500]).range([250,0]))
+    .seriesAccessor(function(d) {return +d.key[0];})
+    .keyAccessor(   function(d) {return +d.key[1];})
+    .valueAccessor( function(d) {return +d.value;})
+    .on('postRender', function(chart){
+      chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; })
+      chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
+    })
+    
     // =======  Groups  =========================================== 
-    $('#status').text("creating crossfilter for groups:");
+    log("creating crossfilter for groups");
 
     // Create the crossfilter for the relevant dimensions and groups.
     meetup.groups.cf                = crossfilter(groups);
@@ -190,7 +224,7 @@
     meetup.groups.categories_dim    = meetup.groups.cf.dimension(function(d) { return d.shortname_category; });
     meetup.groups.categories_groups = meetup.groups.categories_dim.group();
 
-    $('#status').text("creating charts for groups:");
+    log("creating charts for groups:");
 
     countWidget.dimension(meetup.groups.cf).group(meetup.groups.all).html({
       some: '%filter-count of %total-count meetup groups selected',
@@ -273,17 +307,16 @@
       { 'label': 'Last Event',     'format': function(d)  { return formatDate( d.last_event_time  ) } }
     ])
 
-    $('#status').text("rendering all");
+    log("rendering all");
     dc.renderAll();
-    // $('#status').text("filtering from url");
+    // log("filtering from url");
     // url_to_status();
 
   }
-  $('#status').text("start loading data");
+  log("start loading data");
   queue()
   .defer(d3.csv,   "/static/groups.csv")
-  .defer(d3.csv,   "/static/group-evolution-by-month.csv")
-  .defer(d3.csv,   "/static/group-evolution-by-year.csv")
+  .defer(d3.csv,   "/events/time.csv")
   .await(handle_csv);
 </script>
 
