@@ -184,6 +184,7 @@
     .group(meetup.evolution.group_and_year_group)
     .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
     .y(d3.scale.linear().domain([0, 9000]).range([250,0]))
+    .elasticY(true)
     .title(function (d) { 
       return meetup.groups.by_id( d.key[0] ).get("name") + ": " + d.value + " rsvps this year"; 
     })
@@ -233,6 +234,7 @@
       return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
     })
     .on('filtered', reload_timeline)
+    .elasticY(true)
     .x(d3.scale.linear().domain([0, 1500]).rangeRound([0, 10 * 21]));
 
     noMembersChart.xAxis().ticks(5);
@@ -249,6 +251,7 @@
       return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
     })
     .on('filtered', reload_timeline)
+    .elasticY(true)
     .x(d3.scale.linear().domain([1, 200]).rangeRound([0, 10 * 20]));
     noEventsChart.xAxis().ticks(5);
     noEventsChart.yAxis().ticks(4);
@@ -279,6 +282,7 @@
       return "" + formatDate(filter[0]) + " to " + formatDate(filter[1]);
     })
     .on('filtered', reload_timeline)
+    .elasticY(true)
     .x(d3.time.scale()
     .domain([timeline_start, timeline_end])
     .rangeRound([0, 10 * 90]));
