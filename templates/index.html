@@ -11,7 +11,7 @@
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
-      <div id="evolution-month-chart" class="chart" style="display:none;">
+      <div id="evolution-month-chart" class="chart">
         <strong>Number of people who rsvped for events in this month</strong>
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:evolutionMonthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
@@ -58,7 +58,7 @@
 
   /* Global for reset-buttons */
   var evolutionYearChart  = dc.seriesChart('#evolution-year-chart');
-  // var evolutionMonthChart = dc.seriesChart('#evolution-month-chart');
+  var evolutionMonthChart = dc.seriesChart('#evolution-month-chart');
   var noMembersChart    = dc.barChart('#no-members-chart');
   var noEventsChart     = dc.barChart('#no-events-chart');
   var dateCreatedChart  = dc.barChart('#date-created-chart');
@@ -97,14 +97,14 @@
     meetup.evolution.cf.add(more_groups_by_month);
     var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
     meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
-    // evolutionMonthChart.render();
+    evolutionMonthChart.render();
     evolutionYearChart.render();
   }
   function reload_timeline(){
     log("reloading timeline data for groups");
     var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
     meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
-    // evolutionMonthChart.render();
+    evolutionMonthChart.render();
     evolutionYearChart.render();
     /*
     var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
@@ -178,7 +178,7 @@
 
 
     // =======  Evolution by Month =================================== 
-    if ( 0 ) {
+    if ( 1 ) {
       meetup.evolution.group_and_month_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.month]; });
       meetup.evolution.group_and_month_group = meetup.evolution.group_and_month_dim.group().reduceSum(function(d) { return d.sum; })
 
