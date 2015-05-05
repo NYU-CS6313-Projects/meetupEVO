@@ -3,7 +3,8 @@
 <div id="flex_row">
   <div id="left_col">
     <div id="panel5">
-      <h1>Evolution <small>of Meetup Groups </small><span id="status"></span></h1> 
+      <h1>Evolution <small>of Meetup Groups </small><span id="status"></span>
+        <img src="/static/loading.gif" id="loading" style="float: right"></h1> 
     </div>
     <div id="panel2">
       <div id="evolution-year-chart" class="chart">
@@ -303,12 +304,14 @@
 
     log("rendering all");
     dc.renderAll();
+    $('#loading').hide();
     $('#evolution-year-chart svg').hide();
     // log("filtering from url");
     // url_to_status();
 
   }
   log("start loading data");
+  $('#loading').show();
   queue()
   .defer(d3.csv,   "/static/groups.csv")
   .defer(d3.csv,   "/events/time.csv?id_group[]=176399")
