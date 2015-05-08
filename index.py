@@ -189,6 +189,12 @@ def event_time():
   df = pd.read_sql(sql , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
 
+@app.route('/events/categories.csv')
+def category_time():
+  df = pd.read_sql("SELECT * FROM categories_timeseries" , g.db)
+  return Response(df.to_csv(index=False), mimetype='text/plain')
+
+
 @app.route('/build-csv')
 def build_csv():
   columns = [
