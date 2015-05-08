@@ -7,8 +7,13 @@
         <img src="/static/loading.gif" id="loading" style="float: right"></h1> 
     </div>
     <div id="panel2">
+      <div id="categories-year-chart" class="chart">
+        <strong>By Category: Number of people who rsvped for events in this year</strong>
+        <span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+      </div>
       <div id="evolution-year-chart" class="chart">
-        <strong>Number of people who rsvped for events in this year</strong>
+        <strong>By Group: Number of people who rsvped for events in this year</strong>
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
@@ -34,8 +39,8 @@
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:noEventsChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
-      <div id="events-vs-people" class="chart">
-        <strong># Events</strong>
+      <div id="events-vs-people" class="chart" style="display:none;">
+        <strong># Events vs # People</strong>
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:eventsVsPeopleChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
@@ -59,6 +64,7 @@
   var limit_timeline = 100;
 
   /* Global for reset-buttons */
+  var categoriesYearChart = dc.seriesChart('#categories-year-chart');
   var evolutionYearChart  = dc.seriesChart('#evolution-year-chart');
   var noMembersChart      = dc.barChart('#no-members-chart');
   var noEventsChart       = dc.barChart('#no-events-chart');
@@ -69,10 +75,10 @@
   var listOfGroups        = dc.dataTable('.dc-data-table');
 
 /* Global for Debugging */
-  var groups, groups_by_year;   // raw data coming in
+  var groups, groups_by_year, categories_by_year;   // raw data coming in
   var meetup = {               // namespace for crossfilter 
+    'categories': {}, 
     'evolution': {}, 
-    'evolution_by_month': {},
     'groups': {}
   }; 
 </script>                                    
@@ -124,11 +130,12 @@
 
   }
 
-  function handle_csv(error, g, gm) {
+  function handle_csv(error, g, cy, gm) {
     var dataByGroup, date, dates, id_group, id_groups, nestByGroup; // make global for debugging
     log("data loaded");
     // copy over to global variables
     groups = g;
+    categories_by_year = cy;
     groups_by_year = gm; 
 
     // Various formatters.
@@ -143,6 +150,11 @@
 
     // A little coercion, since the loaded JSON and CSV is untyped.
     groups_by_year.forEach(coerce_groups_by_year);
+    categories_by_year.forEach(function(d, i) {
+      d.index    = i;
+      d.sum      = +d.sum;
+      d.year     = formatCreated.parse( d.time_bin ); // time is already binned to 1st of the year
+    });
     category_for_group = {};
     meetup.groups.data_by_id_group = {}
     groups.forEach(function(d, i) {
@@ -176,13 +188,20 @@
     meetup.evolution.id_dim   = meetup.evolution.cf.dimension(function(d) { return d.id_group });
     meetup.evolution.id_group = meetup.evolution.id_dim.group().reduceCount();
 
-
-    // =======  Evolution  by Year==================================== 
-
     meetup.evolution.group_and_year_dim   = meetup.evolution.cf.dimension(function(d) { return [d.id_group, d.year]; });
     meetup.evolution.group_and_year_group = meetup.evolution.group_and_year_dim.group().reduceSum(function(d) { return d.sum; })
 
-    meetup.evolution.id_dim.filter(function(d){ return 0 })
+
+    log("creating crossfilter for categories by year");
+
+    meetup.categories.cf = crossfilter(categories_by_year);
+    
+    meetup.categories.id_dim   = meetup.evolution.cf.dimension(function(d) { return d.name_group });
+    meetup.categories.id_group = meetup.evolution.id_dim.group().reduceCount();
+
+    meetup.categories.category_and_year_dim   = meetup.categories.cf.dimension(function(d) { return [d.name_category, d.year]; });
+    meetup.categories.category_and_year_group = meetup.categories.category_and_year_dim.group().reduceSum(function(d) { return d.sum; })
+
 
     log("creating chart for evolution by year");
     evolutionYearChart.width(1000).height(300)
@@ -205,6 +224,28 @@
       chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
     })
     
+    categoriesYearChart.width(1000).height(100)
+    .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
+    .margins({top: 10, right: 10, bottom: 30, left: 40})
+    .brushOn(0)
+    .dimension(meetup.categories.category_and_year_dim)
+    .group(meetup.categories.category_and_year_group)
+    .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
+    .y(d3.scale.linear().domain([0, 9000]).range([190,0]))
+    .elasticY(true)
+    .title(function (d) { 
+      return meetup.groups.by_id( d.key[0] ).get("name_category") + ": " + d.value + " rsvps this year"; 
+    })
+    .seriesAccessor(function(d) {return +d.key[0];})
+    .keyAccessor(   function(d) {return +d.key[1];})
+    .valueAccessor( function(d) {return +d.value;})
+    .on('postRender', function(chart){
+      chart.selectAll("g.stack path").attr("class",        function(d){ return d.category_name; })
+      chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + d.data.key[0]; })
+    })
+
+    categoriesYearChart.yAxis().ticks(5);
+
     // =======  Groups  =========================================== 
     log("creating crossfilter for groups");
 
@@ -309,6 +350,7 @@
     .domain([timeline_start, timeline_end])
     .rangeRound([0, 10 * 90]));
 
+    
     listOfGroups.dimension(meetup.groups.id_dim)
     .group(function (d) { return meetup.groups.id_dim.top(Infinity).length + " selected groups"; })
     .columns([
@@ -335,6 +377,7 @@
   $('#loading').show();
   queue()
   .defer(d3.csv,   "/static/groups.csv")
+  .defer(d3.csv,   "/static/cat-time.csv")
   .defer(d3.csv,   "/events/time.csv?id_group[]=176399")
   .await(handle_csv);
   
