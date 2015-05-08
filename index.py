@@ -197,7 +197,7 @@ def build_csv():
       "no_members", "rating",
       "city", "lat", "lon", "state", "country", 
       "number_of_events", "first_event_time", "last_event_time",
-      "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes"
+      "max_yes_at_one_event", "no_member_who_ever_rsvpd_yes", "average_rsvps_per_event"
   ]
   db = g.db
   sql = "SELECT " + (",".join(columns)) + " from groups where (created is not null) and (created < '2014-01-01') and (no_member_who_ever_rsvpd_yes > 0) and (number_of_events > 0)"
