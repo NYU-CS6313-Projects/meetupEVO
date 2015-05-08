@@ -191,7 +191,7 @@ def event_time():
 
 @app.route('/events/categories.csv')
 def category_time():
-  df = pd.read_sql("SELECT * FROM categories_timeseries" , g.db)
+  df = pd.read_sql("SELECT * FROM categories_timeseries ORDER BY name_category,time_bin" , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
 
 
