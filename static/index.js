@@ -347,3 +347,8 @@ queue()
 .defer(d3.csv,   "/events/categories.csv")
 .defer(d3.csv,   "/events/time.csv?id_group[]=176399")
 .await(handle_csv);
+
+$(document).ready(function() {
+  $('.tooltip').tooltipster({position: 'top-right'});
+});
+

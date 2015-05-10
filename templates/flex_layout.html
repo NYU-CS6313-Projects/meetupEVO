@@ -8,17 +8,19 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='categories.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tooltipster.css') }}">
     <!-- We are using all the libraries from cloud, see https://cdnjs.com/ -->
   </head>
   <body class="has-drawer flexbox">
     {% block body %}{% endblock %}
     <!-- We are using jquery and Twitter Bootstrap javascript in the cloud, see http://getbootstrap.com/getting-started/ -->
+     <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
      <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
      <script src="{{ url_for('static', filename='crossfilter.min.js') }}"></script>
      <script src="{{ url_for('static', filename='underscore-min.js') }}"></script>
      <script src="{{ url_for('static', filename='queue.min.js') }}"></script>
      <script src="{{ url_for('static', filename='dc.js') }}"></script>
-     <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+     <script src="{{ url_for('static', filename='jquery.tooltipster.min.js') }}"></script>
     {% block javascript %}{% endblock %}
   </body>
 </html>
