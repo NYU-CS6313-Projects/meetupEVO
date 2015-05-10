@@ -97,7 +97,7 @@ function handle_csv(error, g, cy, gm) {
     d.sum      = +d.sum;
     d.avg      = parseFloat(d.avg);
     d.year     = formatCreated.parse( d.time_bin ); // time is already binned to 1st of the year
-    if ( index >= 0 && name_category_of[index] == d.name_category ) {
+    if ( index >= 0 && name_category_of[index] == d.shortname_category ) {
       d.index = index;
     } else {
       index++;
@@ -181,8 +181,7 @@ function handle_csv(error, g, cy, gm) {
   .group(meetup.categories.category_and_year_avg)
   .brushOn(0)
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
-  .y(d3.scale.linear().domain([0, 250]).range([200,0]))
-  .elasticY(true)
+  .y(d3.scale.linear().domain([0, 450]).range([200,0]))
   .title(function (d) { 
     return name_category_of[d.key[0]] + ": " + d.value + " rsvps in " + d.key[1].getFullYear(); 
   })
@@ -190,11 +189,17 @@ function handle_csv(error, g, cy, gm) {
   .keyAccessor(   function(d) {return +d.key[1];})
   .valueAccessor( function(d) {return +d.value;})
   .on('postRender', function(chart){
-    chart.selectAll("g.stack path").attr("class", function(d){ return "category " + name_category_of[d.name]; });
-    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ 
-      console.log("tying to set class for tooltip");
-      console.dir(d);
-      return "category " + name_category_of[d.data.key[0]]; 
+    chart.selectAll("g.stack path")
+    .attr("class", function(d){ return "category " + name_category_of[d.name]; })
+    .on("click",function(d) { 
+      var c = name_category_of[d.name]; 
+      switchCategoryFilterTo(c);
+    });
+    chart.selectAll("g.dc-tooltip circle")
+    .attr("class", function(d){ return "category " + name_category_of[d.data.key[0]]; })
+    .on("click",function(d) { 
+      var c = name_category_of[d.data.key[0]]; 
+      switchCategoryFilterTo(c);
     });
   });
 
@@ -328,6 +333,12 @@ function handle_csv(error, g, cy, gm) {
   // log("filtering from url");
   // url_to_status();
 
+  function switchCategoryFilterTo(c) {
+    console.log("switching category filter to " + c );
+    categoriesChart.filterAll();
+    categoriesChart.filter(c);
+    reload_timeline();
+  }
 }
 log("start loading data");
 $('#loading').show();
