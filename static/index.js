@@ -2,7 +2,7 @@
 var timeline_start = new Date(2002, 0, 1);
 var timeline_end   = new Date(2015, 0, 1);
 
-var limit_timeline = 800;
+var max_no_of_groups_to_display_in_timeline_and_table = 800;
 
 var margin_timelines_left = 60;
 var margin_timelines_top = 30;
@@ -44,7 +44,7 @@ function handle_time_csv(error, gm) {
   more_groups_by_year.forEach(coerce_groups_by_year);
   meetup.evolution.cf.add(more_groups_by_year);
   var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
-  if ( selected_groups.length < limit_timeline ) {
+  if ( selected_groups.length < max_no_of_groups_to_display_in_timeline_and_table ) {
     log("showing " + selected_groups.length + " groups in timeline");
     $('#evolution-year-chart img').hide();
     $('#evolution-year-chart svg').show();
@@ -61,7 +61,7 @@ function handle_time_csv(error, gm) {
 function reload_timeline(){
   log("reloading timeline data for groups");
   var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
-  if ( selected_groups.length < limit_timeline ) {
+  if ( selected_groups.length < max_no_of_groups_to_display_in_timeline_and_table ) {
     log("Should load timeline data on " + selected_groups.length + " new groups");
     url = "/events/time.csv?" + $.param({id_group:selected_groups});
     queue()
@@ -305,6 +305,7 @@ function handle_csv(error, g, cy, gm) {
   
   listOfGroups.dimension(meetup.groups.id_dim)
   .group(function (d) { return meetup.groups.id_dim.top(Infinity).length + " selected groups"; })
+  .size(max_no_of_groups_to_display_in_timeline_and_table)
   .columns([
     { 'label': 'Group Name',     'format': function(d)  { return '<a href="/group/'+d.id_group+'">' + d.name + '</a>'   } },
     { 'label': 'Group Created',  'format': function(d)  { return formatYearMonth( d.created )     } },
@@ -316,6 +317,7 @@ function handle_csv(error, g, cy, gm) {
     { 'label': '# Events',       'format': function(d)  { return d.number_of_events               } },
     { 'label': 'Last Event',     'format': function(d)  { return formatDate( d.last_event_time  ) } }
   ])
+  .sortBy(function (d){ return - d.no_member_who_ever_rsvpd_yes; });
 
   log("rendering all");
   dc.renderAll();
