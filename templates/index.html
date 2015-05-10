@@ -3,23 +3,25 @@
 <div id="flex_row">
   <div id="left_col">
     <div id="panel5">
-      <h1>Evolution <small>of Meetup Groups </small><span id="status"></span>
-        <img src="/static/loading.gif" id="loading" style="float: right"></h1> 
+      <h1><img src="/static/logo-2x.png" id = "logo" style="float: left" height="40" width="60" >Evolution <small>of Groups </small><span id="status"></span>
+<!--        <img src="/static/loading.gif" id="loading" style="float: right"></h1> -->
     </div>
     <div id="panel2">
       <div id="categories-year-chart" class="chart">
-        <strong>By Category: Number of people who rsvped for events in this year</strong>
+        <strong>By Category</strong>
+                    <input type="image" src = '/static/more_info.jpeg' height="15" width="15">
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
       <div id="evolution-year-chart" class="chart">
-        <strong>By Group: Number of people who rsvped for events in this year</strong>
+        <strong>By Group</strong>
+          <input type="image" src = '/static/more_info.jpeg' height="15" width="15">
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
       </div>
       <div id="date-created-chart" class="chart">
-        <strong>Date group was created</strong>
+        <strong>Group Created</strong>
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
@@ -28,6 +30,13 @@
     </table>
   </div>
   <div id="right_col">
+    <div id="panel1">
+      <div id="categories-chart" class="chart">
+        <strong>Categories</strong>
+        <span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:categoriesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+      </div>
+    </div>
     <div id="panel3">
       <div id="no-members-chart" class="chart">
         <strong># Attendees</strong>
@@ -45,6 +54,7 @@
         <a class="reset" href="javascript:eventsVsPeopleChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
     </div> 
+<!--
     <div id="panel1">
       <div id="categories-chart" class="chart">
         <strong>Categories</strong>
@@ -52,6 +62,7 @@
         <a class="reset" href="javascript:categoriesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
       </div>
     </div>
+-->
   </div>
 </div>
 {% endblock %}
