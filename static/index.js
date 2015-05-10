@@ -275,7 +275,7 @@ function handle_csv(error, g, cy, gm) {
   .dimension(meetup.groups.categories_dim)
   .group(meetup.groups.categories_groups)
   .ordering(function(d){ return -d.value })
-  .width(230).height(1000).margins({top: 10, right: 10, bottom: 30, left: 40})
+  .width(230).height(700).margins({top: 10, right: 10, bottom: 30, left: 40})
   .label(function (d) {
     return d.key + " (" + d.value + ")";
   })

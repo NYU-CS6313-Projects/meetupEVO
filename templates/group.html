@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   <h1>{{ title }} </h1>
-
+  <p>See <a href="{{ group["link"] }}">Homepage on Meetup.com</a></p>
 
   <table class="table">
     <tr>
@@ -118,15 +118,12 @@
 
     var chart = d3.timeline()
     .display("circle")
-    // .beginning(1046908800)
-    // .ending(1410559200)
     .tickFormat({
       format: d3.time.format("%b'%y"),
       tickTime: d3.time.month,
       tickInterval: 1,
-      tickSize: 6
     });
-    var svg = d3.select("#timeline").append("svg").attr("width", 500).datum(testData).call(chart);
+    var svg = d3.select("#timeline").append("svg").attr("width", 1200).datum(testData).call(chart);
 
   </script>
   {% endblock %}
