@@ -1,3 +1,5 @@
+p { margin: 0px; 0px; }
+
 div.dc-chart {
   float: left;
 }
@@ -377,7 +379,7 @@ body{
 
 .chart {
   display: inline-block;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 
 .chart .grid-line { opacity: 0.2; }
@@ -431,6 +433,7 @@ body{
 
 #no-members-chart {
     font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+  padding: 5px;
     border-radius: 5px;  
     border: 1px solid #D8D8D8;
     background: white;
@@ -444,6 +447,7 @@ color: #e0393e;
 
 #no-events-chart {
     font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+  padding: 5px;
      border: 1px solid #D8D8D8;
     border-radius: 5px;  
   background: white;
@@ -454,8 +458,12 @@ color: #e0393e;
       box-shadow: 0.1px 0.1px 3px 1px #D8D8D8;
 
 }
+#categories-year-chart {
+  height: 237px;
+}
 #categories-chart text {
   font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+  padding: 5px;
   font-size: 11px;
   fill: black;
 }
@@ -463,6 +471,7 @@ color: #e0393e;
 #categories-chart{
    font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
   border-radius: 5px;
+  padding: 5px;
   border: 1px solid #D8D8D8;
   background: white;
   height: 455px;
@@ -476,6 +485,7 @@ color: #e0393e;
 
 #categories-year-chart{
    font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+  margin: 5px;
 /*
     border-radius: 10px;
     border: 1.5px solid #e0393e;
@@ -490,10 +500,11 @@ color: #e0393e;
 
 #evolution-year-chart{
    font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+  height: 312px;
+  margin: 5px;
 /*
     border-radius: 10px;
     border: 1.5px solid #D8D8D8;
-  height: 280px;
   width: 990px;
       margin-bottom: 0.5em;
       box-shadow: 0.1px 0.1px 3px 1px #D8D8D8;
@@ -503,12 +514,14 @@ color: #e0393e;
 
 
 #date-created-chart {
+  margin: 5px;
    font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
     border-radius: 5px;
+  padding: 5px;
     border: 1.5px solid #D8D8D8;
   background: white;
-  height: 100px;
-  width: 990px;
+  height: 120px;
+  width: 1100px;
     color: #e0393e;
     box-shadow: 0.1px 0.1px 3px 1px #D8D8D8;
 }

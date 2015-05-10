@@ -8,27 +8,25 @@
     </div>
     <div id="panel2">
       <div id="categories-year-chart" class="chart">
-        <strong>By Category</strong>
-        <input type="image" src = '/static/more_info.png'  class="tooltip"
+        <p><strong>By Category</strong><img src='/static/more_info.png'  class="tooltip"
         title="Show average number of yes-rsvps 
         per event in this category.
         binned by years.
-
-        ">
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        "><span class="reset"><span class="filter"></span></span>
+        <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
       </div>
       <div id="evolution-year-chart" class="chart">
-        <strong>By Group</strong>
-          <input type="image" src = '/static/more_info.png'  class="tooltip" title="something clever here">
+        <p><strong>By Group</strong>
+        <img src='/static/more_info.png'  class="tooltip" title="something clever here">
         <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        
+        <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
         <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
       </div>
       <div id="date-created-chart" class="chart">
-        <strong>Group Created</strong>
+        <p><strong>Group Created</strong>
         <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
       </div>
     </div>
     <table class="table table-hover dc-data-table">

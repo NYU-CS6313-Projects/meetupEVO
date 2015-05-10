@@ -240,7 +240,7 @@ function handle_csv(error, g, cy, gm) {
   .dimension(meetup.groups.no_member_dim)
   .group(meetup.groups.no_member_groups)
   .xUnits(dc.units.integers) 
-  .width(230).height(100).margins({top: 10, right: 10, bottom: 30, left: 40})
+  .width(230).height(80).margins({top: 10, right: 10, bottom: 30, left: 30})
   .filterPrinter(function (filters) {
     var filter = filters[0];
     return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
@@ -257,7 +257,7 @@ function handle_csv(error, g, cy, gm) {
   .group(meetup.groups.no_event_groups)
   .xUnits(dc.units.integers) 
   .gap(1)
-  .width(230).height(100).margins({top: 10, right: 10, bottom: 30, left: 40})
+  .width(230).height(80).margins({top: 10, right: 10, bottom: 30, left: 30})
   .filterPrinter(function (filters) {
     var filter = filters[0];
     return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
@@ -282,7 +282,7 @@ function handle_csv(error, g, cy, gm) {
   .dimension(meetup.groups.categories_dim)
   .group(meetup.groups.categories_groups)
   .ordering(function(d){ return -d.value })
-  .width(230).height(700).margins({top: 10, right: 10, bottom: 30, left: 40})
+  .width(230).height(700).margins({top: 10, right: 10, bottom: 20, left: 10})
   .label(function (d) {
     return d.key + " (" + d.value + ")";
   })
@@ -297,7 +297,7 @@ function handle_csv(error, g, cy, gm) {
   dateCreatedChart
   .dimension(meetup.groups.created_dim)
   .group(meetup.groups.created_groups)
-  .width(1000).height(100).margins({top: margin_timelines_top, right: 10, bottom: 30, left: margin_timelines_left})
+  .width(1000).height(100).margins({top: 10, right: 10, bottom: 30, left: margin_timelines_left})
   .round(d3.time.day.round)
   .filterPrinter(function (filters) {
     var filter = filters[0];
