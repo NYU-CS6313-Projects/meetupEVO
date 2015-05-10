@@ -91,10 +91,18 @@ function handle_csv(error, g, cy, gm) {
 
   // A little coercion, since the loaded JSON and CSV is untyped.
   groups_by_year.forEach(coerce_groups_by_year);
+  name_category_of = [];
+  index = -1;
   categories_by_year.forEach(function(d, i) {
-    d.index    = i;
     d.sum      = +d.sum;
     d.year     = formatCreated.parse( d.time_bin ); // time is already binned to 1st of the year
+    if ( index >= 0 && name_category_of[index] == d.name_category ) {
+      d.index = index;
+    } else {
+      index++;
+      d.index = index;
+      name_category_of[index] = d.shortname_category;
+    }
   });
   category_for_group = {};
   meetup.groups.data_by_id_group = {}
@@ -140,7 +148,7 @@ function handle_csv(error, g, cy, gm) {
   meetup.categories.id_dim   = meetup.categories.cf.dimension(function(d) { return d.name_group });
   meetup.categories.id_group = meetup.categories.id_dim.group().reduceCount();
 
-  meetup.categories.category_and_year_dim   = meetup.categories.cf.dimension(function(d) { return [d.name_category, d.year]; });
+  meetup.categories.category_and_year_dim   = meetup.categories.cf.dimension(function(d) { return [d.index, d.year]; });
   meetup.categories.category_and_year_group = meetup.categories.category_and_year_dim.group().reduceSum(function(d) { return d.sum; })
 
 
@@ -160,8 +168,8 @@ function handle_csv(error, g, cy, gm) {
   .keyAccessor(   function(d) {return +d.key[1];})
   .valueAccessor( function(d) {return +d.value;})
   .on('postRender', function(chart){
-    chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; })
-    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0]  ]; })
+    chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; });
+    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.name ]; });
   })
   
   categoriesYearChart.width(1000).height(210)
@@ -171,18 +179,22 @@ function handle_csv(error, g, cy, gm) {
   .group(meetup.categories.category_and_year_group)
   .brushOn(0)
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
-  .y(d3.scale.linear().domain([0, 200000]).range([200,0]))
+  .y(d3.scale.linear().domain([0, 250000]).range([200,0]))
   .elasticY(true)
   .title(function (d) { 
-    return d.key[0] + ": " + d.value + " rsvps in " + d.key[1].getFullYear(); 
+    return name_category_of[d.key[0]] + ": " + d.value + " rsvps in " + d.key[1].getFullYear(); 
   })
   .seriesAccessor(function(d) {return +d.key[0];})
   .keyAccessor(   function(d) {return +d.key[1];})
   .valueAccessor( function(d) {return +d.value;})
   .on('postRender', function(chart){
-    chart.selectAll("g.stack path").attr("class",        function(d){ return d.category_name; })
-    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + d.data.key[0]; })
-  })
+    chart.selectAll("g.stack path").attr("class", function(d){ return "category " + name_category_of[d.name]; });
+    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ 
+      console.log("tying to set class for tooltip");
+      console.dir(d);
+      return "category " + name_category_of[d.data.key[0]]; 
+    });
+  });
 
   categoriesYearChart.yAxis().ticks(5);
 
