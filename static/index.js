@@ -95,6 +95,7 @@ function handle_csv(error, g, cy, gm) {
   index = -1;
   categories_by_year.forEach(function(d, i) {
     d.sum      = +d.sum;
+    d.avg      = parseFloat(d.avg);
     d.year     = formatCreated.parse( d.time_bin ); // time is already binned to 1st of the year
     if ( index >= 0 && name_category_of[index] == d.name_category ) {
       d.index = index;
@@ -149,7 +150,8 @@ function handle_csv(error, g, cy, gm) {
   meetup.categories.id_group = meetup.categories.id_dim.group().reduceCount();
 
   meetup.categories.category_and_year_dim   = meetup.categories.cf.dimension(function(d) { return [d.index, d.year]; });
-  meetup.categories.category_and_year_group = meetup.categories.category_and_year_dim.group().reduceSum(function(d) { return d.sum; })
+  meetup.categories.category_and_year_sum   = meetup.categories.category_and_year_dim.group().reduceSum(function(d) { return d.sum; })
+  meetup.categories.category_and_year_avg   = meetup.categories.category_and_year_dim.group().reduceSum(function(d) { return d.avg; })
 
 
   log("creating chart for evolution by year");
@@ -176,10 +178,10 @@ function handle_csv(error, g, cy, gm) {
   .margins({top: margin_timelines_top, right: 10, bottom: 30, left: margin_timelines_left})
   .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
   .dimension(meetup.categories.category_and_year_dim)
-  .group(meetup.categories.category_and_year_group)
+  .group(meetup.categories.category_and_year_avg)
   .brushOn(0)
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
-  .y(d3.scale.linear().domain([0, 250000]).range([200,0]))
+  .y(d3.scale.linear().domain([0, 250]).range([200,0]))
   .elasticY(true)
   .title(function (d) { 
     return name_category_of[d.key[0]] + ": " + d.value + " rsvps in " + d.key[1].getFullYear(); 

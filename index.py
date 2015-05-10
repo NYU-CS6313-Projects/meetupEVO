@@ -191,7 +191,17 @@ def event_time():
 
 @app.route('/events/categories.csv')
 def category_time():
-  df = pd.read_sql("SELECT * FROM categories_timeseries ORDER BY name_category,time_bin" , g.db)
+  df = pd.read_sql("""
+      SELECT 
+        categories_timeseries.name_category ,
+        categories_timeseries.shortname_category ,
+        categories_timeseries.sum,
+        categories_timeseries_avg.avg,
+        categories_timeseries.time_bin
+      FROM categories_timeseries 
+      JOIN categories_timeseries_avg USING ( name_category, time_bin) 
+      ORDER BY name_category,time_bin
+      """ , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
 #
 @app.route('/events/categories_avg.csv')
