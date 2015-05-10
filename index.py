@@ -193,6 +193,11 @@ def event_time():
 def category_time():
   df = pd.read_sql("SELECT * FROM categories_timeseries ORDER BY name_category,time_bin" , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
+#
+@app.route('/events/categories_avg.csv')
+def category_time_avg():
+  df = pd.read_sql("SELECT * FROM categories_timeseries_avg ORDER BY name_category,time_bin" , g.db)
+  return Response(df.to_csv(index=False), mimetype='text/plain')
 
 
 @app.route('/build-csv')
