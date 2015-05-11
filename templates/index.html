@@ -1,78 +1,74 @@
 {% extends "flex_layout.html" %}
 {% block body %}
 <div id="flex_col">
-<div id="flex_row">
-  <div id="left_col">
-    <div id="panel5">
-      <h1><img src="/static/logo-2x.png" id = "logo" style="float: left" height="40" width="60" >Evolution <small>of Groups </small><span id="status"></span>
-<!--        <img src="/static/loading.gif" id="loading" style="float: right"></h1> -->
-    </div>
-    <div id="panel2">
-        <div id = "panel2-part1">
-          <div id="categories-year-chart" class="chart">
-            <p><strong>By Category</strong>
-                <img src='/static/more_info.png'  class="tooltip" 
-            title="This graph illustrates the evolution of Meetup categories. This was calculated by averaging all yes-rsvps beloging to that category. The time interval was binned by year." ><span class="reset"><span class="filter"></span></span>
-            <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
-          </div>
-          <div id="evolution-year-chart" class="chart">
-            <p><strong>By Group</strong>
-            <img src='/static/more_info.png'  class="tooltip" title="This graph displays the evolution of groups belonging to the selected Meetup Category. This was claculated by summing the yes-rsvps of all group events binned by year.">
-            <span class="reset"><span class="filter"></span></span>
+  <div id="flex_row">
+    <div id="left_col">
+      <div id="panel5">
+        <h1><img src="/static/logo-2x.png" id = "logo" style="float: left" height="40" width="60" >Evolution <small>of Groups </small><span id="status"></span>
+  <!--        <img src="/static/loading.gif" id="loading" style="float: right"></h1> -->
+      </div>
+      <div id="panel2">
+          <div id = "panel2-part1">
+            <div id="categories-year-chart" class="chart">
+              <p><strong>By Category</strong>
+                  <img src='/static/more_info.png'  class="tooltip" 
+              title="This graph illustrates the evolution of Meetup categories. It shows the average of yes-rsvps belonging to that category. The time interval was binned by year." ><span class="reset"><span class="filter"></span></span>
+              <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
+            </div>
+            <div id="evolution-year-chart" class="chart">
+              <p><strong>By Group</strong>
+              <img src='/static/more_info.png'  class="tooltip" title="This graph displays the evolution of selected groups. It shows the sum of yes-rsvps of all group events binned by year.">
+              <span class="reset"><span class="filter"></span></span>
 
-            <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
-            <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
+              <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
+              <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
+            </div>
           </div>
+        <div id="date-created-chart" class="chart">
+          <p><strong>Group Created</strong>
+          <img src='/static/play_info.png'  class="tooltip" title="This graph shows when groups were created on a timeline, binned by day. ">
+
+          <span class="reset"><span class="filter"></span></span>
+          <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
         </div>
-      <div id="date-created-chart" class="chart">
-        <p><strong>Group Created</strong>
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
       </div>
+    </div>
+    <div id="right_col">
+      <div id="panel1">
+        <div id="categories-chart" class="chart">
+          <strong>Categories</strong>
+          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Categories: shows number of groups. You can select here.">
+          <span class="reset"><span class="filter"></span></span>
+          <a class="reset" href="javascript:categoriesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        </div>
+      </div>
+      <div id="panel3">
+        <div id="no-members-chart" class="chart">
+          <strong># Attendees</strong>
+          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Number of Attendees in a group. You can select here.">
+          <span class="reset"><span class="filter"></span></span>
+          <a class="reset" href="javascript:noMembersChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        </div>
+        <div id="no-events-chart" class="chart">
+          <strong># Events</strong>
+          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Number of Events. You can select here.">
+          <span class="reset"><span class="filter"></span></span>
+          <a class="reset" href="javascript:noEventsChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        </div>
+      </div> 
     </div>
   </div>
-  <div id="right_col">
-    <div id="panel1">
-      <div id="categories-chart" class="chart">
-        <strong>Categories</strong>
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:categoriesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-      </div>
+  <div id='below'>
+    <div id='table-holder'>
+      <strong>List of Groups</strong>
+      <img src='/static/more_info.png'  class="tooltip" title="Details of all selected groups. Click group for more information.">
+      <table class="table table-hover dc-data-table">
+      </table>   
     </div>
-    <div id="panel3">
-      <div id="no-members-chart" class="chart">
-        <strong># Attendees</strong>
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:noMembersChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-      </div>
-      <div id="no-events-chart" class="chart">
-        <strong># Events</strong>
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:noEventsChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-      </div>
-      <div id="events-vs-people" class="chart" style="display:none;">
-        <strong># Events vs # People</strong>
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:eventsVsPeopleChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-      </div>
-    </div> 
-<!--
-    <div id="panel1">
-      <div id="categories-chart" class="chart">
-        <strong>Categories</strong>
-        <span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:categoriesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-      </div>
-    </div>
--->
-  </div>
-</div>
-  <div id= 'below'>
-    <table class="table table-hover dc-data-table">
-    </table>   
   </div>
 </div>
 {% endblock %}
 {% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.5/js/jquery.tablesorter.min.js"></script>
 <script src="{{ url_for('static', filename='index.js') }}"></script>
 {% endblock %}

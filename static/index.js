@@ -183,7 +183,7 @@ function handle_csv(error, g, cy, gm) {
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
   .y(d3.scale.linear().domain([0, 450]).range([200,0]))
   .title(function (d) { 
-    return name_category_of[d.key[0]] + ": " + d.value + " rsvps in " + d.key[1].getFullYear(); 
+    return "Groups in category " + name_category_of[d.key[0]] + " had an average of " + d.value + " rsvps in the year " + d.key[1].getFullYear(); 
   })
   .seriesAccessor(function(d) {return +d.key[0];})
   .keyAccessor(   function(d) {return +d.key[1];})
@@ -350,5 +350,7 @@ queue()
 
 $(document).ready(function() {
   $('.tooltip').tooltipster({position: 'bottom-right', maxWidth: 300});
+  $(".dc-data-table").tablesorter();
+  console.log("tooltips and tablesorter set up");
 });
 
