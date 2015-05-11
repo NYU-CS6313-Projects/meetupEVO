@@ -39,7 +39,7 @@
     </tr>
   </table>
   
-
+  <div id="chart"></div>
 
   <h2>Events</h2>
   <style>
@@ -112,18 +112,33 @@
   {% endblock %}
   {% block javascript %}
   <script>
+    var timeline_start = new Date(2002, 0, 1);
+    var timeline_end   = new Date(2013, 2, 1);
     // display the timeline with https://github.com/jiahuang/d3-timeline
     var t = {{ timeline_json|safe }} ;
-    var testData = [ {"label": "events", "times": t } ];
-
-    var chart = d3.timeline()
-    .display("circle")
-    .tickFormat({
-      format: d3.time.format("%b'%y"),
-      tickTime: d3.time.month,
-      tickInterval: 1,
+    var formatDate      = d3.time.format("%Y-%m-%d");
+    t.forEach(function(d){
+      d.date = formatDate.parse( d.date );
+      d.yes = +d.yes;
     });
-    var svg = d3.select("#timeline").append("svg").attr("width", 1200).datum(testData).call(chart);
+    var cf = crossfilter(t);
+    var dim = cf.dimension(function(d){ return d.date } );
+    var gr  = dim.group().reduceSum(function(d){ return d.yes } );
 
+    var eventsChart = dc.barChart('#chart');
+    eventsChart
+    .width(1200).height(200)
+    .dimension(dim)
+    .group(gr)
+    .margins({top: 10, right: 10, bottom: 30, left: 30})
+    .round(d3.time.day.round)
+    .elasticY(true)
+    .xAxisLabel("Year")
+    .yAxisLabel("# of rsvps for this event")
+    .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]));
+
+    eventsChart.yAxis().ticks(4).tickFormat(d3.format("d")).tickSubdivide(0);
+
+    dc.renderAll();
   </script>
   {% endblock %}

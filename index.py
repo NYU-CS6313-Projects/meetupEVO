@@ -70,14 +70,13 @@ def group(id_group):
   app.logger.error(this_group['name'])
   g.db_cursor.execute("""
       SELECT
-        EXTRACT(EPOCH FROM time) AS starting_time, 
-        EXTRACT(EPOCH FROM time) + COALESCE(duration,0) AS ending_time,  
+        to_char(time,'YYYY-MM-DD') AS date,
         yes_rsvp_count_from_rsvps AS yes,
         yes_rsvp_count_from_rsvps/max_yes_at_one_event AS size
       FROM 
         events LEFT JOIN groups USING (id_group)
       WHERE events.id_group=%(id)s 
-      ORDER BY time""", { 'id': id_group })
+      ORDER BY date""", { 'id': id_group })
   timeline=[]
   for t in g.db_cursor.fetchall():
     timeline.append(t)
