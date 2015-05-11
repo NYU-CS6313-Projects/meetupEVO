@@ -303,9 +303,9 @@ function handle_csv(error, g, cy, gm) {
     return d.key + " (" + d.value + ")";
   })
   .title(function (d) { return d.value; })
-  /*.on('postRender', function(chart){
+  .on('postRender', function(chart){
     chart.selectAll("g.row rect").attr("class", function(d){ return "deselected category " + d.key; })
-  }) */
+  }) 
   .elasticX(true)
   .on('filtered', reload_timeline)
   .xAxis().ticks(4);
