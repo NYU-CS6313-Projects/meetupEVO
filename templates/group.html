@@ -112,8 +112,6 @@
   {% endblock %}
   {% block javascript %}
   <script>
-    var timeline_start = new Date(2002, 0, 1);
-    var timeline_end   = new Date(2013, 2, 1);
     // display the timeline with https://github.com/jiahuang/d3-timeline
     var t = {{ timeline_json|safe }} ;
     var formatDate      = d3.time.format("%Y-%m-%d");
@@ -121,6 +119,8 @@
       d.date = formatDate.parse( d.date );
       d.yes = +d.yes;
     });
+    var timeline_start = new Date(2002, 0, 1);
+    var timeline_end   = new Date(2014, 8, 12);
     var cf = crossfilter(t);
     var dim = cf.dimension(function(d){ return d.date } );
     var gr  = dim.group().reduceSum(function(d){ return d.yes } );
