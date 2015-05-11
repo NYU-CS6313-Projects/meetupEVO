@@ -39,7 +39,7 @@ function handle_time_csv(error, gm) {
   log("new timeline data has arrived");
   var more_groups_by_year = gm; 
   var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
-  console.log("loaded timeline data on " + more_groups_by_year.length + " groups");
+  console.log("loaded timeline data of " + more_groups_by_year.length + " groups");
   more_groups_by_year = more_groups_by_year.filter(function(d){ return loaded_groups.indexOf( d.id_group ) == -1; });
   console.log("of these only " + more_groups_by_year.length + " are new, will add them");
   more_groups_by_year.forEach(coerce_groups_by_year);
@@ -47,13 +47,13 @@ function handle_time_csv(error, gm) {
   var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
   if ( selected_groups.length < max_no_of_groups_to_display_in_timeline_and_table ) {
     log("showing " + selected_groups.length + " groups in timeline");
-    $('#evolution-year-chart img').hide();
+    $('#evolution-year-chart #fake-timeline').hide();
     $('#evolution-year-chart svg').show();
     meetup.evolution.id_dim.filter(function(d){ return selected_groups.indexOf(d)>=0 })
     evolutionYearChart.render();
   } else {
     log("too many groups selected, not showing timeline");
-    $('#evolution-year-chart img').show();
+    $('#evolution-year-chart #fake-timeline').show();
     $('#evolution-year-chart svg').hide();
     meetup.evolution.id_dim.filter(function(d){ return 0 })
     evolutionYearChart.render();
@@ -62,12 +62,16 @@ function handle_time_csv(error, gm) {
 function reload_timeline(){
   log("reloading timeline data for groups");
   var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
+  $('#evolution-year-chart svg').hide();
+  $('#evolution-year-chart #fake-timeline').hide();
   if ( selected_groups.length < max_no_of_groups_to_display_in_timeline_and_table ) {
     log("Should load timeline data on " + selected_groups.length + " new groups");
     url = "/events/time.csv?" + $.param({id_group:selected_groups});
     queue()
     .defer(d3.csv, url)
     .await(handle_time_csv);
+  } else {
+    $('#evolution-year-chart #fake-timeline').show();
   }
 
 }
