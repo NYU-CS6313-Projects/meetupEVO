@@ -178,6 +178,8 @@ function handle_csv(error, g, cy, gm) {
   .group(meetup.evolution.group_and_year_group)
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
   .y(d3.scale.linear().domain([0, 9000]).range([250,0]))
+  .xAxisLabel("Year")
+  .yAxisLabel("RSVPS per Group")
   .elasticY(true)
   .title(function (d) { 
     return meetup.groups.by_id( d.key[0] ).get("name") + ": " + d.value + " rsvps this year"; 
@@ -198,6 +200,8 @@ function handle_csv(error, g, cy, gm) {
   .brushOn(0)
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
   .y(d3.scale.linear().domain([0, 450]).range([200,0]))
+  .xAxisLabel("Year")
+  .yAxisLabel("Average RSVPS per Category")
   .title(function (d) { 
     return "Groups in category " + name_category_of[d.key[0]] + " had an average of " + formatFloat( d.value ) + " rsvps in the year " + d.key[1].getFullYear(); 
   })
@@ -256,7 +260,8 @@ function handle_csv(error, g, cy, gm) {
   .dimension(meetup.groups.no_member_dim)
   .group(meetup.groups.no_member_groups)
   .xUnits(dc.units.integers) 
-  .width(230).height(80).margins({top: 10, right: 10, bottom: 30, left: 30})
+  .xAxisLabel("# of RSVPs")
+  .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 30})
   .filterPrinter(function (filters) {
     var filter = filters[0];
     return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
@@ -271,9 +276,10 @@ function handle_csv(error, g, cy, gm) {
   noEventsChart
   .dimension(meetup.groups.no_event_dim)
   .group(meetup.groups.no_event_groups)
+  .xAxisLabel("# of Events")
   .xUnits(dc.units.integers) 
   .gap(1)
-  .width(230).height(80).margins({top: 10, right: 10, bottom: 30, left: 30})
+  .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 30})
   .filterPrinter(function (filters) {
     var filter = filters[0];
     return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
@@ -321,6 +327,8 @@ function handle_csv(error, g, cy, gm) {
   })
   .on('filtered', reload_timeline)
   .elasticY(true)
+  .xAxisLabel("Year")
+  .yAxisLabel("# Groups")
   .x(d3.time.scale()
   .domain([timeline_start, timeline_end])
   .rangeRound([0, 10 * 90]));
