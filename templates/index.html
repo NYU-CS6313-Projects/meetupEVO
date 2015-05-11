@@ -1,5 +1,6 @@
 {% extends "flex_layout.html" %}
 {% block body %}
+<div id="flex_col">
 <div id="flex_row">
   <div id="left_col">
     <div id="panel5">
@@ -7,30 +8,31 @@
 <!--        <img src="/static/loading.gif" id="loading" style="float: right"></h1> -->
     </div>
     <div id="panel2">
-      <div id="categories-year-chart" class="chart">
-        <p><strong>By Category</strong><img src='/static/more_info.png'  class="tooltip"
-        title="Show average number of yes-rsvps 
-        per event in this category.
-        binned by years.
-        "><span class="reset"><span class="filter"></span></span>
-        <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
-      </div>
-      <div id="evolution-year-chart" class="chart">
-        <p><strong>By Group</strong>
-        <img src='/static/more_info.png'  class="tooltip" title="something clever here">
-        <span class="reset"><span class="filter"></span></span>
-        
-        <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
-        <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
-      </div>
+        <div id = "panel2-part1">
+          <div id="categories-year-chart" class="chart">
+            <p><strong>By Category</strong>
+                <img src='/static/more_info.png'  class="tooltip" 
+            title="Show average number of yes-rsvps 
+            per event in this category.
+            binned by years.
+            "><span class="reset"><span class="filter"></span></span>
+            <a class="reset" href="javascript:categoriesYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
+          </div>
+          <div id="evolution-year-chart" class="chart">
+            <p><strong>By Group</strong>
+            <img src='/static/more_info.png'  class="tooltip" title="something clever here">
+            <span class="reset"><span class="filter"></span></span>
+
+            <a class="reset" href="javascript:evolutionYearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
+            <img src="{{ url_for('static', filename='timeline.png') }}" id="fake_timeline">
+          </div>
+        </div>
       <div id="date-created-chart" class="chart">
         <p><strong>Group Created</strong>
         <span class="reset"><span class="filter"></span></span>
         <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
       </div>
     </div>
-    <table class="table table-hover dc-data-table">
-    </table>
   </div>
   <div id="right_col">
     <div id="panel1">
@@ -66,6 +68,11 @@
       </div>
     </div>
 -->
+  </div>
+</div>
+  <div id= 'below'>
+    <table class="table table-hover dc-data-table">
+    </table>   
   </div>
 </div>
 {% endblock %}
