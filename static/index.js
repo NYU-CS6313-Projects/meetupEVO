@@ -1,6 +1,6 @@
 /* Configuration for Charts */
 var timeline_start = new Date(2002, 0, 1);
-var timeline_end   = new Date(2014, 2, 1);
+var timeline_end   = new Date(2013, 2, 1);
 
 var max_no_of_groups_to_display_in_timeline_and_table = 800;
 
