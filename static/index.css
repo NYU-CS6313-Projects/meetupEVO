@@ -1,5 +1,12 @@
 #logo { width: 60px; height: 40px;  vertical-align: baseline; margin-right: 10px; }
 
+path {
+  pointer-events:all;
+}
+
+#categories-year-chart path:hover { stroke-width: 3px; }
+#evolution-year-chart path:hover { stroke-width: 3px; }
+
 p { margin: 0px; 0px; }
 
 div.dc-chart {
