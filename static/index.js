@@ -19,6 +19,16 @@ var categoriesChart     = dc.rowChart('#categories-chart');
 var countWidget         = dc.dataCount('#status');
 var listOfGroups        = dc.dataTable('.dc-data-table');
 
+
+var category_colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928",
+"#8dd3c7", "#ffffb3", "#bebada", "#cab2d6", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc7",
+"#ffed6f", "#bf812d", "#f6e8c3", "#c51b7d", "#f1b6da", "#e6f598", "#01665e", "#80cdc1", "#3288bd"];
+
+var category_shortnames = [ "tech", "women", "alternative-lifestyle", "career-business", "cars-motorcycles", "community-environment", "dancing", 
+"education-learning", "fashion-beauty", "fine-arts-culture", "fitness", "food-drink", "games", "health-wellbeing", "hobbies-crafts", 
+"language-ethnic-identity", "LGBT", "literature-writing", "government-politics", "movies-film", "music", "new-age-spirituality", 
+"outdoors-adventure", "paranormal", "parents-family", "pets-animals", "photography", "religion-beliefs", "sci-fi-fantasy", "singles", 
+"socializing", "sports-recreation", "support"]; 
 /* Global for Debugging */
 var groups, groups_by_year, categories_by_year;   // raw data coming in
 var meetup = {               // namespace for crossfilter 
@@ -86,6 +96,7 @@ function handle_csv(error, g, cy, gm) {
 
   // Various formatters.
   formatInt       = d3.format("f");  // turn any number into integer by dropping digits after point
+  formatFloat     = d3.format("f.1");  // turn any number into integer by dropping digits after point
   formatNumber    = d3.format(",d");  // integer with comma to separate thousands: 1,000
   formatCreated   = d3.time.format("%Y-%m-%d %H:%M:%S");  // to parse dates coming in from csv / json
   formatDate      = d3.time.format("%Y-%m-%d");
@@ -176,7 +187,7 @@ function handle_csv(error, g, cy, gm) {
   .valueAccessor( function(d) {return +d.value;})
   .on('postRender', function(chart){
     chart.selectAll("g.stack path").attr("class",        function(d){ return "category " + category_for_group[ d.name ]; });
-    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.name ]; });
+    chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.data.key[0] ]; });
   })
   
   categoriesYearChart.width(width_timeline).height(210)
@@ -188,7 +199,7 @@ function handle_csv(error, g, cy, gm) {
   .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
   .y(d3.scale.linear().domain([0, 450]).range([200,0]))
   .title(function (d) { 
-    return "Groups in category " + name_category_of[d.key[0]] + " had an average of " + d.value + " rsvps in the year " + d.key[1].getFullYear(); 
+    return "Groups in category " + name_category_of[d.key[0]] + " had an average of " + formatFloat( d.value ) + " rsvps in the year " + d.key[1].getFullYear(); 
   })
   .seriesAccessor(function(d) {return +d.key[0];})
   .keyAccessor(   function(d) {return +d.key[1];})
@@ -292,9 +303,9 @@ function handle_csv(error, g, cy, gm) {
     return d.key + " (" + d.value + ")";
   })
   .title(function (d) { return d.value; })
-  .on('postRender', function(chart){
+  /*.on('postRender', function(chart){
     chart.selectAll("g.row rect").attr("class", function(d){ return "deselected category " + d.key; })
-  })
+  }) */
   .elasticX(true)
   .on('filtered', reload_timeline)
   .xAxis().ticks(4);
