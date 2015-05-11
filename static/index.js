@@ -1,9 +1,10 @@
 /* Configuration for Charts */
 var timeline_start = new Date(2002, 0, 1);
-var timeline_end   = new Date(2015, 0, 1);
+var timeline_end   = new Date(2014, 2, 1);
 
 var max_no_of_groups_to_display_in_timeline_and_table = 800;
 
+var width_timeline = 1080;
 var margin_timelines_left = 60;
 var margin_timelines_top = 30;
 
@@ -155,7 +156,7 @@ function handle_csv(error, g, cy, gm) {
 
 
   log("creating chart for evolution by year");
-  evolutionYearChart.width(1000).height(300).margins({top: margin_timelines_top, right: 10, bottom: 30, left: margin_timelines_left})
+  evolutionYearChart.width(width_timeline).height(300).margins({top: margin_timelines_top, right: 10, bottom: 30, left: margin_timelines_left})
   .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
   .brushOn(0)
   .dimension(meetup.evolution.group_and_year_dim)
@@ -174,7 +175,7 @@ function handle_csv(error, g, cy, gm) {
     chart.selectAll("g.dc-tooltip circle").attr("class", function(d){ return "category " + category_for_group[ d.name ]; });
   })
   
-  categoriesYearChart.width(1000).height(210)
+  categoriesYearChart.width(width_timeline).height(210)
   .margins({top: margin_timelines_top, right: 10, bottom: 30, left: margin_timelines_left})
   .chart(function(c) { return dc.lineChart(c).interpolate('linear').renderArea(0).renderDataPoints(1).dotRadius(5); })
   .dimension(meetup.categories.category_and_year_dim)
@@ -297,7 +298,7 @@ function handle_csv(error, g, cy, gm) {
   dateCreatedChart
   .dimension(meetup.groups.created_dim)
   .group(meetup.groups.created_groups)
-  .width(1000).height(100).margins({top: 10, right: 10, bottom: 30, left: margin_timelines_left})
+  .width(width_timeline).height(100).margins({top: 10, right: 10, bottom: 30, left: margin_timelines_left})
   .round(d3.time.day.round)
   .filterPrinter(function (filters) {
     var filter = filters[0];
@@ -350,7 +351,6 @@ queue()
 
 $(document).ready(function() {
   $('.tooltip').tooltipster({position: 'bottom-right', maxWidth: 300});
-  $(".dc-data-table").tablesorter();
-  console.log("tooltips and tablesorter set up");
+  console.log("tooltips set up");
 });
 

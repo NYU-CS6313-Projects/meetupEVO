@@ -4,7 +4,7 @@
   <div id="flex_row">
     <div id="left_col">
       <div id="panel5">
-        <h1><img src="/static/logo-2x.png" id = "logo" style="float: left" height="40" width="60" >Evolution <small>of Groups </small><span id="status"></span>
+        <h1><img src="/static/logo-2x.png" id="logo">Evolution <small>of Groups </small><span id="status"></span>
   <!--        <img src="/static/loading.gif" id="loading" style="float: right"></h1> -->
       </div>
       <div id="panel2">
@@ -63,12 +63,17 @@
       <strong>List of Groups</strong>
       <img src='/static/more_info.png'  class="tooltip" title="Details of all selected groups. Click group for more information.">
       <table class="table table-hover dc-data-table">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+        </tfoot>
       </table>   
     </div>
   </div>
 </div>
 {% endblock %}
 {% block javascript %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.5/js/jquery.tablesorter.min.js"></script>
 <script src="{{ url_for('static', filename='index.js') }}"></script>
 {% endblock %}
