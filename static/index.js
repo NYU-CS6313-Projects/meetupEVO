@@ -349,6 +349,6 @@ queue()
 .await(handle_csv);
 
 $(document).ready(function() {
-  $('.tooltip').tooltipster({position: 'top-right'});
+  $('.tooltip').tooltipster({position: 'bottom-right', maxWidth: 300});
 });
 

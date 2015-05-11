@@ -596,8 +596,6 @@ table{
   border: 1px solid #D8D8D8;
   background: white;
   width: 1405px;
-  overflow-y: scroll;
-  overflow-x: hidden;
   box-shadow: 0.1px 0.1px 3px 1px #D8D8D8;
 }
 
@@ -614,6 +612,7 @@ td + td, th + th { border-left: 1px #ddd solid; border-width: 1px; }
 th, td { padding-left: 10px; padding-right: 10px; }
 
 tr:hover { background-color: #ddd; }
+tr:hover { opacity: 0.9; }
 tr:hover td { border-color: white;}
 
 
