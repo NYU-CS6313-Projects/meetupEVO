@@ -167,6 +167,10 @@ def intro():
 def index():
   return render_template("index.html")
 
+@app.route('/story.html')
+def story():
+  return render_template("story.html")
+
 @app.route('/v2.html')
 def sketch():
   return render_template("v2.html")
@@ -178,12 +182,12 @@ def event_time():
     sql = g.db_cursor.mogrify("""
       SELECT * FROM event_rsvps_by_year WHERE id_group IN (
         SELECT id_group FROM groups WHERE number_of_events>0 LIMIT %s
-      )""", (l,))
+      ) AND time_bin BETWEEN '2004-01-01' AND '2013-01-01'""", (l,))
   else:
     sql = g.db_cursor.mogrify("""
       SELECT * FROM event_rsvps_by_year WHERE id_group IN (
-        SELECT id_group FROM groups WHERE number_of_events>0 AND id_group IN %s  LIMIT %s
-      )""", ( tuple( request.args.getlist('id_group[]') ), l ) )
+        SELECT id_group FROM groups WHERE number_of_events>0 AND id_group IN %s LIMIT %s
+      ) AND time_bin BETWEEN '2004-01-01' AND '2013-01-01'""", ( tuple( request.args.getlist('id_group[]') ), l ) )
   app.logger.error('time.csv: %s' % sql)
   df = pd.read_sql(sql , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
@@ -199,6 +203,7 @@ def category_time():
         categories_timeseries.time_bin
       FROM categories_timeseries 
       JOIN categories_timeseries_avg USING ( name_category, time_bin) 
+      WHERE time_bin BETWEEN '2004-01-01' AND '2013-01-01'
       ORDER BY name_category,time_bin
       """ , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
