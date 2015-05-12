@@ -127,6 +127,7 @@ function handle_csv(error, g, cy, gm) {
     d.index                = i;
     d.rating               = parseFloat(d.rating);
     d.created              = formatCreated.parse( d.created );
+    d.month_created        = new Date(d.created.getFullYear(), d.created.getMonth(), 1);
     d.first_event_time     = formatCreated.parse( d.first_event_time );
     d.last_event_time      = formatCreated.parse( d.last_event_time );
     d.no_members           = +d.no_members;
@@ -234,8 +235,8 @@ function handle_csv(error, g, cy, gm) {
   meetup.groups.all               = meetup.groups.cf.groupAll();
   meetup.groups.id_dim            = meetup.groups.cf.dimension(function(d) { return d.id_group; });
 
-  meetup.groups.created_dim       = meetup.groups.cf.dimension(function(d) { return d.created; });
-  meetup.groups.created_groups    = meetup.groups.created_dim.group(d3.time.day);
+  meetup.groups.created_dim       = meetup.groups.cf.dimension(function(d) { return d.month_created; });
+  meetup.groups.created_groups    = meetup.groups.created_dim.group().reduceCount();
 
   meetup.groups.no_member_dim     = meetup.groups.cf.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
   meetup.groups.no_member_groups  = meetup.groups.no_member_dim.group(function(d) { return Math.floor(d / 10) * 10; });
@@ -277,7 +278,7 @@ function handle_csv(error, g, cy, gm) {
   .dimension(meetup.groups.no_event_dim)
   .group(meetup.groups.no_event_groups)
   .xAxisLabel("# of Events")
-  .xUnits(dc.units.integers) 
+  .xUnits(function(start, end, xDomain) { return Math.abs(end - start) / 10; })
   .gap(1)
   .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 30})
   .filterPrinter(function (filters) {
@@ -286,7 +287,7 @@ function handle_csv(error, g, cy, gm) {
   })
   .on('filtered', reload_timeline)
   .elasticY(true)
-  .x(d3.scale.linear().domain([1, 200]).rangeRound([0, 10 * 20]));
+  .x(d3.scale.linear().domain([0, 200]).rangeRound([0, 10 * 20]));
   noEventsChart.xAxis().ticks(5);
   noEventsChart.yAxis().ticks(4);
 
@@ -318,6 +319,7 @@ function handle_csv(error, g, cy, gm) {
 
   dateCreatedChart
   .dimension(meetup.groups.created_dim)
+  .xUnits(d3.time.months)
   .group(meetup.groups.created_groups)
   .width(width_timeline).height(100).margins({top: 10, right: 10, bottom: 30, left: margin_timelines_left})
   .round(d3.time.day.round)
