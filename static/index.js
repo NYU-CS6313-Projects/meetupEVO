@@ -266,7 +266,7 @@ function handle_csv(error, g, cy, gm) {
   .group(meetup.groups.no_member_groups)
   .xUnits(dc.units.integers) 
   .xAxisLabel("# of RSVPs")
-  .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 30})
+  .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 35})
   .filterPrinter(function (filters) {
     var filter = filters[0];
     return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
@@ -285,7 +285,7 @@ function handle_csv(error, g, cy, gm) {
   .xAxisLabel("# of Events")
   .xUnits(function(start, end, xDomain) { return Math.abs(end - start) / no_events_bin; })
   .gap(1)
-  .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 30})
+  .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 35})
   .filterPrinter(function (filters) {
     var filter = filters[0];
     return "" + formatInt(filter[0]) + "-" + formatInt(filter[1]);
@@ -336,9 +336,8 @@ function handle_csv(error, g, cy, gm) {
   .elasticY(true)
   .xAxisLabel("Year")
   .yAxisLabel("# Groups")
-  .x(d3.time.scale()
-  .domain([timeline_start, timeline_end])
-  .rangeRound([0, 10 * 90]));
+  .x(d3.time.scale().domain([timeline_start, timeline_end]).rangeRound([0, 10 * 90]))
+  .yAxis().ticks(4);
 
   
   listOfGroups.dimension(meetup.groups.id_dim)
