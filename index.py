@@ -188,7 +188,6 @@ def event_time():
       SELECT * FROM event_rsvps_by_year WHERE id_group IN (
         SELECT id_group FROM groups WHERE number_of_events>0 AND id_group IN %s LIMIT %s
       ) AND time_bin BETWEEN '2004-01-01' AND '2013-01-01'""", ( tuple( request.args.getlist('id_group[]') ), l ) )
-  app.logger.error('time.csv: %s' % sql)
   df = pd.read_sql(sql , g.db)
   return Response(df.to_csv(index=False), mimetype='text/plain')
 
@@ -256,6 +255,10 @@ def build_csv():
 
   return "<h1>Created</h1><a href='static/groups.csv'>group.csv</a>"
 
+@app.route('/favicon.ico')
+def favicon():
+  return send_from_directory(os.path.join(app.root_path, 'static'),
+                             'favicon.ico', mimetype='image/vnd.microsoft.icon')
 # ====================================================================================
 @app.errorhandler(404)
 def page_not_found(e):
