@@ -26,7 +26,7 @@
           </div>
         <div id="date-created-chart" class="chart">
           <p><strong>Group Creation Timeline</strong>
-          <img src='/static/play_info.png'  class="tooltip" title="This graph shows when groups were created on a timeline, binned by day. ">
+          <img src='/static/play_info.png'  class="tooltip" title="This graph shows when groups were created on a timeline, binned by month. ">
 
           <span class="reset"><span class="filter"></span></span>
           <a class="reset" href="javascript:dateCreatedChart.filterAll();dc.redrawAll();" style="display: none;">reset</a></p>
@@ -45,13 +45,14 @@
       <div id="panel3">
         <div id="no-members-chart" class="chart">
           <strong># Attendees</strong>
-          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Number of Attendees in a group. You can select here.">
+          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Number of Attendees in a group, in bins of width 10, cut off at 1.000. There are 176 outliers. You can select here.">
+          <a class="outliers" href="javascript:$('#no-members-chart .reset').show();$('#no-members-chart svg').hide(); meetup.groups.no_member_dim.filter([1001,20000]);dc.redrawAll();reload_timeline();">outliers</a>
           <span class="reset"><span class="filter"></span></span>
-          <a class="reset" href="javascript:noMembersChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+          <a class="reset" href="javascript:$('#no-members-chart svg').show(); noMembersChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         </div>
         <div id="no-events-chart" class="chart">
           <strong># Events</strong>
-          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Number of Events. You can select here.">
+          <img src='/static/play_info.png'  class="tooltip" title="Histogram of Number of Events, in bins of width 10. You can select here.">
           <span class="reset"><span class="filter"></span></span>
           <a class="reset" href="javascript:noEventsChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         </div>

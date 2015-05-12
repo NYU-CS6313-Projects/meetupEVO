@@ -420,6 +420,10 @@ font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
   height: 300px;
 }
 
+.outliers {
+  font-size: smaller;
+  color: #ccccff;
+}
 .reset {
   padding-left: 1em;
   font-size: smaller;

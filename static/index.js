@@ -4,6 +4,9 @@ var timeline_end   = new Date(2013, 2, 1);
 
 var max_no_of_groups_to_display_in_timeline_and_table = 800;
 
+var no_events_bin = 10;
+var no_members_bin = 10;
+
 var width_timeline = 1080;
 var margin_timelines_left = 60;
 var margin_timelines_top = 30;
@@ -49,9 +52,9 @@ function handle_time_csv(error, gm) {
   log("new timeline data has arrived");
   var more_groups_by_year = gm; 
   var loaded_groups = meetup.evolution.id_group.top(Infinity).map(function(d){return d.key });
-  console.log("loaded timeline data of " + more_groups_by_year.length + " groups");
+  console.log("loaded " + more_groups_by_year.length + " timeline data points");
   more_groups_by_year = more_groups_by_year.filter(function(d){ return loaded_groups.indexOf( d.id_group ) == -1; });
-  console.log("of these only " + more_groups_by_year.length + " are new, will add them");
+  console.log("of these only " + more_groups_by_year.length + " points belong to new groups, will add them");
   more_groups_by_year.forEach(coerce_groups_by_year);
   meetup.evolution.cf.add(more_groups_by_year);
   var selected_groups = meetup.groups.id_dim.top(Infinity).map(function(d){return d.id_group });
@@ -81,6 +84,7 @@ function reload_timeline(){
     .defer(d3.csv, url)
     .await(handle_time_csv);
   } else {
+    log(selected_groups.length + " groups is too much (>" + max_no_of_groups_to_display_in_timeline_and_table + "), display dummy");
     $('#evolution-year-chart #fake-timeline').show();
   }
 
@@ -133,7 +137,7 @@ function handle_csv(error, g, cy, gm) {
     d.no_members           = +d.no_members;
     d.number_of_events     = +d.number_of_events;
     d.max_yes_at_one_event = +d.max_yes_at_one_event;
-    d.no_member_who_ever_rsvpd_yes = +d.no_member_who_ever_rsvpd_yes;
+    d.no_member_who_ever_rsvpd_yes = parseInt(d.no_member_who_ever_rsvpd_yes);
     d.average_rsvps_per_event  = parseFloat(d.average_rsvps_per_event);
     if (d.rating == 0.0)  d.rating = null;
 
@@ -239,16 +243,16 @@ function handle_csv(error, g, cy, gm) {
   meetup.groups.created_groups    = meetup.groups.created_dim.group().reduceCount();
 
   meetup.groups.no_member_dim     = meetup.groups.cf.dimension(function(d) { return d.no_member_who_ever_rsvpd_yes })
-  meetup.groups.no_member_groups  = meetup.groups.no_member_dim.group(function(d) { return Math.floor(d / 10) * 10; });
+  meetup.groups.no_member_groups  = meetup.groups.no_member_dim.group(function(d) { return no_members_bin * Math.floor(d / no_members_bin); }).reduceCount();
 
   meetup.groups.no_event_dim      = meetup.groups.cf.dimension(function(d) { return d.number_of_events });
-  meetup.groups.no_event_groups   = meetup.groups.no_event_dim.group(function(d) { return Math.floor(d / 10) * 10; });
+  meetup.groups.no_event_groups   = meetup.groups.no_event_dim.group(function(d) { return Math.floor(d / no_events_bin) * no_events_bin; }).reduceCount();
 
   meetup.groups.no_event_vs_no_people_dim = meetup.groups.cf.dimension(function(d) { return [d.number_of_events, d.average_rsvps_per_event] });
   meetup.groups.no_event_vs_no_people_groups = meetup.groups.no_event_vs_no_people_dim.group().reduceCount();
 
   meetup.groups.categories_dim    = meetup.groups.cf.dimension(function(d) { return d.shortname_category; });
-  meetup.groups.categories_groups = meetup.groups.categories_dim.group();
+  meetup.groups.categories_groups = meetup.groups.categories_dim.group().reduceCount();
 
   log("creating charts for groups:");
 
@@ -269,7 +273,8 @@ function handle_csv(error, g, cy, gm) {
   })
   .on('filtered', reload_timeline)
   .elasticY(true)
-  .x(d3.scale.linear().domain([0, 1500]).rangeRound([0, 10 * 21]));
+  .xUnits(function(start, end, xDomain) { return Math.abs(end - start) / no_members_bin; })
+  .x(d3.scale.linear().domain([0, 1000]).rangeRound([0, 10 * 21]));
 
   noMembersChart.xAxis().ticks(5);
   noMembersChart.yAxis().ticks(4);
@@ -278,7 +283,7 @@ function handle_csv(error, g, cy, gm) {
   .dimension(meetup.groups.no_event_dim)
   .group(meetup.groups.no_event_groups)
   .xAxisLabel("# of Events")
-  .xUnits(function(start, end, xDomain) { return Math.abs(end - start) / 10; })
+  .xUnits(function(start, end, xDomain) { return Math.abs(end - start) / no_events_bin; })
   .gap(1)
   .width(230).height(110).margins({top: 10, right: 10, bottom: 40, left: 30})
   .filterPrinter(function (filters) {
@@ -337,20 +342,22 @@ function handle_csv(error, g, cy, gm) {
 
   
   listOfGroups.dimension(meetup.groups.id_dim)
-  .group(function (d) { return meetup.groups.id_dim.top(Infinity).length + " selected groups"; })
-  .size(max_no_of_groups_to_display_in_timeline_and_table)
+  .group(function (d) { 
+    return meetup.groups.id_dim.top(Infinity).length + " selected groups"; 
+  })
+  .size(meetup.groups.id_dim.top(Infinity).length)
   .columns([
     { 'label': 'Group Name',     'format': function(d)  { return '<a href="/group/'+d.id_group+'">' + d.name + '</a>'   } },
     { 'label': 'Group Created',  'format': function(d)  { return formatYearMonth( d.created )     } },
     { 'label': 'Rating',         'format': function(d)  { return d.rating                         } },
     { 'label': 'Join Mode',      'format': function(d)  { return d.join_mode                      } },
     { 'label': 'Biggest Event',  'format': function(d)  { return d.max_yes_at_one_event           } },
-    { 'label': 'Total Rsvps',    'format': function(d)  { return d.no_member_who_ever_rsvpd_yes   } },
+    { 'label': '# Attendees',    'format': function(d)  { return d.no_member_who_ever_rsvpd_yes   } },
     { 'label': 'First Event',    'format': function(d)  { return formatDate( d.first_event_time ) } },
     { 'label': '# Events',       'format': function(d)  { return d.number_of_events               } },
     { 'label': 'Last Event',     'format': function(d)  { return formatDate( d.last_event_time  ) } }
   ])
-  .sortBy(function (d){ return - d.no_member_who_ever_rsvpd_yes; });
+  .sortBy(function (d){ return -d.no_member_who_ever_rsvpd_yes; });
 
   log("rendering all");
   dc.renderAll();
