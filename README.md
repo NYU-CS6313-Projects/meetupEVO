@@ -16,6 +16,9 @@ https://vimeo.com/128170931/
 [the full app running on heroku](https://agile-island-7524.herokuapp.com/)
 https://agile-island-7524.herokuapp.com/
 
+## Final Project Proposal
+[meetupEVO: A visualization tool for exploring Meetup.com groups and their evolution through time](https://drive.google.com/drive/u/1/folders/0B4-nfirkrdvjMXdVdUpyelo3a1E/)
+
 ## Data Sources:
 Meetup.com API.
 
