@@ -6,6 +6,7 @@ Meeup.com has over 191,000 groups in more than 180 countries around the world. G
 See the [static github page](https://nyu-cs6313-projects.github.io/sp2015-group13/), 
 but better yet [the full app running on heroku](https://agile-island-7524.herokuapp.com/)
 
+
 Data Sources: Meetup.com API.
 
 Technology Stack:
