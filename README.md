@@ -29,4 +29,4 @@ Meetup.com API.
 * dc-d3.jc
 * crossfilter
 
-To reproduce the project, please clone the repository, install the above technology stack, host the database on Heroku, and then run it through your local machine.
+To reproduce the project, please clone the repository, install the above technology stack, host the database on Heroku, and then run index.py through your machine to obtain a local copy of the website.
